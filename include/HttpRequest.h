@@ -9,6 +9,7 @@ class HttpRequest
 {
     public:
         bool parseRequestLine(const std::string& line);
+        bool parseHeaderLine(const std::string& line);
 
         std::string _method;
         std::string _url;

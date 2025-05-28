@@ -21,5 +21,18 @@ int main()
     std::cout << "Method: " << request._method << "\n";
     std::cout << "URL: " << request._url << "\n";
     std::cout << "Version: " << request._version << "\n";
+
+    std::istringstream stream(str);
+    std::string line;
+    while (std::getline(stream, line) && line != "\r") {
+        if (!line.empty() && line[line.length() - 1] == '\r') {
+            line = line.substr(0, line.length() - 1);
+        }
+        request.parseHeaderLine(line);
+    }
+
+    std::cout << "\nHeaders\n";
+    for (std::map<std::string, std::string>::iterator It = request._headers.begin(); It != request._headers.end(); ++It)
+        std::cout << It->first << ": " << It->second << "\n";
     return 0;
 }

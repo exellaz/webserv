@@ -12,3 +12,17 @@ bool HttpRequest::parseRequestLine(const std::string& line)
         return false; // This should return status 400 Bad Request
     return true;
 }
+
+bool HttpRequest::parseHeaderLine(const std::string& line)
+{
+    size_t colon = line.find(':');
+    if (colon != std::string::npos) {
+        std::string key = line.substr(0, colon);
+        std::string value = line.substr(colon + 1);
+        while (!value.empty() && value[0] == ' ') {
+            value = value.substr(1);
+        }
+        _headers[key] = value;
+    }
+    return true;
+}
