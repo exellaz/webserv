@@ -11,6 +11,8 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <poll.h>
+#include <vector>
+#include <iostream>
 
 #define PORT "8080"   // Port we're listening on
 

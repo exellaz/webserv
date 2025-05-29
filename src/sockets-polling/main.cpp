@@ -3,9 +3,8 @@
 // Get sockaddr, IPv4 or IPv6:
 void *getInAddr(struct sockaddr *sa)
 {
-    if (sa->sa_family == AF_INET) {
+    if (sa->sa_family == AF_INET)
         return &(((struct sockaddr_in*)sa)->sin_addr);
-    }
 
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
@@ -19,7 +18,7 @@ int getListenerSocket(void)
 
     struct addrinfo hints, *ai, *p;
 
-    // Get us a socket and bind it
+    // Get socket and bind it
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
@@ -42,49 +41,38 @@ int getListenerSocket(void)
             close(listener);
             continue;
         }
-
         break;
     }
 
     // If we got here, it means we didn't get bound
-    if (p == NULL) {
+    if (p == NULL)
         return -1;
-    }
 
     freeaddrinfo(ai); // All done with this
 
     // Listen
-    if (listen(listener, 10) == -1) {
+    if (listen(listener, 10) == -1)
         return -1;
-    }
 
     return listener;
 }
 
 // Add a new file descriptor to the set
-void addToPfds(struct pollfd *pfds[], int newFd, int *fdCount, int *fdSize)
+void addToPfds(std::vector<struct pollfd>& pfds, int newFd)
 {
-    // If we don't have room, add more space in the pfds array
-    if (*fdCount == *fdSize) {
-        *fdSize *= 2; // Double it
+	struct pollfd pfd;
 
-        *pfds = (struct pollfd *)realloc(*pfds, sizeof(**pfds) * (*fdSize));
-    }
+	pfd.fd = newFd;
+	pfd.events = POLLIN;
+	pfd.revents = 0;
 
-    (*pfds)[*fdCount].fd = newFd;
-    (*pfds)[*fdCount].events = POLLIN; // Check ready-to-read
-    (*pfds)[*fdCount].revents = 0;
-
-    (*fdCount)++;
+	pfds.push_back(pfd);
 }
 
 // Remove an index from the set
-void delFromPfds(struct pollfd pfds[], int i, int *fdCount)
+void delFromPfds(std::vector<struct pollfd>& pfds, int i)
 {
-    // Copy the one from the end over this one
-    pfds[i] = pfds[*fdCount-1];
-
-    (*fdCount)--;
+	pfds.erase(pfds.begin() + i);
 }
 
 // Main
@@ -97,11 +85,7 @@ int main(void)
     char buf[256];    // Buffer for client data
     char remoteIp[INET6_ADDRSTRLEN];
 
-    // Start off with room for 5 connections
-    // (We'll realloc as necessary)
-    int fdCount = 0;
-    int fdSize = 5;
-    struct pollfd *pfds = (struct pollfd *)malloc(sizeof *pfds * fdSize);
+	std::vector<struct pollfd> pfds;
 
     // Set up and get a listening socket
     listener = getListenerSocket();
@@ -112,15 +96,15 @@ int main(void)
     }
 
     // Add the listener to set
-    pfds[0].fd = listener;
-    pfds[0].events = POLLIN; // Report ready to read on incoming connection
-
-    fdCount = 1; // For the listener
+	struct pollfd pfd;
+    pfd.fd = listener;
+    pfd.events = POLLIN; // Report ready to read on incoming connection
+	pfds.push_back(pfd); 
 
     // Main loop
     while(1) {
         // wait indefinitely until 1 or more fds become ready for reading (POLLIN) or other events.
-        int pollCount = poll(pfds, fdCount, -1);
+        int pollCount = poll(&pfds[0], pfds.size(), -1);
 
         if (pollCount == -1) {
             perror("poll");
@@ -128,7 +112,7 @@ int main(void)
         }
 
         // Run through the existing connections looking for data to read
-        for(int i = 0; i < fdCount; i++) {
+        for(size_t i = 0; i < pfds.size(); i++) {
 
             // Check if someone's ready to read
             if (pfds[i].revents & (POLLIN | POLLHUP)) { // We got one!!
@@ -146,7 +130,7 @@ int main(void)
                         const char *hello = "Hello from server!";
                         send(newFd, hello, strlen(hello), 0);
 
-                        addToPfds(&pfds, newFd, &fdCount, &fdSize);
+						addToPfds(pfds, newFd);
 
                         printf("pollserver: new connection from %s on "
                             "socket %d\n",
@@ -163,7 +147,6 @@ int main(void)
                 else {
                     // If not the listener, we're just a regular client
                     int nBytes = recv(pfds[i].fd, buf, sizeof buf, 0);
-
                     int senderFd = pfds[i].fd;
 
                     if (nBytes <= 0) {
@@ -177,16 +160,15 @@ int main(void)
 
                         close(pfds[i].fd); // Bye!
 
-                        delFromPfds(pfds, i, &fdCount);
+						delFromPfds(pfds, i);
 
                         // reexamine the slot we just deleted
                         i--;
-
                     } 
                     else {
                         // We got some good data from a client
 
-                        for(int j = 0; j < fdCount; j++) {
+                        for(size_t j = 0; j < pfds.size(); j++) {
                             // Send to everyone!
                             int destFd = pfds[j].fd;
 
