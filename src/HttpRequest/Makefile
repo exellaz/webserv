@@ -3,13 +3,13 @@ RED = \033[0;31m
 RESET = \033[0m
 ORANGE = \033[0;38;5;166m
 
-NAME = webserv
+NAME = http-request
 
 CC = c++
 CFLAGS = -Wall -Wextra -Werror -std=c++98 -g3
-INC = -Iinclude
+INC = -I../../include
 
-SRC = src/main.cpp
+SRC = main.cpp HttpRequest.cpp
 
 OBJ = $(SRC:.cpp=.o)
 
