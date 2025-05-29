@@ -4,6 +4,8 @@
 # include <iostream>
 # include <sstream>
 # include <map>
+# include <cstdlib>
+
 
 namespace HttpConstants
 {
@@ -20,6 +22,8 @@ class HttpRequest
     public:
         bool parseRequestLine(const std::string& line);
         bool parseHeaderLine(const std::string& line);
+        bool parseRequestBody(const std::string& str);
+
 
         std::string _method;
         std::string _url;

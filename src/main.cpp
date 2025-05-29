@@ -1,5 +1,4 @@
 #include "HttpRequest.h"
-#include <cstdlib>
 
 // Sample HTTP Request:
 // GET /index.html HTTP/1.1
@@ -17,8 +16,8 @@ int main()
     HttpRequest request;
 
     if (!request.parseRequestLine(str)) {
-        std::cout << "Invalid header" << "\n";
-        return false;
+        std::cout << "Invalid header\n";
+        return 1;
     }
 
     std::istringstream stream(str);
@@ -30,21 +29,9 @@ int main()
         request.parseHeaderLine(line);
     }
 
-    size_t headerEnd = str.find("\r\n\r\n");
-    if (headerEnd != std::string::npos) {
-        // Compute where the body starts
-        size_t bodyStart = headerEnd + 4;  // skip “\r\n\r\n”
-        // See if there’s a Content-Length header
-        std::string clStr = request._headers["Content-Length"];
-        if (!clStr.empty()) {
-            int content_length = std::atoi(clStr.c_str());
-            // Don’t read past the end of str
-            size_t maxAvailable = str.size() - bodyStart;
-            size_t toCopy = std::min<size_t>(content_length, maxAvailable);
+    if (!request.parseRequestBody(str))
+        std::cout << "No body found\n";
 
-            request._body = str.substr(bodyStart, toCopy);
-        }
-    }
     std::cout << request;
     return 0;
 }
