@@ -20,13 +20,9 @@ int main()
         return 1;
     }
 
-    std::istringstream stream(str);
-    std::string line;
-    while (std::getline(stream, line) && line != "\r") {
-        if (!line.empty() && line[line.length() - 1] == '\r') {
-            line = line.substr(0, line.length() - 1);
-        }
-        request.parseHeaderLine(line);
+    if (!request.parseHeaderLines(str)) {
+        std::cout << "Invalid header field\n";
+        return 1;
     }
 
     if (!request.parseRequestBody(str))

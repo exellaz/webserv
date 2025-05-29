@@ -13,16 +13,23 @@ bool HttpRequest::parseRequestLine(const std::string& line)
     return true;
 }
 
-bool HttpRequest::parseHeaderLine(const std::string& line)
+bool HttpRequest::parseHeaderLines(const std::string& str)
 {
-    size_t colon = line.find(':');
-    if (colon != std::string::npos) {
-        std::string key = line.substr(0, colon);
-        std::string value = line.substr(colon + 1);
-        while (!value.empty() && value[0] == ' ') {
-            value = value.substr(1);
+    std::istringstream stream(str);
+    std::string line;
+    while (std::getline(stream, line) && line != "\r") {
+        if (!line.empty() && line[line.length() - 1] == '\r') {
+            line = line.substr(0, line.length() - 1);
         }
-        _headers[key] = value;
+        size_t colon = line.find(':');
+        if (colon != std::string::npos) {
+            std::string key = line.substr(0, colon);
+            std::string value = line.substr(colon + 1);
+            while (!value.empty() && value[0] == ' ') {
+                value = value.substr(1);
+            }
+            _headers[key] = value;
+        }
     }
     return true;
 }
