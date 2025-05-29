@@ -13,27 +13,29 @@ void *getInAddr(struct sockaddr *sa)
 int getListenerSocket(void)
 {
     int listener;     // Listening socket descriptor
-    int yes = 1;      // For setsockopt() SO_REUSEADDR, below
     int rv;
+	struct addrinfo hints; 
+	struct addrinfo *res;
+	struct addrinfo *p;
 
-    struct addrinfo hints, *ai, *p;
 
     // Get socket and bind it
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE;
-    if ((rv = getaddrinfo(NULL, PORT, &hints, &ai)) != 0) {
+
+    if ((rv = getaddrinfo(NULL, PORT, &hints, &res)) != 0) {
         fprintf(stderr, "pollserver: %s\n", gai_strerror(rv));
         exit(1);
     }
     
-    for(p = ai; p != NULL; p = p->ai_next) {
+    for(p = res; p != NULL; p = p->ai_next) {
         listener = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
-        if (listener < 0) { 
+        if (listener < 0)
             continue;
-        }
         
+		int yes = 1;      
         // Lose the pesky "address already in use" error message
         setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
 
@@ -48,7 +50,7 @@ int getListenerSocket(void)
     if (p == NULL)
         return -1;
 
-    freeaddrinfo(ai); // All done with this
+    freeaddrinfo(res); 
 
     // Listen
     if (listen(listener, 10) == -1)
@@ -89,9 +91,8 @@ int main(void)
 
     // Set up and get a listening socket
     listener = getListenerSocket();
-
     if (listener == -1) {
-        fprintf(stderr, "error getting listening socket\n");
+		std::cerr << "Error: error getting listening socket\n";
         exit(1);
     }
 
@@ -141,7 +142,7 @@ int main(void)
                         
                         char buffer[30000];
                         recv(newFd, buffer, sizeof(buffer), 0);
-                        printf("%s\n", buffer);
+						std::cout << buffer << '\n';
                     }
                 } 
                 else {
@@ -153,13 +154,11 @@ int main(void)
                         // Got error or connection closed by client
                         if (nBytes == 0) {
                             // Connection closed
-                            printf("pollserver: socket %d hung up\n", senderFd);
+							std::cout << "pollserver: socket " << senderFd << "hung up\n";
                         } else {
                             perror("recv");
                         }
-
                         close(pfds[i].fd); // Bye!
-
 						delFromPfds(pfds, i);
 
                         // reexamine the slot we just deleted
@@ -173,11 +172,9 @@ int main(void)
                             int destFd = pfds[j].fd;
 
                             // Except the listener and ourselves
-                            if (destFd != listener && destFd != senderFd) {
-                                if (send(destFd, buf, nBytes, 0) == -1) {
+                            if (destFd != listener && destFd != senderFd)
+                                if (send(destFd, buf, nBytes, 0) == -1)
                                     perror("send");
-                                }
-                            }
                         }
                     }
                 } 
