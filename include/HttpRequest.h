@@ -5,6 +5,16 @@
 # include <sstream>
 # include <map>
 
+namespace HttpConstants
+{
+    // Supported Methods
+    const std::string GET = "GET";
+    const std::string POST = "POST";
+    const std::string DELETE = "DELETE";
+
+    const std::string HTTP_1_1 = "HTTP/1.1";
+}
+
 class HttpRequest
 {
     public:
@@ -20,5 +30,7 @@ class HttpRequest
     private:
 
 };
+
+std::ostream& operator<<(std::ostream &stream, const HttpRequest& src);
 
 #endif

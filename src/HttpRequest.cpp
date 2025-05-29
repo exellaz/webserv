@@ -26,3 +26,15 @@ bool HttpRequest::parseHeaderLine(const std::string& line)
     }
     return true;
 }
+
+std::ostream& operator<<(std::ostream &stream, const HttpRequest& src)
+{
+    stream << "Method: " << src._method << "\n";
+    stream << "URL: " << src._url << "\n";
+    stream << "Version: " << src._version << "\n";
+    stream << "\nHeaders\n";
+    for (std::map<std::string, std::string>::const_iterator It = src._headers.begin(); It != src._headers.end(); ++It)
+        stream << It->first << ": " << It->second << "\n";
+    stream << "\nBody\n" << src._body << "\n";
+    return stream;
+}
