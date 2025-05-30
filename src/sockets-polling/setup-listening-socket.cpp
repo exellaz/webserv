@@ -1,7 +1,7 @@
-#include "sockets-polling.h"
+#include "../../include/sockets-polling.h"
 
 // Return a listening socket
-int getListenerSocket(void)
+int getListenerSocket(Config& config)
 {
     int listener;     // Listening socket descriptor
     int rv;
@@ -16,7 +16,7 @@ int getListenerSocket(void)
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE;
 
-    if ((rv = getaddrinfo(NULL, PORT, &hints, &res)) != 0) {
+    if ((rv = getaddrinfo(config.getHost().c_str(), config.getPort().c_str(), &hints, &res)) != 0) {
         fprintf(stderr, "pollserver: %s\n", gai_strerror(rv));
         exit(1);
     }
@@ -51,9 +51,9 @@ int getListenerSocket(void)
 }
 
 // returns listening socket fd
-int setupListeningSocket(std::vector<struct pollfd>& pfds) {
+int setupListeningSocket(std::vector<struct pollfd>& pfds, Config& config) {
 
-    int listener = getListenerSocket();
+    int listener = getListenerSocket(config);
     if (listener == -1) {
 		std::cerr << "Error: error getting listening socket\n";
         exit(1);

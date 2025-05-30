@@ -6,15 +6,16 @@ ORANGE = \033[0;38;5;166m
 NAME = webserv
 
 CC = c++
-CFLAGS = -Wall -Wextra -Werror -std=c++98 -fsanitize=address -g3
+CFLAGS = -Wall -Wextra -Werror -std=c++98 -g3
 INC = -Iinclude
 
 SRC = \
-			main.cpp \
-			setup-listening-socket.cpp \
-			handleConnections.cpp \
-			utils.cpp \
-
+		main.cpp \
+		sockets-polling/handleConnections.cpp \
+		sockets-polling/utils.cpp \
+		sockets-polling/setup-listening-socket.cpp \
+		\
+		config-parser/Configuration.cpp \
 
 OBJ = $(SRC:.cpp=.o)
 

@@ -1,4 +1,4 @@
-#include "sockets-polling.h"
+#include "../../include/sockets-polling.h"
 
 int main(void)
 {
@@ -21,11 +21,8 @@ int main(void)
         // Run through the existing connections looking for data to read
         for(size_t i = 0; i < pfds.size(); i++) {
 
-			if (pfds[i].revents & POLLHUP) { 
-				std::cout << "POLLHUP\n";
-			}
             // Check if socket is ready to read
-            if (pfds[i].revents & (POLLIN)) { 
+			if (pfds[i].revents & (POLLIN | POLLHUP)) { // socket can have 
 				std::cout << "POLLIN\n";
 
                 if (pfds[i].fd == listener)

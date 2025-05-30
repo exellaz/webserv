@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   Configuration.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: welow <welow@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: sting <sting@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/29 15:31:13 by welow             #+#    #+#             */
-/*   Updated: 2025/05/30 14:45:28 by welow            ###   ########.fr       */
+/*   Updated: 2025/05/30 18:13:14 by sting            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Configuration.hpp"
+#include "../../include/Configuration.hpp"
 
 static std::string ft_trim(const std::string &str);
 static void skipBlock(std::ifstream &conf);
@@ -21,7 +21,7 @@ static std::string	extractLine(const std::string &line);
  * @brief Config constructor
 */
 Config::Config(std::ifstream &conf)
-	: _port(0),
+	: _port(""),
 	  _host(""),
 	  _serverName(""),
 	  _rootDirectory(""),
@@ -42,11 +42,10 @@ Config::Config(std::ifstream &conf)
 			if (colon != std::string::npos)
 			{
 				this->_host = listen.substr(0, colon);
-				std::string port = listen.substr(colon + 1);
-				this->_port = std::strtol(port.c_str(), NULL, 10);
+				_port = listen.substr(colon + 1);
 			}
 			else
-				this->_port = std::strtol(listen.c_str(), NULL, 10);
+				_port = listen.substr(colon + 1);
 		}
 		else if (line.find("server_name") != std::string::npos)
 		{
@@ -156,7 +155,7 @@ Location::Location(std::ifstream &conf, const std::string &locName)
 /**
  * @brief get port number
 */
-unsigned int	Config::getPort() const
+std::string	Config::getPort() const
 {
 	return (this->_port);
 }
@@ -245,7 +244,7 @@ std::string Location::getAllowedMethods(size_t index) const
 */
 std::ostream &operator<<(std::ostream &cout, const Config &config)
 {
-	if (config.getPort() != 0)
+	if (config.getPort().empty())
 		cout << "port           : [" << config.getPort() << "]\n";
 	if (!config.getHost().empty())
 		cout << "host           : [" << config.getHost() << "]\n";
