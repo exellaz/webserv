@@ -31,5 +31,6 @@
 *.out
 *.app
 
-.vscode/
 webserv
+http-request
+.vscode/
