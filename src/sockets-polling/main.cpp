@@ -23,10 +23,6 @@ void acceptClient(std::vector<struct pollfd>& pfds, int listener)
 				getInAddr((struct sockaddr*)&remoteAddr),
 				remoteIp, INET6_ADDRSTRLEN),
 			newFd);
-		
-		char buffer[30000];
-		recv(newFd, buffer, sizeof(buffer), 0);
-		std::cout << buffer << '\n';
 	}
 }
 
@@ -72,8 +68,9 @@ int main(void)
 					// NOTE: Receive data from Client
 
                     // If not the listener, we're just a regular client
-					char buf[256];    // Buffer for client data
+					char buf[3000];    // Buffer for client data
                     int nBytes = recv(pfds[i].fd, buf, sizeof buf, 0);
+					buf[nBytes] = '\0';
                     int senderFd = pfds[i].fd;
 
                     if (nBytes <= 0) {
@@ -86,11 +83,26 @@ int main(void)
                         }
                         close(pfds[i].fd); // Bye!
 						delFromPfds(pfds, i);
-
-                        // reexamine the slot we just deleted
                         i--;
                     } else {
 						// do something with client data
+						std::cout << "Data from Client: \n"<< buf << '\n';
+
+						const char* htmlBody = "<!DOCTYPE html><html><body><h1>Hello from your C++ server!</h1></body></html>";
+						int contentLength = strlen(htmlBody);
+						std::ostringstream oss;
+						oss << "HTTP/1.1 200 OK\r\n"
+							<< "Content-Type: text/html\r\n"
+							<< "Content-Length: " << contentLength << "\r\n"
+							<< "Connection: close\r\n"
+							<< "\r\n"
+							<< htmlBody;
+						std::string httpResponse = oss.str();
+						send(pfds[i].fd, httpResponse.c_str(), httpResponse.size(), 0);
+
+						close(pfds[i].fd);
+						delFromPfds(pfds, i);
+						i--;
 					}
                 } 
             } 

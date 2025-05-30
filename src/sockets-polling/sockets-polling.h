@@ -13,6 +13,7 @@
 #include <poll.h>
 #include <vector>
 #include <iostream>
+#include <sstream>
 
 #define PORT "8080"   // Port we're listening on
 
