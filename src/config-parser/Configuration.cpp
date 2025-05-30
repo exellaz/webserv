@@ -6,37 +6,16 @@
 /*   By: welow <welow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/29 15:31:13 by welow             #+#    #+#             */
-/*   Updated: 2025/05/29 17:41:53 by welow            ###   ########.fr       */
+/*   Updated: 2025/05/30 14:45:28 by welow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Configuration.hpp"
 
-Config::~Config() {}
-Location::Location() {}
-Location::~Location() {}
-
-/**
- * @brief trim front and back whitespace from a string
- * @param str string that i want to trim
- * @return trimmed string
-*/
-static std::string ft_trim(const std::string &str)
-{
-	size_t first = str.find_first_not_of(" \t\n\r\f\v");
-	if (first == std::string::npos)
-		return "";
-	size_t last = str.find_last_not_of(" \t\n\r\f\v");
-	return str.substr(first, (last - first + 1));
-}
-
-std::string	check_comment(const std::string &line)
-{
-	size_t comment_pos = line.find('#');
-	if (comment_pos != std::string::npos)
-		return line.substr(0, comment_pos);
-	return line;
-}
+static std::string ft_trim(const std::string &str);
+static void skipBlock(std::ifstream &conf);
+static std::string	checkComment(const std::string &line);
+static std::string	extractLine(const std::string &line);
 
 /**
  * @brief Config constructor
@@ -45,24 +24,29 @@ Config::Config(std::ifstream &conf)
 	: _port(0),
 	  _host(""),
 	  _serverName(""),
-	  _rootDirectory("")
+	  _rootDirectory(""),
+	  _clientMaxSize(0),
+	  _errorPage()
 {
 	if (!conf.is_open())
-		throw std::runtime_error("Configuration file not found or cannot be opened");
+		throw std::runtime_error("config file not found or cannot open");
 	else if (conf.peek() == std::ifstream::traits_type::eof())
-		throw std::runtime_error("Configuration file is empty");
+		throw std::runtime_error("config file is empty");
 	for (std::string line; std::getline(conf,line);)
 	{
-		line = check_comment(line);
-		if (line.find("port") != std::string::npos)
+		line = checkComment(line);
+		if (line.find("listen") != std::string::npos)
 		{
-			std::string portNB = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
-			this->_port = std::strtol(portNB.c_str(), NULL, 10);
-		}
-		else if (line.find("host") != std::string::npos)
-		{
-			std::string hostName = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
-			this->_host = hostName;
+			std::string listen = line.substr(line.find(' ') + 1,line.find(';') - line.find(' ') - 1);
+			size_t colon = listen.find(':');
+			if (colon != std::string::npos)
+			{
+				this->_host = listen.substr(0, colon);
+				std::string port = listen.substr(colon + 1);
+				this->_port = std::strtol(port.c_str(), NULL, 10);
+			}
+			else
+				this->_port = std::strtol(listen.c_str(), NULL, 10);
 		}
 		else if (line.find("server_name") != std::string::npos)
 		{
@@ -74,15 +58,20 @@ Config::Config(std::ifstream &conf)
 			std::string rootPath = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
 			this->_rootDirectory = rootPath;
 		}
-		else if (line.find("error_log") != std::string::npos)
+		else if (line.find("client_max_body_size") != std::string::npos)
 		{
-			std::string errorLog = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
-			size_t errorCodePos = errorLog.find(' ');
+			std::string clientMaxSize = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
+			this->_clientMaxSize = std::strtol(clientMaxSize.c_str(), NULL, 10);
+		}
+		else if (line.find("error_page") != std::string::npos)
+		{
+			std::string errorPage = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
+			size_t errorCodePos = errorPage.find(' ');
 			if (errorCodePos != std::string::npos)
 			{
-				int errorCode = std::strtol(errorLog.substr(0, errorCodePos).c_str(), NULL, 10);
-				std::string errorFilePath = ft_trim(errorLog.substr(errorCodePos + 1));
-				this->_errorLog[errorCode] = errorFilePath;
+				int errorCode = std::strtol(errorPage.substr(0, errorCodePos).c_str(), NULL, 10);
+				std::string errorFilePath = ft_trim(errorPage.substr(errorCodePos + 1));
+				this->_errorPage[errorCode] = errorFilePath;
 			}
 		}
 		else if (line.find("location") != std::string::npos)
@@ -90,6 +79,8 @@ Config::Config(std::ifstream &conf)
 			Location loc(conf, line);
 			this->_location[loc.locationPath] = loc;
 		}
+		else if (line.find("}") != std::string::npos)
+			break;
 	}
 }
 
@@ -100,20 +91,16 @@ Location::Location(std::ifstream &conf, const std::string &locName)
 	: locationPath(""),
 	  index(""),
 	  rootDirectory(""),
-	  allowMethods(""),
-	  cgiPath(""),
-	  cgiExtension(""),
+	  alias(""),
+	  allowMethods(),
+	  returnPath(),
 	  clientMaxSize(0),
 	  autoIndex(false)
 {
-	unsigned int start_pos = locName.find(' ') + 1;
-	unsigned int end_pos = locName.find("{");
-	std::string trimLocName = ft_trim(locName.substr(start_pos, end_pos - start_pos));
-	this->locationPath = trimLocName;
-
+	this->locationPath = extractLine(locName);
 	for(std::string line; std::getline(conf, line);)
 	{
-		line = check_comment(line);
+		line = checkComment(line);
 		if (line.find("autoindex") != std::string::npos)
 		{
 			std::string autoIndex = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
@@ -126,14 +113,36 @@ Location::Location(std::ifstream &conf, const std::string &locName)
 		}
 		else if (line.find("index") != std::string::npos)
 			this->index = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
-		else if (line.find("root_directory") != std::string::npos)
+		else if (line.find("root") != std::string::npos)
+		{
 			this->rootDirectory = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
-		else if (line.find("allow_method") != std::string::npos)
-			this->allowMethods = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
-		else if (line.find("cgi_path") != std::string::npos)
-			this->cgiPath = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
-		else if (line.find("cgi_extension") != std::string::npos)
-			this->cgiExtension = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
+			this->rootDirectory.append(this->locationPath);
+		}
+		else if (line.find("alias") != std::string::npos)
+			this->alias = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
+		else if (line.find("limit_except") != std::string::npos)
+		{
+			std::string allowMethod = extractLine(line);
+			std::istringstream iss(allowMethod);
+			for (std::string method; iss >> method;)
+			{
+				if (method != "GET" && method != "POST")
+					throw std::runtime_error("invalid method");
+				this->allowMethods.push_back(method);
+			}
+			skipBlock(conf);
+		}
+		else if (line.find("return") != std::string::npos)
+		{
+			std::string returnPath = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
+			size_t space = returnPath.find(' ');
+			if (space != std::string::npos)
+			{
+				int errorCode = std::strtol(returnPath.substr(0, space).c_str(), NULL, 10);
+				std::string path = ft_trim(returnPath.substr(space + 1));
+				this->returnPath[errorCode] = path;
+			}
+		}
 		else if (line.find("client_max_size") != std::string::npos)
 		{
 			std::string clientMaxSize = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
@@ -176,6 +185,11 @@ std::string	Config::getRootDirectory() const
 	return (this->_rootDirectory);
 }
 
+int Config::getClientMaxSize() const
+{
+	return (this->_clientMaxSize);
+}
+
 /**
  * @brief get location
 */
@@ -187,33 +201,43 @@ const std::map<std::string, Location>	&Config::getLocations() const
 /**
  * @brief get error log
 */
-const std::map<int, std::string>	&Config::getErrorLog() const
+const std::map<int, std::string>	&Config::getErrorPage() const
 {
-	return (this->_errorLog);
+	return (this->_errorPage);
 }
 
 /**
  * @brief get location contain
  * @param path location path
 */
-Location *Config::getLocationPath(const std::string &path)
+Location Config::getLocationPath(const std::string &path)
 {
 	std::map<std::string, Location>::iterator it = this->_location.find(path);
 	if (it != this->_location.end())
-		return &(it->second);
-	throw std::runtime_error("Location not found");
+		return it->second;
+	throw std::runtime_error("location not found");
 }
 
 /**
  * @brief get error log by code
  * @param errorCode error code
 */
-std::string Config::getErrorLogByCode(int errorCode)
+std::string Config::getErrorPageByCode(int errorCode) const
 {
-	std::map<int, std::string>::const_iterator it = this->_errorLog.find(errorCode);
-	if (it != this->_errorLog.end())
+	std::map<int, std::string>::const_iterator it = this->_errorPage.find(errorCode);
+	if (it != this->_errorPage.end())
 		return it->second;
-	throw std::runtime_error("Error log not found for code");
+	throw std::runtime_error("error page not found");
+}
+
+/**
+ * @brief get allowed methods by index
+*/
+std::string Location::getAllowedMethods(size_t index) const
+{
+	if (index <= this->allowMethods.size())
+		return this->allowMethods[index];
+	throw std::runtime_error("method unavailable");
 }
 
 /**
@@ -221,27 +245,113 @@ std::string Config::getErrorLogByCode(int errorCode)
 */
 std::ostream &operator<<(std::ostream &cout, const Config &config)
 {
-	cout << "port           : [" << (config.getPort() == 0 ? 0 : config.getPort()) << "]\n";
-	cout << "host           : [" << (config.getHost().empty() ? "-" : config.getHost()) << "]\n";
-	cout << "server_name    : [" << (config.getServerName().empty() ? "-" : config.getServerName() )<< "]\n";
-	cout << "root_directory : [" << (config.getRootDirectory().empty() ? "-" : config.getRootDirectory()) << "]\n";
-	for (std::map<int, std::string>::const_iterator it = config.getErrorLog().begin();
-			it != config.getErrorLog().end(); ++it)
+	if (config.getPort() != 0)
+		cout << "port           : [" << config.getPort() << "]\n";
+	if (!config.getHost().empty())
+		cout << "host           : [" << config.getHost() << "]\n";
+	if (!config.getServerName().empty())
+		cout << "server_name    : [" << config.getServerName() << "]\n";
+	if (!config.getRootDirectory().empty())
+		cout << "root_directory : [" << config.getRootDirectory() << "]\n";
+	if (config.getClientMaxSize() != 0)
+		cout << "client_max_size: [" << config.getClientMaxSize() << "]\n";
+	for (std::map<int, std::string>::const_iterator it = config.getErrorPage().begin();
+			it != config.getErrorPage().end(); ++it)
 	{
 		cout << "error_log      : [" << it->first << "] [" << it->second << "]\n";
 	}
 	for (std::map<std::string, Location>::const_iterator it = config.getLocations().begin();
 			it != config.getLocations().end(); ++it)
 	{
-		cout << "	location        : [" << (it->second.locationPath.empty() ? "-" : it->second.locationPath) << "]\n";
-		cout << "	index           : [" << (it->second.index.empty() ? "-" : it->second.index) << "]\n";
-		cout << "	root_directory  : [" << (it->second.rootDirectory.empty() ? "-" : it->second.rootDirectory) << "]\n";
-		cout << "	allow_methods   : [" << (it->second.allowMethods.empty() ? "-" : it->second.allowMethods) << "]\n";
-		cout << "	client_max_size : [" << it->second.clientMaxSize << "]\n";
-		cout << "	autoindex       : [" << (it->second.autoIndex ? "on" : "off") << "]\n";
-		cout << "	cgi_path        : [" << (it->second.cgiPath.empty() ? "-" : it->second.cgiPath) << "]\n";
-		cout << "	cgi_extension   : [" << (it->second.cgiExtension.empty() ? "-" : it->second.cgiExtension) << "]\n";
+		const Location &loc = it->second;
+
+		if (!loc.locationPath.empty())
+			cout << "	location        : [" << loc.locationPath << "]\n";
+		if (!loc.index.empty())
+			cout << "	files           : [" << loc.index << "]\n";
+		if (!loc.rootDirectory.empty())
+			cout << "	root_directory  : [" << loc.rootDirectory << "]\n";
+		if (!loc.alias.empty())
+			cout << "	alias_directory : [" << loc.alias << "]\n";
+		for (std::vector<std::string>::const_iterator methodIt = loc.allowMethods.begin();
+				methodIt != loc.allowMethods.end(); ++methodIt)
+		{
+			cout << "	allow_method    : [" << *methodIt << "]\n";
+		}
+		for (std::map<int, std::string>::const_iterator retIt = loc.returnPath.begin();
+				retIt != loc.returnPath.end(); ++retIt)
+		{
+			cout << "	return_path     : [" << retIt->first << "] [" << retIt->second << "]\n";
+		}
+		if (loc.clientMaxSize != 0)
+			cout << "	client_max_size : [" << loc.clientMaxSize << "]\n";
+		if (loc.autoIndex)
+			cout << "	list_directory  : [on]\n";
 		cout << "	-------------------------------------------------\n";
 	}
 	return cout;
+}
+
+Config::~Config() {}
+Location::Location() {}
+Location::~Location() {}
+
+/**
+ * @brief trim front and back whitespace from a string
+ * @param str string that i want to trim
+ * @return trimmed string
+*/
+static std::string ft_trim(const std::string &str)
+{
+	size_t first = str.find_first_not_of(" \t\n\r\f\v");
+	if (first == std::string::npos)
+		return "";
+	size_t last = str.find_last_not_of(" \t\n\r\f\v");
+	return str.substr(first, (last - first + 1));
+}
+
+/**
+ * @brief skip block in config file
+ * @param conf config file
+ * @note 1. if found '{', increment braceCount (but it already incremented by 1)
+ * @note 2. if found '}', decrement braceCount (so it will skip the whole block)
+*/
+static void skipBlock(std::ifstream &conf) {
+	int braceCount = 1;
+	std::string line;
+	while (std::getline(conf, line)) {
+		if (line.find('{') != std::string::npos)
+			braceCount++;
+		if (line.find('}') != std::string::npos)
+			braceCount--;
+		if (braceCount == 0)
+			break;
+	}
+}
+
+/**
+ * @brief check the line had comment or not
+ * @param line string
+ * @return line if no comment, otherwise return line before comment
+*/
+static std::string	checkComment(const std::string &line)
+{
+	size_t comment_pos = line.find('#');
+	if (comment_pos != std::string::npos)
+		return line.substr(0, comment_pos);
+	return line;
+}
+
+/**
+ * @brief extract the line between 'line' and '{'
+ * @param line line
+ * @return extract line
+*/
+static std::string	extractLine(const std::string &line)
+{
+	size_t	start = line.find(' ') + 1;
+	size_t	end = line.find('{');
+	if (start == 0 || end == 0 || start >= end)
+		throw std::runtime_error("invalid line");
+	return ft_trim(line.substr(start, end - start));
 }
