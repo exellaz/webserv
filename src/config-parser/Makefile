@@ -7,9 +7,10 @@ NAME = webserv
 
 CC = c++
 CFLAGS = -Wall -Wextra -Werror -std=c++98 -g3
-INC = -Iinclude
+INC = -I ../../include
 
-SRC = src/main.cpp
+SRC = main.cpp \
+	  Configuration.cpp \
 
 OBJ = $(SRC:.cpp=.o)
 
