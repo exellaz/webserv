@@ -5,19 +5,20 @@ ORANGE = \033[0;38;5;166m
 
 NAME = webserv
 
-
 CC = c++
 CFLAGS = -Wall -Wextra -Werror -std=c++98 -g3
-INC = -I ../../include
+INC = -Iinclude
 
-SRC = main.cpp \
-	  Configuration.cpp \
+SRC = \
+			main.cpp \
+			setup-listening-socket.cpp \
+			handleConnections.cpp \
+			utils.cpp \
+
 
 OBJ = $(SRC:.cpp=.o)
 
 all: $(NAME)
-
-sockets-polling: $()
 
 $(NAME): $(OBJ)
 	$(CC) $(CFLAGS) $(INC) $(OBJ) -o $(NAME)
