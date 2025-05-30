@@ -16,5 +16,18 @@
 
 #define PORT "8080"   // Port we're listening on
 
+// Setup Listening Socket
+int setupListeningSocket(std::vector<struct pollfd>& pfds);
+
+// Utils
+void *getInAddr(struct sockaddr *sa);
+void addToPfds(std::vector<struct pollfd>& pfds, int newFd);
+void delFromPfds(std::vector<struct pollfd>& pfds, int i);
+
+
+
+
+
+
 
 #endif

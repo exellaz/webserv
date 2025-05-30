@@ -9,7 +9,11 @@ CC = c++
 CFLAGS = -Wall -Wextra -Werror -std=c++98 -g3
 INC = -Iinclude
 
-SRC = main.cpp
+SRC = \
+			main.cpp \
+			setup-listening-socket.cpp \
+			utils.cpp \
+
 
 OBJ = $(SRC:.cpp=.o)
 
