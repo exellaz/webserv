@@ -18,8 +18,6 @@
 
 #define PORT "8080"   // Port we're listening on
 
-class Config;
-
 // Setup Listening Socket
 int setupListeningSocket(std::vector<struct pollfd>& pfds, Config& config);
 

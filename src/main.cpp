@@ -8,7 +8,7 @@ int main(int argc, char **argv)
     if (argc < 2) {
         std::cout << "No config file found. Using default config file.\n";
         (void)argv;
-        configFile = "./config-parser/server.conf";
+        configFile = "./src/config-parser/server.conf";
     }
     else if (argc > 2) {
         std::cout << "Error: Expected 1 config file only.\n";
