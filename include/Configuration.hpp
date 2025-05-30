@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Configuration.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: welow <welow@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: sting <sting@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/29 15:29:35 by welow             #+#    #+#             */
-/*   Updated: 2025/05/30 14:45:34 by welow            ###   ########.fr       */
+/*   Updated: 2025/05/30 18:02:23 by sting            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ class Location;
 class Config
 {
 	private:
-	unsigned int					_port;           // port number
+	std::string						_port;           // port number
 	std::string						_host;           // host IP address
 	std::string						_serverName;     // server name
 	std::string						_rootDirectory;  // root directory
@@ -37,7 +37,7 @@ class Config
 	Config(std::ifstream &conf);
 	~Config();
 
-	unsigned int							getPort() const;
+	std::string								getPort() const;
 	std::string								getHost() const;
 	std::string								getServerName() const;
 	std::string								getRootDirectory() const;
