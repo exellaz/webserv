@@ -30,3 +30,7 @@
 *.exe
 *.out
 *.app
+
+webserv
+http-request
+.vscode/
