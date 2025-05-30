@@ -20,6 +20,10 @@
 // Setup Listening Socket
 int setupListeningSocket(std::vector<struct pollfd>& pfds);
 
+// Connections
+void acceptClient(std::vector<struct pollfd>& pfds, int listener);
+void receiveClientData(struct pollfd& pfd);
+
 // Utils
 void *getInAddr(struct sockaddr *sa);
 void addToPfds(std::vector<struct pollfd>& pfds, int newFd);
