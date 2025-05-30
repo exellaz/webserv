@@ -14,6 +14,7 @@
 #include <vector>
 #include <iostream>
 #include <sstream>
+#include <fcntl.h>
 #include "./Configuration.hpp"
 
 #define PORT "8080"   // Port we're listening on
@@ -27,6 +28,7 @@ void receiveClientData(struct pollfd& pfd);
 
 // Utils
 void *getInAddr(struct sockaddr *sa);
+int  set_nonblocking(int fd);
 void addToPfds(std::vector<struct pollfd>& pfds, int newFd);
 void delFromPfds(std::vector<struct pollfd>& pfds, int i);
 

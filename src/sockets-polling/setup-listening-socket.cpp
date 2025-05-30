@@ -59,6 +59,12 @@ int setupListeningSocket(std::vector<struct pollfd>& pfds, Config& config) {
         exit(1);
     }
 
+    if (set_nonblocking(listener) == -1) {
+        perror("set_nonblocking");
+        close(listener);
+        exit(4);
+    }
+
     // Add the listener to set
 	struct pollfd pfd;
     pfd.fd = listener;

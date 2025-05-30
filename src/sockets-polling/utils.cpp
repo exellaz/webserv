@@ -10,7 +10,13 @@ void *getInAddr(struct sockaddr *sa)
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
-
+// Helper: set a file descriptor to non-blocking mode
+int set_nonblocking(int fd) {
+    int flags = fcntl(fd, F_GETFL, 0);
+    if (flags == -1) 
+		return -1;
+    return fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+}
 
 // Add a new file descriptor to the set
 void addToPfds(std::vector<struct pollfd>& pfds, int newFd)

@@ -6,24 +6,28 @@ void acceptClient(std::vector<struct pollfd>& pfds, int listener)
 	struct sockaddr_storage remoteAddr; // Client address
 	socklen_t addrLen = sizeof remoteAddr;
 	int newFd = accept(listener, (struct sockaddr *)&remoteAddr, &addrLen);
-	if (newFd == -1)
+	if (newFd == -1) {
 		perror("accept");
-	else {
-		
-		// server sends text to every client that connects
-		const char *hello = "Hello from server!\n";
-		send(newFd, hello, strlen(hello), 0);
-
-		addToPfds(pfds, newFd);
-
-		char remoteIp[INET6_ADDRSTRLEN];
-		printf("pollserver: new connection from %s on "
-			"socket %d\n",
-			inet_ntop(remoteAddr.ss_family,
-				getInAddr((struct sockaddr*)&remoteAddr),
-				remoteIp, INET6_ADDRSTRLEN),
-			newFd);
+		return ;
 	}
+	if (set_nonblocking(newFd) == -1) {
+		perror("set_nonblocking (new_fd)");
+		close(newFd);
+		return ;
+	}
+	// server sends text to every client that connects
+	const char *hello = "Hello from server!\n";
+	send(newFd, hello, strlen(hello), 0);
+
+	addToPfds(pfds, newFd);
+
+	char remoteIp[INET6_ADDRSTRLEN];
+	printf("pollserver: new connection from %s on "
+		"socket %d\n",
+		inet_ntop(remoteAddr.ss_family,
+			getInAddr((struct sockaddr*)&remoteAddr),
+			remoteIp, INET6_ADDRSTRLEN),
+		newFd);
 }
 
 void receiveClientData(struct pollfd& pfd)
