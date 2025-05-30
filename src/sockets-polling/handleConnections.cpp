@@ -30,18 +30,18 @@ void acceptClient(std::vector<struct pollfd>& pfds, int listener)
 		newFd);
 }
 
-void receiveClientData(struct pollfd& pfd)
+void receiveClientData(int fd)
 {
+	// TODO: create loop to recv() in chunks
 	char buf[3000];    // Buffer for client data
-	int nBytes = recv(pfd.fd, buf, sizeof buf, 0);
+	int nBytes = recv(fd, buf, sizeof buf, 0);
 	buf[nBytes] = '\0';
-	int senderFd = pfd.fd;
 
 	if (nBytes <= 0) {
 		// Got error or connection closed by client
 		if (nBytes == 0) {
 			// Connection closed
-			std::cout << "pollserver: socket " << senderFd << " hung up\n"; 
+			std::cout << "pollserver: socket " << fd << " hung up\n"; 
 		} else {
 			perror("recv");
 		}
@@ -50,6 +50,6 @@ void receiveClientData(struct pollfd& pfd)
 		std::cout << "Data from Client: \n"<< buf << '\n';
 
 		const std::string response = "Response from server\n";
-		send(pfd.fd, response.c_str(), response.size(), 0);
+		send(fd, response.c_str(), response.size(), 0);
 	}
 }

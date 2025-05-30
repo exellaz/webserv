@@ -48,7 +48,7 @@ int main(int argc, char **argv)
                     if (pfds[i].fd == listener)
                         acceptClient(pfds, listener);
                     else { // Client socketfd
-                        receiveClientData(pfds[i]);
+                        receiveClientData(pfds[i].fd);
                         close(pfds[i].fd);
                         delFromPfds(pfds, i);
                         i--;
