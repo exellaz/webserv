@@ -30,26 +30,58 @@ void acceptClient(std::vector<struct pollfd>& pfds, int listener)
 		newFd);
 }
 
-void receiveClientData(int fd)
+// void receiveClientData(int fd)
+// {
+// 	// TODO: create loop to recv() in chunks
+// 	char buf[3000];    // Buffer for client data
+// 	int nBytes = recv(fd, buf, sizeof buf, 0);
+// 	buf[nBytes] = '\0';
+//
+// 	if (nBytes <= 0) {
+// 		// Got error or connection closed by client
+// 		if (nBytes == 0) {
+// 			// Connection closed
+// 			std::cout << "pollserver: socket " << fd << " hung up\n"; 
+// 		} else {
+// 			perror("recv");
+// 		}
+// 	} else {
+// 		// do something with client data
+// 		std::cout << "Data from Client: \n"<< buf << '\n';
+//
+// 		const std::string response = "Response from server\n";
+// 		send(fd, response.c_str(), response.size(), 0);
+// 	}
+// }
+
+
+
+int receiveClientData(int fd)
 {
-	// TODO: create loop to recv() in chunks
-	char buf[3000];    // Buffer for client data
-	int nBytes = recv(fd, buf, sizeof buf, 0);
-	buf[nBytes] = '\0';
+    std::string requestStr;
+    char buf[BODY_BUFFER_SIZE + 1]; // Use a stack-allocated buffer
+	
+    while (true) {
+        int nBytes = recv(fd, buf, BODY_BUFFER_SIZE, 0);
+        if (nBytes == -1) { // Error receiving data
+			std::cout << "recv: no data available in socket\n";
+    		std::cout << "\nData from Client: \n" << requestStr << '\n';
 
-	if (nBytes <= 0) {
-		// Got error or connection closed by client
-		if (nBytes == 0) {
-			// Connection closed
-			std::cout << "pollserver: socket " << fd << " hung up\n"; 
-		} else {
-			perror("recv");
-		}
-	} else {
-		// do something with client data
-		std::cout << "Data from Client: \n"<< buf << '\n';
+            return -1;
+        } else if (nBytes == 0) {
+            // Client connection closed
+            std::cout << "recv: socket " << fd << " hung up\n"; 
+    		std::cout << "\nData from Client: \n" << requestStr << '\n';
 
-		const std::string response = "Response from server\n";
-		send(fd, response.c_str(), response.size(), 0);
-	}
+            return -2;
+        }
+        buf[nBytes] = '\0'; // Null-terminate the received data
+        requestStr += buf;  // Append to the string
+    }
+
+    std::cout << "Data from Client: \n" << requestStr << '\n';
+    const std::string response = "Response from server\n";
+    send(fd, response.c_str(), response.size(), 0);
+
+    return 0;
 }

@@ -15,17 +15,20 @@
 #include <iostream>
 #include <sstream>
 #include <fcntl.h>
+#include <vector>
 #include "./Configuration.hpp"
 
 #define PORT "8080"
-#define BUFFER_SIZE 5
+#define HEADER_BUFFER_SIZE 1024
+#define BODY_BUFFER_SIZE 8192
 
 // Setup Listening Socket
 int setupListeningSocket(std::vector<struct pollfd>& pfds, Config& config);
 
 // Connections
 void acceptClient(std::vector<struct pollfd>& pfds, int listener);
-void receiveClientData(int fd);
+// void receiveClientData(int fd);
+int receiveClientData(int fd);
 
 // Utils
 void *getInAddr(struct sockaddr *sa);

@@ -49,6 +49,7 @@ int main(int argc, char **argv)
                         acceptClient(pfds, listener);
                     else { // Client socketfd
                         receiveClientData(pfds[i].fd);
+						// TODO: receiveClientData: handle err/return values
                         close(pfds[i].fd);
                         delFromPfds(pfds, i);
                         i--;
