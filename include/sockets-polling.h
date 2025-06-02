@@ -17,6 +17,7 @@
 #include <fcntl.h>
 #include <vector>
 #include "./Configuration.hpp"
+#include "./Buffer.h"
 
 #define PORT "8080"
 #define HEADER_BUFFER_SIZE 1024
@@ -27,8 +28,8 @@ int setupListeningSocket(std::vector<struct pollfd>& pfds, Config& config);
 
 // Connections
 void acceptClient(std::vector<struct pollfd>& pfds, int listener);
-// void receiveClientData(int fd);
-int receiveClientData(int fd);
+void readRequestHeader(int fd, std::string& headerStr, std::vector<Buffer>& buffers);
+int receiveClientRequest(int fd);
 
 // Utils
 void *getInAddr(struct sockaddr *sa);

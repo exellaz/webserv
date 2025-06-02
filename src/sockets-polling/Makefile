@@ -12,7 +12,7 @@ INC = -Iinclude
 SRC = \
 			main.cpp \
 			setup-listening-socket.cpp \
-			handleConnections.cpp \
+			handle-connections.cpp \
 			utils.cpp \
 
 
