@@ -112,6 +112,17 @@ std::string extractHeaderSectionFromBuffers(std::vector<Buffer>& buffers)
 	return headerStr;
 }
 
+// NOTE: Replaces entire of `buffers` with section after header
+void storeLeftoverBuffer(std::vector<Buffer>& buffers) 
+{
+	// TODO: extract leftover to std::string
+	
+	// TODO: clear list
+	
+	// TODO: add new buffer with leftover_string to `buffers` 
+
+}
+
 void readRequestHeader(int fd, std::string& headerStr, std::vector<Buffer>& buffers)
 {
 	// TODO: Handle return values/errors 
