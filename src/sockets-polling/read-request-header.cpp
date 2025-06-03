@@ -2,8 +2,7 @@
 
 
 int readFromSocket(int fd, Buffer& buf) {
-	std::vector<char> buff;
-    ssize_t n = recv(fd, &buff[1], buf.remainingSize(), 0);
+    ssize_t n = recv(fd, buf.last, buf.remainingSize(), 0);
 
 	std::cout << "n: " << n << '\n';
 	buf.last[n] = '\0';
@@ -81,11 +80,15 @@ std::string extractHeaderSectionFromBuffers(std::vector<Buffer>& buffers)
 		headerStr = it->start;
 	}
 	
-	// transfer chars from last buffer till "\r\n\r\n"
-	int i = 0;
-	while (it->start[i] && !isEndOfHeaderSection(it->start, i))
-		++i;
-	headerStr.append(it->start, i);
+	if (it != buffers.end())
+	{
+		// transfer chars from last buffer till "\r\n\r\n"
+		int i = 0;
+		while (it->start[i] && !isEndOfHeaderSection(it->start, i))
+			++i;
+		headerStr.append(it->start, i);
+
+	}
 
 	return headerStr;
 }
