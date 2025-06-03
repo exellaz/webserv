@@ -41,8 +41,11 @@ int main(int argc, char **argv)
             // Run through the existing connections looking for data to read
             for(size_t i = 0; i < pfds.size(); i++) {
 
-                // Check if socket is ready to read
-                if (pfds[i].revents & (POLLIN | POLLHUP)) { // socket can have 
+				// if (pfds[i].revents & (POLLHUP)) // socket can have 
+				//                 std::cout << "POLLHUP\n";
+
+				// Check if socket is ready to read
+                if (pfds[i].revents & (POLLIN )) { // socket can have 
                     std::cout << "POLLIN\n";
 
                     if (pfds[i].fd == listener)

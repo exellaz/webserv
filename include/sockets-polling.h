@@ -23,6 +23,15 @@
 #define HEADER_BUFFER_SIZE 1024
 #define BODY_BUFFER_SIZE 8192
 
+#define NGX_AGAIN -1
+#define NGX_OK 0
+#define NGX_ERROR -2
+#define NGX_REQUEST_HEADER_TOO_LARGE -431
+#define CLIENT_HEADER_BUFFER_SIZE 4096
+#define LARGE_HEADER_BUFFER_SIZE 8192
+#define MAX_LARGE_BUFFERS 4
+
+
 // Setup Listening Socket
 int setupListeningSocket(std::vector<struct pollfd>& pfds, Config& config);
 
