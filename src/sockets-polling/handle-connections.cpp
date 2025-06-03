@@ -30,34 +30,6 @@ void acceptClient(std::vector<struct pollfd>& pfds, int listener)
 }
 
 
-// int readRequestHeader(int fd, std::string& headerStr)
-// {
-//     char buf[HEADER_BUFFER_SIZE + 1]; 
-//
-//     while (true) {
-//         int nBytes = recv(fd, buf, HEADER_BUFFER_SIZE, 0);
-//         if (nBytes == -1) { // Error receiving data
-// 			std::cout << "recv: no data available in socket\n";
-//     		std::cout << "\nData from Client: \n" << headerStr << '\n';
-//
-//             return -1;
-//         } else if (nBytes == 0) {
-//             // Client connection closed
-//             std::cout << "recv: socket " << fd << " hung up\n"; 
-//     		std::cout << "\nData from Client: \n" << headerStr << '\n';
-//
-//             return -2;
-//         }
-//         buf[nBytes] = '\0'; // Null-terminate the received data
-//         headerStr += buf;  // Append to the string
-//     }
-//
-//     std::cout << "\nData from Client: \n" << headerStr << '\n';
-//     const std::string response = "Response from server\n";
-//     send(fd, response.c_str(), response.size(), 0);
-//
-// }
-
 int readRequestBody(int fd, std::string& bodyStr, int contentLength)
 {
 	(void)contentLength;
@@ -82,7 +54,10 @@ int readRequestBody(int fd, std::string& bodyStr, int contentLength)
         bodyStr += buf;  // Append to the string
     }
 
-    std::cout << "Data from Client: \n" << bodyStr << '\n';
+	std::cout << "\n===== Body String: =====\n";
+	std::cout << bodyStr << '\n';
+	std::cout << "==========================\n\n";
+
     const std::string response = "Response from server\n";
     send(fd, response.c_str(), response.size(), 0);
 
