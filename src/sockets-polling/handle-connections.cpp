@@ -37,15 +37,15 @@ NOTE:
 */
 int receiveClientRequest(int fd)
 {
-	std::vector<Buffer> buffers;
+	// std::vector<Buffer> buffers;
 	std::string headerStr;
 	std::string bodyStr;
 	
-	readRequestHeader(fd, headerStr, buffers);
+	readRequestHeader(fd, headerStr);
 	// parseRequestHeader();
 	
 	// TODO: isBodyPresent()   -> check Content-Length, Transfer-Encoding, request method
-	readRequestBody(fd, bodyStr, buffers, 0);
+	// readRequestBody(fd, bodyStr, buffers, 0);
 	// parseRequestBody();
 
     return 0;

@@ -8,7 +8,9 @@
 struct Buffer {
     std::vector<char> data;
     size_t lastIndex;
-
+	
+	Buffer() {}
+	 
     Buffer(size_t sz)
         : data(sz), lastIndex(0) {}
 	

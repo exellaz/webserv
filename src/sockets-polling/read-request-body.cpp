@@ -32,26 +32,26 @@
 // }
 
 // TODO: handle `contentLength` checking
-int readBodyToBuffers(int fd, std::vector<Buffer>& buffers) {
-    if (buffers.empty())
-        buffers.push_back(Buffer(BODY_BUFFER_SIZE));
-
-    while (1) {
-        Buffer& current = buffers.back();
-
-        int ret = readFromSocket(fd, current);
-        if (ret == NGX_AGAIN)
-            return NGX_AGAIN;
-        if (ret == NGX_ERROR)
-            return NGX_ERROR;
-			//      if (hasEndOfHeaderSection(current))
-			// return NGX_OK;
-
-        if (current.remainingSize() == 0) 
-            buffers.push_back(Buffer(BODY_BUFFER_SIZE));
-    }
-	
-}
+// int readBodyToBuffers(int fd, std::vector<Buffer>& buffers) {
+//     if (buffers.empty())
+//         buffers.push_back(Buffer(BODY_BUFFER_SIZE));
+//
+//     while (1) {
+//         Buffer& current = buffers.back();
+//
+//         int ret = readFromSocket(fd, current);
+//         if (ret == NGX_AGAIN)
+//             return NGX_AGAIN;
+//         if (ret == NGX_ERROR)
+//             return NGX_ERROR;
+// 			//      if (hasEndOfHeaderSection(current))
+// 			// return NGX_OK;
+//
+//         if (current.remainingSize() == 0) 
+//             buffers.push_back(Buffer(BODY_BUFFER_SIZE));
+//     }
+//
+// }
 
 void printBuffers(std::vector<Buffer>& buffers)
 {
@@ -67,10 +67,25 @@ void printBuffers(std::vector<Buffer>& buffers)
 
 void combineBuffersToSTring(std::vector<Buffer>& buffers, std::string& bodyStr)
 {
+
+	std::cout << "Size of buffers: " << buffers.size() << '\n';
 	std::vector<Buffer>::iterator it = buffers.begin();
 	for (; it != buffers.end(); ++it) {
-		std::string bufStr(it->data.begin(), it->data.end());
-		bodyStr += bufStr;
+		// std::string bufStr(it->data.begin(), it->data.end());
+		// std::cout << "bufStr.length: " << bufStr.length() << '\n';
+		// bodyStr += bufStr;
+		bodyStr.append(it->data.begin(), it->data.end());
+		std::cout << "Size of data: " << it->data.end() - it->data.begin() << '\n';
+
+	
+		
+		std::vector<char>::iterator bufIt = it->data.begin();
+		for (; bufIt != it->data.end(); ++bufIt) {
+			std::cout << *bufIt;
+			// std::cout << "check\n" << '\n';
+		}
+
+		std::cout << '\n';
 	}
 }
 
@@ -78,8 +93,9 @@ void readRequestBody(int fd, std::string& bodyStr, std::vector<Buffer>& buffers,
 {
 	std::cout << "\nREAD REQUEST BODY\n";
 	(void)contentLength;
+	(void)fd;
 	// TODO: Handle return values/errors 
-	readBodyToBuffers(fd, buffers);
+	// readBodyToBuffers(fd, buffers);
 	
 	// printBuffers(buffers);
 
