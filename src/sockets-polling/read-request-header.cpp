@@ -2,9 +2,7 @@
 
 int readFromSocket(int fd, Buffer& buf) {
     ssize_t n = recv(fd, buf.last(), buf.remainingSize(), 0);
-	
-	std::cout << "n: " << n << '\n';
-		
+
 	if (n == 0)
         return NGX_ERROR;  // connection closed
     if (n < 0) {
@@ -95,19 +93,17 @@ std::string extractHeaderSectionFromBuffers(std::vector<Buffer>& buffers)
 	return headerStr;
 }
 
-// NOTE: Replaces entire of `buffers` with section after header
 void storeLeftoverBuffer(std::vector<Buffer>& buffers) 
 {
-	// TODO: extract leftover to std::string
-	
 	const std::vector<char>& lastBuffer = buffers.back().data;
 	int i = 0;
 	while (!isEndOfHeaderSection(lastBuffer, i))
 		++i;
-
-	// TODO: clear list
+	std::string leftover = &lastBuffer[i + 4];
 	
-	// TODO: add new buffer with leftover_string to `buffers` 
+	// Replaces entire of `buffers` with section after header
+	buffers.clear();
+	buffers.push_back(Buffer(leftover));
 
 }
 
@@ -117,11 +113,11 @@ void readRequestHeader(int fd, std::string& headerStr, std::vector<Buffer>& buff
 	readHeaderToBuffers(fd, buffers);
 
 	headerStr = extractHeaderSectionFromBuffers(buffers);
-	
-	// TODO: store leftover section -> body section in
-
-
 	std::cout << "\n===== Header String: =====\n";
 	std::cout << headerStr << '\n';
 	std::cout << "==========================\n\n";
+	
+	// TODO: store leftover section -> body section in
+	storeLeftoverBuffer(buffers);
+	std::cout << "leftover: " << &(buffers[0].data[0]) << '\n';	
 }

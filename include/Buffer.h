@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <unistd.h>
+#include <string>
 
 struct Buffer {
     std::vector<char> data;
@@ -10,6 +11,12 @@ struct Buffer {
 
     Buffer(size_t sz)
         : data(sz), lastIndex(0) {}
+	
+	Buffer(const std::string& str) 
+		: data(str.begin(), str.end()), lastIndex(str.length()) 
+	{
+		data.push_back('\0');
+	}
 
     size_t remainingSize() const {
         return data.size() - lastIndex;
