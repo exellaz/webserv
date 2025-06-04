@@ -1,41 +1,25 @@
 #include "../../include/sockets-polling.h"
 
-
-// int readFromSocket(int fd, Buffer& buf) {
-//     ssize_t n = recv(fd, buf.last, buf.remainingSize(), 0);
-//
-// 	std::cout << "n: " << n << '\n';
-// 	buf.last[n] = '\0';
-// 	if (n == 0)
-//         return NGX_ERROR;  // connection closed
-//     if (n < 0) {
-//         if (errno == EAGAIN || errno == EWOULDBLOCK)
-//             return NGX_AGAIN;
-//         return NGX_ERROR;
-//     }
-//
-// 	buf.last += n;
-//     return n;
-// }
-
 int readFromSocket(int fd, Buffer& buf) {
     ssize_t n = recv(fd, buf.last(), buf.remainingSize(), 0);
-
-	buf.lastIndex += n;
-	buf.data[buf.lastIndex] = '\0';
 	
+	std::cout << "n: " << n << '\n';
+		
 	if (n == 0)
         return NGX_ERROR;  // connection closed
     if (n < 0) {
-        if (errno == EAGAIN || errno == EWOULDBLOCK)
+        if (errno == EAGAIN || errno == EWOULDBLOCK) // WARN: cannot use errno
             return NGX_AGAIN;
         return NGX_ERROR;
     }
+	buf.lastIndex += n;
+	buf.data[buf.lastIndex] = '\0';
 	
     return n;
 }
 
-bool isEndOfHeaderSection(std::vector<char> &str, int i)
+
+bool isEndOfHeaderSection(const std::vector<char> &str, int i)
 {
 	if (str[i]     == '\r' &&
 		str[i + 1] == '\n' &&
@@ -95,7 +79,6 @@ std::string extractHeaderSectionFromBuffers(std::vector<Buffer>& buffers)
 	std::vector<Buffer>::iterator it = buffers.begin();
 	for (; it != buffers.end(); ++it) {
         const std::vector<char>& data = it->data;
-        size_t len = it->dataSize();
 
 		if (hasEndOfHeaderSection(*it)) {
 			int i = 0;
@@ -106,7 +89,7 @@ std::string extractHeaderSectionFromBuffers(std::vector<Buffer>& buffers)
 		}
 
 		// transfer buffers without "\r\n\r\n"
-		headerStr.append(data.begin(), data.begin() + len);
+		headerStr.append(data.begin(), data.begin() + it->dataSize());
 	}
 	
 	return headerStr;
@@ -117,6 +100,11 @@ void storeLeftoverBuffer(std::vector<Buffer>& buffers)
 {
 	// TODO: extract leftover to std::string
 	
+	const std::vector<char>& lastBuffer = buffers.back().data;
+	int i = 0;
+	while (!isEndOfHeaderSection(lastBuffer, i))
+		++i;
+
 	// TODO: clear list
 	
 	// TODO: add new buffer with leftover_string to `buffers` 

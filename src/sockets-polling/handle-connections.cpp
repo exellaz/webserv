@@ -40,13 +40,11 @@ int readRequestBody(int fd, std::string& bodyStr, int contentLength)
         int nBytes = recv(fd, buf, BODY_BUFFER_SIZE, 0);
         if (nBytes == -1) { // Error receiving data
 			std::cout << "recv: no data available in socket\n";
-    		std::cout << "\nData from Client: \n" << bodyStr << '\n';
 
             return -1;
         } else if (nBytes == 0) {
             // Client connection closed
             std::cout << "recv: socket " << fd << " hung up\n"; 
-    		std::cout << "\nData from Client: \n" << bodyStr << '\n';
 
             return -2;
         }
