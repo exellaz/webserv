@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Configuration.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sting <sting@student.42.fr>                +#+  +:+       +#+        */
+/*   By: welow <welow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/29 15:31:13 by welow             #+#    #+#             */
-/*   Updated: 2025/05/30 18:13:14 by sting            ###   ########.fr       */
+/*   Updated: 2025/06/04 16:37:08 by welow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,10 @@ Config::Config(std::ifstream &conf)
 	  _serverName(""),
 	  _rootDirectory(""),
 	  _clientMaxSize(0),
+	  _clientBodyBufferSize(0),
+	  _clientHeaderBufferSize(0),
+	  _largeClientHeaderBufferNumber(0),
+	  _largeClientHeaderBufferSize(0),
 	  _errorPage()
 {
 	if (!conf.is_open())
@@ -61,6 +65,25 @@ Config::Config(std::ifstream &conf)
 		{
 			std::string clientMaxSize = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
 			this->_clientMaxSize = std::strtol(clientMaxSize.c_str(), NULL, 10);
+		}
+		else if (line.find("client_body_buffer_size") != std::string::npos)
+		{
+			std::string clientBodyBufferSize = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
+			this->_clientBodyBufferSize = std::strtol(clientBodyBufferSize.c_str(), NULL, 10);
+		}
+		else if (line.find("client_header_buffer_size") != std::string::npos)
+		{
+			std::string clientHeaderBufferSize = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
+			this->_clientHeaderBufferSize = std::strtol(clientHeaderBufferSize.c_str(), NULL, 10);
+		}
+		else if (line.find("large_client_header_buffers") != std::string::npos)
+		{
+			std::string numBuffer = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
+			std::string bufferSize = numBuffer.substr(numBuffer.find(' ') + 1);
+			int numBuffers = std::strtol(numBuffer.c_str(), NULL, 10);
+			int sizeBuffer = std::strtol(bufferSize.c_str(), NULL, 10);
+			this->_largeClientHeaderBufferNumber = numBuffers;
+			this->_largeClientHeaderBufferSize = sizeBuffer;
 		}
 		else if (line.find("error_page") != std::string::npos)
 		{
@@ -184,9 +207,44 @@ std::string	Config::getRootDirectory() const
 	return (this->_rootDirectory);
 }
 
+/**
+ * @brief get client max size
+*/
 int Config::getClientMaxSize() const
 {
 	return (this->_clientMaxSize);
+}
+
+/**
+ * @brief get client body buffer size
+*/
+int	Config::getClientBodyBufferSize() const
+{
+	return (this->_clientBodyBufferSize);
+}
+
+/**
+ * @brief get client header buffer size
+*/
+int	Config::getClientHeaderBufferSize() const
+{
+	return (this->_clientHeaderBufferSize);
+}
+
+/**
+ * @brief get large client header buffer number
+*/
+int	Config::getLargeClientHeaderBufferNumber() const
+{
+	return (this->_largeClientHeaderBufferNumber);
+}
+
+/**
+ * @brief get large client header buffer size
+*/
+int Config::getLargeClientHeaderBufferSize() const
+{
+	return (this->_largeClientHeaderBufferSize);
 }
 
 /**
@@ -254,6 +312,13 @@ std::ostream &operator<<(std::ostream &cout, const Config &config)
 		cout << "root_directory : [" << config.getRootDirectory() << "]\n";
 	if (config.getClientMaxSize() != 0)
 		cout << "client_max_size: [" << config.getClientMaxSize() << "]\n";
+	if (config.getClientBodyBufferSize() != 0)
+		cout << "client_body_buffer_size: [" << config.getClientBodyBufferSize() << "]\n";
+	if (config.getClientHeaderBufferSize() != 0)
+		cout << "client_header_buffer_size: [" << config.getClientHeaderBufferSize() << "]\n";
+	cout << "large_client_header_buffers: ";
+	if (config.getLargeClientHeaderBufferNumber() != 0)
+		cout << "[" << config.getLargeClientHeaderBufferNumber() << "] [" << config.getLargeClientHeaderBufferSize() << "]\n";
 	for (std::map<int, std::string>::const_iterator it = config.getErrorPage().begin();
 			it != config.getErrorPage().end(); ++it)
 	{
