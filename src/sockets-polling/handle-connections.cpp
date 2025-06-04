@@ -29,38 +29,6 @@ void acceptClient(std::vector<struct pollfd>& pfds, int listener)
 		newFd);
 }
 
-
-int readRequestBody(int fd, std::string& bodyStr, int contentLength)
-{
-	(void)contentLength;
-
-    char buf[BODY_BUFFER_SIZE + 1]; 
-	
-    while (true) {
-        int nBytes = recv(fd, buf, BODY_BUFFER_SIZE, 0);
-        if (nBytes == -1) { // Error receiving data
-			std::cout << "recv: no data available in socket\n";
-
-            return -1;
-        } else if (nBytes == 0) {
-            // Client connection closed
-            std::cout << "recv: socket " << fd << " hung up\n"; 
-
-            return -2;
-        }
-        buf[nBytes] = '\0'; // Null-terminate the received data
-        bodyStr += buf;  // Append to the string
-    }
-
-	std::cout << "\n===== Body String: =====\n";
-	std::cout << bodyStr << '\n';
-	std::cout << "==========================\n\n";
-
-    const std::string response = "Response from server\n";
-    send(fd, response.c_str(), response.size(), 0);
-
-}
-
 /*
 NOTE: 
 - `readHeader` will remove the 'header' section from `buffers`
@@ -75,7 +43,9 @@ int receiveClientRequest(int fd)
 	
 	readRequestHeader(fd, headerStr, buffers);
 	// parseRequestHeader();
-	readRequestBody(fd, bodyStr, 0);
+	
+	// TODO: isBodyPresent()   -> check Content-Length, Transfer-Encoding, request method
+	readRequestBody(fd, bodyStr, buffers, 0);
 	// parseRequestBody();
 
     return 0;

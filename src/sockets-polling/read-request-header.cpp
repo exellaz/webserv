@@ -1,7 +1,9 @@
 #include "../../include/sockets-polling.h"
 
 int readFromSocket(int fd, Buffer& buf) {
+	std::cout << "remainingSize: " << buf.remainingSize() << '\n';
     ssize_t n = recv(fd, buf.last(), buf.remainingSize(), 0);
+	std::cout << "n: " << n << '\n';
 
 	if (n == 0)
         return NGX_ERROR;  // connection closed
@@ -11,7 +13,7 @@ int readFromSocket(int fd, Buffer& buf) {
         return NGX_ERROR;
     }
 	buf.lastIndex += n;
-	buf.data[buf.lastIndex] = '\0';
+	// buf.data[buf.lastIndex -1] = '\0';
 	
     return n;
 }
@@ -43,7 +45,7 @@ bool hasEndOfHeaderSection(Buffer& buf) {
 
 int readHeaderToBuffers(int fd, std::vector<Buffer>& buffers) {
     if (buffers.empty())
-        buffers.push_back(Buffer(CLIENT_HEADER_BUFFER_SIZE));
+        buffers.push_back(Buffer(HEADER_BUFFER_SIZE));
 
     while (1) {
         Buffer& current = buffers.back();
@@ -95,11 +97,16 @@ std::string extractHeaderSectionFromBuffers(std::vector<Buffer>& buffers)
 
 void storeLeftoverBuffer(std::vector<Buffer>& buffers) 
 {
+	if (!hasEndOfHeaderSection(buffers.back()))
+		return ;
+
 	const std::vector<char>& lastBuffer = buffers.back().data;
 	int i = 0;
 	while (!isEndOfHeaderSection(lastBuffer, i))
 		++i;
-	std::string leftover = &lastBuffer[i + 4];
+	// std::string leftover = &lastBuffer[i + 4];
+
+	std::string leftover(lastBuffer.begin() + i + 4, lastBuffer.end());
 	
 	// Replaces entire of `buffers` with section after header
 	buffers.clear();

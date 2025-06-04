@@ -20,24 +20,26 @@
 #include "./Buffer.h"
 
 #define PORT "8080"
-#define HEADER_BUFFER_SIZE 1024
-#define BODY_BUFFER_SIZE 8192
 
 #define NGX_AGAIN -1
 #define NGX_OK 0
 #define NGX_ERROR -2
 #define NGX_REQUEST_HEADER_TOO_LARGE -431
-#define CLIENT_HEADER_BUFFER_SIZE 4096
+#define HEADER_BUFFER_SIZE 1024 // defines the size of the buffer allocated 
 #define LARGE_HEADER_BUFFER_SIZE 8192
 #define MAX_LARGE_BUFFERS 4
-
+#define BODY_BUFFER_SIZE 8192
+#define MAX_BODY_SIZE 1048576
 
 // Setup Listening Socket
 int setupListeningSocket(std::vector<struct pollfd>& pfds, Config& config);
 
 // Connections
 void acceptClient(std::vector<struct pollfd>& pfds, int listener);
+
+int readFromSocket(int fd, Buffer& buf);
 void readRequestHeader(int fd, std::string& headerStr, std::vector<Buffer>& buffers);
+void readRequestBody(int fd, std::string& bodyStr, std::vector<Buffer>& buffers, int contentLength);
 int receiveClientRequest(int fd);
 
 // Utils
