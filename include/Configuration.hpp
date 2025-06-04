@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Configuration.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sting <sting@student.42.fr>                +#+  +:+       +#+        */
+/*   By: welow <welow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/29 15:29:35 by welow             #+#    #+#             */
-/*   Updated: 2025/05/30 18:02:23 by sting            ###   ########.fr       */
+/*   Updated: 2025/06/04 16:38:20 by welow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,10 @@ class Config
 	std::string						_serverName;     // server name
 	std::string						_rootDirectory;  // root directory
 	int								_clientMaxSize;  // maximum client request size
+	int								_clientBodyBufferSize; //client body buffer size
+	int								_clientHeaderBufferSize; //client header buffer size
+	int								_largeClientHeaderBufferNumber; //number of buffer for large client header (eg: user agent, cookies)
+	int								_largeClientHeaderBufferSize; //size of buffer for large client header (eg: user agent, cookies)
 	std::map<int, std::string>		_errorPage;      // error pages(error code to file path)
 	std::map<std::string, Location>	_location;       // location paths to Location objects
 	public:
@@ -42,6 +46,10 @@ class Config
 	std::string								getServerName() const;
 	std::string								getRootDirectory() const;
 	int										getClientMaxSize() const;
+	int										getClientBodyBufferSize() const;
+	int										getClientHeaderBufferSize() const;
+	int										getLargeClientHeaderBufferNumber() const;
+	int										getLargeClientHeaderBufferSize() const;
 	const std::map<int, std::string>		&getErrorPage() const;
 	std::string								getErrorPageByCode(int errorCode) const;
 	const std::map<std::string, Location>	&getLocations() const;
