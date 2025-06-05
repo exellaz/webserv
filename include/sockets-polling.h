@@ -51,13 +51,9 @@ int setupListeningSocket(std::vector<struct pollfd>& pfds, Config& config);
 void acceptClient(std::vector<struct pollfd>& pfds, int listener);
 
 // Read Request Utils
-void readFromSocket(int fd, std::string& buffer);
-
+int readFromSocket(int fd, std::string& buffer, size_t bufferSize);
 void readRequestHeader(int fd, std::string& headerStr, std::string& buffer);
-
-// int readFromSocket(int fd, Buffer& buf);
-// void readRequestHeader(int fd, std::string& headerStr, std::vector<Buffer>& buffers);
-void readRequestBody(int fd, std::string& bodyStr, std::vector<Buffer>& buffers, int contentLength);
+void readRequestBody(int fd, std::string& bodyStr, std::string& buffer, enum reqBodyType type);
 int receiveClientRequest(int fd);
 
 // Utils

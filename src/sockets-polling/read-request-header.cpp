@@ -1,25 +1,48 @@
 #include "../../include/sockets-polling.h"
 
-void readFromSocket(int fd, std::string& buffer)
+int readFromSocket(int fd, std::string& buffer, size_t bufferSize)
 {
-	char buf[HEADER_BUFFER_SIZE + 1];
+	char buf[bufferSize + 1];
 
-	ssize_t n = recv(fd, buf, HEADER_BUFFER_SIZE, 0);
+	ssize_t n = recv(fd, buf, bufferSize, 0);
 	std::cout << "n: " << n << '\n';
 	
 	// NOTE: throw exceptions?
 	if (n == 0) // connection closed
 		throw ClientCloseConnectionException();
-	if (n < 0) {
+	if (n == -1) {
         // if (errno == EAGAIN || errno == EWOULDBLOCK) // WARN: cannot use errno
         //     return NGX_AGAIN;
         // return NGX_ERROR;
+		switch (errno) {
+           case EINTR:
+               // The call was interrupted by a signal
+               perror("recv interrupted");
+               break;
+           case EWOULDBLOCK:
+               // The socket is non-blocking and no data is available
+               perror("recv would block");
+               break;
+           case ENOTCONN:
+               // The socket is not connected
+               perror("socket not connected");
+               break;
+           case ECONNRESET:
+               // Connection reset by peer
+               perror("connection reset by peer");
+               break;
+           // Add more cases as needed
+           default:
+               // Handle other errors
+               perror("recv error");
+               break;
+       }
 		throw BadRequestException();
     }
 
 	buf[n] = '\0';
 	buffer += buf;
-
+	return n;
 }
 
 void getHeaderStr(int fd, std::string& buffer, std::string& headerStr)
@@ -30,7 +53,7 @@ void getHeaderStr(int fd, std::string& buffer, std::string& headerStr)
 		found = buffer.find("\r\n\r\n");
 		if (found != std::string::npos)
 			break;
-		readFromSocket(fd, buffer);
+		readFromSocket(fd, buffer, HEADER_BUFFER_SIZE);
 	}
 
 	// if found is end index -> headerStr = Buffer

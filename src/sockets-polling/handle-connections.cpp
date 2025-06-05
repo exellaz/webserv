@@ -38,15 +38,16 @@ NOTE:
 int receiveClientRequest(int fd)
 {
 	// std::vector<Buffer> buffers;
+	std::string buffer;	
 	std::string headerStr;
 	std::string bodyStr;
 	
-	readRequestHeader(fd, headerStr);
+	readRequestHeader(fd, headerStr, buffer);
 	// parseRequestHeader();
 	
 	// TODO: isBodyPresent()   -> check Content-Length, Transfer-Encoding, request method
-	// readRequestBody(fd, bodyStr, buffers, 0);
+	
+	readRequestBody(fd, bodyStr, buffer, CONTENT_LENGTH); // hardcoded to 'CONTENT_LENGTH'
 	// parseRequestBody();
-
     return 0;
 }
