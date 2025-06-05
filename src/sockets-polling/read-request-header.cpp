@@ -45,7 +45,7 @@ void getHeaderStr(int fd, std::string& buffer, std::string& headerStr)
 	else {
 		headerStr = buffer.substr(0, found);
 		// replace buffer with body part only
-		buffer = buffer.substr(found); 
+		buffer = buffer.substr(found + 4); 
 	}
 	
 }
@@ -57,15 +57,13 @@ void readRequestHeader(int fd, std::string& headerStr)
 
 	getHeaderStr(fd, buffer, headerStr);
 
-	// TODO: extract 
 
 	std::cout << "\n===== Header String: =====\n";
 	std::cout << headerStr << '\n';
 	std::cout << "==========================\n\n";
-	std::cout << "Leftover in Buffer: "<< buffer << '\n';
-	
-	(void)headerStr;
-
+	std::cout << "----Leftover in Buffer: ----\n";
+	std::cout << buffer << '\n';
+	std::cout << "----------------------------\n";
 }
 
 
