@@ -1,6 +1,6 @@
 #include "../../include/sockets-polling.h"
 
-int readFromSocket(int fd, std::string& buffer)
+void readFromSocket(int fd, std::string& buffer)
 {
 	char buf[HEADER_BUFFER_SIZE + 1];
 
@@ -8,22 +8,23 @@ int readFromSocket(int fd, std::string& buffer)
 	std::cout << "n: " << n << '\n';
 	
 	// NOTE: throw exceptions?
-	if (n == 0)
-        return NGX_ERROR;  // connection closed
-    if (n < 0) {
-        if (errno == EAGAIN || errno == EWOULDBLOCK) // WARN: cannot use errno
-            return NGX_AGAIN;
-        return NGX_ERROR;
+	if (n == 0) // connection closed
+		throw ClientCloseConnectionException();
+	if (n < 0) {
+        // if (errno == EAGAIN || errno == EWOULDBLOCK) // WARN: cannot use errno
+        //     return NGX_AGAIN;
+        // return NGX_ERROR;
+		throw BadRequestException();
     }
 
 	buf[n] = '\0';
 	buffer += buf;
 
-    return n;
 }
 
 void getHeaderStr(int fd, std::string& buffer, std::string& headerStr)
 {
+	// TODO: if End if header not found -> infinite loop
 	size_t found;
 	while (1) {
 		found = buffer.find("\r\n\r\n");
@@ -34,8 +35,12 @@ void getHeaderStr(int fd, std::string& buffer, std::string& headerStr)
 
 	// if found is end index -> headerStr = Buffer
 	// else -> headerstr = buffer.substr
+	
 	// TODO: if CRLF not found -> throw exception?
-
+	if (found == std::string::npos) {
+		std::cout << "getHeaderStr: Error: End of Header not found\n";
+		throw BadRequestException();
+	}
 	// if no body
 	if (buffer.begin() + found == buffer.end() - 4) {
 		std::cout << "getHeaderStr: no body found\n";
@@ -51,10 +56,8 @@ void getHeaderStr(int fd, std::string& buffer, std::string& headerStr)
 }
 
 
-void readRequestHeader(int fd, std::string& headerStr)
+void readRequestHeader(int fd, std::string& headerStr, std::string& buffer)
 {
-	std::string buffer;
-
 	getHeaderStr(fd, buffer, headerStr);
 
 

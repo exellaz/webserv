@@ -51,8 +51,13 @@ int main(int argc, char **argv)
                     if (pfds[i].fd == listener)
                         acceptClient(pfds, listener);
                     else { // Client socketfd
-                        receiveClientRequest(pfds[i].fd);
-						// TODO: receiveClientData: handle err/return values
+						try {
+							receiveClientRequest(pfds[i].fd);
+							// TODO: receiveClientData: handle err/return values
+						}
+						catch (const std::exception &e) {
+							std::cerr << RED << "\nError: " << RESET << e.what() << "\n";
+						}
                         close(pfds[i].fd);
                         delFromPfds(pfds, i);
                         i--;
@@ -63,7 +68,7 @@ int main(int argc, char **argv)
 	}
 	catch (const std::exception &e)
 	{
-		std::cerr << "Error: " << e.what() << "\n";
+		std::cerr << RED << "Error: " << RESET << e.what() << "\n";
 	}
     
     return 0;
