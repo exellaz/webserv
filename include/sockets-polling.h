@@ -15,16 +15,46 @@
 #include <iostream>
 #include <sstream>
 #include <fcntl.h>
+#include <vector>
 #include "./Configuration.hpp"
+#include "./Buffer.h"
 
-#define PORT "8080"   // Port we're listening on
+#define RESET "\033[0m"
+#define BOLD "\033[1m"
+#define CYAN "\033[36m"
+#define GREEN "\033[0;32m"
+#define RED "\033[0;31m"
+#define GREY "\033[90m"
+
+#define PORT "8080"
+
+#define NGX_AGAIN -1
+#define NGX_OK 0
+#define NGX_ERROR -2
+#define NGX_REQUEST_HEADER_TOO_LARGE -431
+#define HEADER_BUFFER_SIZE 1024 // defines the size of the buffer allocated 
+#define LARGE_HEADER_BUFFER_SIZE 8192
+#define MAX_LARGE_BUFFERS 4
+#define BODY_BUFFER_SIZE 8192
+#define MAX_BODY_SIZE 1048576
+
+enum reqBodyType {
+	CONTENT_LENGTH,
+	TRANSFER_ENCODING,
+	NO_BODY,
+};
 
 // Setup Listening Socket
 int setupListeningSocket(std::vector<struct pollfd>& pfds, Config& config);
 
-// Connections
+// CONNECTIONS 
 void acceptClient(std::vector<struct pollfd>& pfds, int listener);
-void receiveClientData(struct pollfd& pfd);
+
+// Read Request Utils
+int readFromSocket(int fd, std::string& buffer, size_t bufferSize);
+void readRequestHeader(int fd, std::string& headerStr, std::string& buffer);
+void readRequestBody(int fd, std::string& bodyStr, std::string& buffer, enum reqBodyType type);
+int receiveClientRequest(int fd);
 
 // Utils
 void *getInAddr(struct sockaddr *sa);
@@ -32,5 +62,22 @@ int  set_nonblocking(int fd);
 void addToPfds(std::vector<struct pollfd>& pfds, int newFd);
 void delFromPfds(std::vector<struct pollfd>& pfds, int i);
 
+class BadRequestException : public std::exception {
+public:
+	// 'throw()' specifies that func won't throw any exceptions 
+	const char* what() const throw() {
+		return "400: Bad Request";
+	}
+
+};
+
+class ClientCloseConnectionException : public std::exception {
+public:
+	// 'throw()' specifies that func won't throw any exceptions 
+	const char* what() const throw() {
+		return "Client close connection";
+	}
+
+};
 
 #endif

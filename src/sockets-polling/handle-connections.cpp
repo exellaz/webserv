@@ -23,33 +23,31 @@ void acceptClient(std::vector<struct pollfd>& pfds, int listener)
 
 	char remoteIp[INET6_ADDRSTRLEN];
 	printf("pollserver: new connection from %s on "
-		"socket %d\n",
-		inet_ntop(remoteAddr.ss_family,
+		"socket %d\n", inet_ntop(remoteAddr.ss_family,
 			getInAddr((struct sockaddr*)&remoteAddr),
 			remoteIp, INET6_ADDRSTRLEN),
 		newFd);
 }
 
-void receiveClientData(struct pollfd& pfd)
+/*
+NOTE: 
+- `readHeader` will remove the 'header' section from `buffers`
+- if recv(HEADER_BUFFER_SIZE) reads till the 'body' section, that section of 'body' will remain in buffers after `readHeader()` is called
+
+*/
+int receiveClientRequest(int fd)
 {
-	char buf[3000];    // Buffer for client data
-	int nBytes = recv(pfd.fd, buf, sizeof buf, 0);
-	buf[nBytes] = '\0';
-	int senderFd = pfd.fd;
-
-	if (nBytes <= 0) {
-		// Got error or connection closed by client
-		if (nBytes == 0) {
-			// Connection closed
-			std::cout << "pollserver: socket " << senderFd << " hung up\n"; 
-		} else {
-			perror("recv");
-		}
-	} else {
-		// do something with client data
-		std::cout << "Data from Client: \n"<< buf << '\n';
-
-		const std::string response = "Response from server\n";
-		send(pfd.fd, response.c_str(), response.size(), 0);
-	}
+	// std::vector<Buffer> buffers;
+	std::string buffer;	
+	std::string headerStr;
+	std::string bodyStr;
+	
+	readRequestHeader(fd, headerStr, buffer);
+	// parseRequestHeader();
+	
+	// TODO: isBodyPresent()   -> check Content-Length, Transfer-Encoding, request method
+	
+	readRequestBody(fd, bodyStr, buffer, CONTENT_LENGTH); // hardcoded to 'CONTENT_LENGTH'
+	// parseRequestBody();
+    return 0;
 }
