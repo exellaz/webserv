@@ -32,5 +32,6 @@
 *.app
 
 webserv
+.vscode
 http-request
 http-response

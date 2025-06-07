@@ -24,12 +24,11 @@
 
 int main()
 {
-    const std::string str("GET /test HTTP/1.1\r\nHost: example.com\r\nContent-Type: application/x-www-form-urlencoded\r\nContent-Length: 27\r\n\r\nfield1=value1&field2=value2\r\n");
+    const std::string str("GET /epoll.cpp HTTP/1.1\r\nHost: example.com\r\nContent-Type: application/x-www-form-urlencoded\r\nContent-Length: 27\r\n\r\nfield1=value1&field2=value2\r\n");
     HttpRequest request;
     HttpResponse response(OK);
 
     if (!request.parseRequestLine(str)) {
-        // response._status = HttpResponse::BAD_REQUEST;
         response.setStatus(BAD_REQUEST);
 
         std::cout << "Invalid header\n";
@@ -41,11 +40,13 @@ int main()
 
     if (!request.parseRequestBody(str))
         std::cout << "No body found\n";
-    response.setBody(request._body);
 
     std::cout << request;
 
-    std::cout << "\n" << response.buildStatusLine();
-    response.printResponseHeaders();
+    if (request._method == "GET") {
+        response = handleGetRequest(request, "../../experimental");
+    }
+
+    std::cout << response.toString();
     return 0;
 }

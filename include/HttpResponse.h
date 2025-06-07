@@ -3,6 +3,8 @@
 
 # include <iostream>
 # include <map>
+# include "HttpRequest.h"
+
 
 namespace HttpCodes {
     enum StatusCode {
@@ -33,15 +35,19 @@ class HttpResponse
         std::string buildStatusLine();
         void printResponseHeaders();
 
-
         void setStatus(StatusCode code);
         void setHeader(const std::string& name, const std::string& value);
         void setBody(const std::string& bodyData);
 
-        private:
-            StatusCode _status;
-            std::map<std::string, std::string> _headers;
-            std::string _body;
+        std::string getHttpDate();
+        std::string toString();
+
+    private:
+        StatusCode _status;
+        std::map<std::string, std::string> _headers;
+        std::string _body;
     };
+
+HttpResponse handleGetRequest(const HttpRequest& request, const std::string& docRoot);
 
 #endif

@@ -1,10 +1,17 @@
 #include "HttpResponse.h"
+#include "HttpRequest.h"
 #include <sstream>
 #include <cstdlib>
+
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <ctime>
 
 HttpResponse::HttpResponse(StatusCode code)
     : _status(code)
 {
+    _headers["Server"] = "Webserv/1.0";
 }
 
 std::string HttpResponse::reasonPhrase(StatusCode code)
@@ -43,6 +50,7 @@ void HttpResponse::printResponseHeaders()
     for (std::map<std::string, std::string>::iterator It = _headers.begin(); It != _headers.end(); ++It) {
         std::cout << It->first << ": " << It->second << "\r\n";
     }
+    std::cout << "\r\n" << _body;
 }
 
 void HttpResponse::setStatus(StatusCode code)
@@ -62,4 +70,122 @@ void HttpResponse::setBody(const std::string& bodyData)
     _body = bodyData;
     stream << _body.size();
     setHeader("Content-Length", stream.str());
+}
+
+std::string HttpResponse::toString() {
+    std::ostringstream responseStream;
+
+    // Add date header
+    _headers["Date"] = getHttpDate();
+
+    // Status line
+    responseStream << buildStatusLine();
+
+    // All headers
+    for (std::map<std::string, std::string>::const_iterator it = _headers.begin();
+         it != _headers.end(); ++it) {
+        responseStream << it->first << ": " << it->second << "\r\n";
+    }
+
+    responseStream << "\r\n";
+
+    // Body if present
+    responseStream << _body;
+    return responseStream.str();
+}
+
+// constructs the filesystem path given a docRoot and request path
+std::string mapUriToPath(const std::string& docRoot, const std::string& uri) {
+    std::string safeUri = uri;
+    if (safeUri.empty() || safeUri[0] != '/')
+        safeUri = "/" + safeUri;
+
+    // Normalize “/” -> “/index.html” (i.e. default file)
+    if (safeUri == "/")
+        safeUri = "/index.html";
+
+    return docRoot + safeUri;
+}
+
+// Reads the entire file at filepath into a std::string.
+// Returns empty string if any error occurs.
+std::string readFileToString(const std::string& filepath) {
+    struct stat st;
+    if (stat(filepath.c_str(), &st) < 0 || !S_ISREG(st.st_mode)) {
+        return "";  // file doesn’t exist or isn’t regular
+    }
+
+    int fd = open(filepath.c_str(), O_RDONLY);
+    if (fd < 0)
+        return "";
+
+    std::string content;
+    content.reserve(st.st_size);
+
+    const size_t BUFFER_SIZE = 4096;
+    char buffer[BUFFER_SIZE];
+    ssize_t n;
+    while ((n = read(fd, buffer, BUFFER_SIZE)) > 0) {
+        content.append(buffer, n);
+    }
+    close(fd);
+
+    return content;
+}
+
+
+std::string getMimeType(const std::string& path)
+{
+    size_t dot = path.rfind('.');
+    if (dot == std::string::npos)
+        return "application/octet-stream";
+
+    std::string ext = path.substr(dot + 1);
+    if (ext == "html" || ext == "htm") return "text/html";
+    if (ext == "css")                  return "text/css";
+    if (ext == "js")                   return "application/javascript";
+    if (ext == "png")                  return "image/png";
+    if (ext == "jpg" || ext == "jpeg") return "image/jpeg";
+    if (ext == "gif")                  return "image/gif";
+    if (ext == "txt")                  return "text/plain";
+    // Fallback
+    return "application/octet-stream";
+}
+
+HttpResponse handleGetRequest(const HttpRequest& request, const std::string& docRoot)
+{
+    // Map URI to filesystem path
+    std::string fullPath = mapUriToPath(docRoot, request._url);
+
+    // Read from file
+    std::string fileContents = readFileToString(fullPath);
+    if (fileContents.empty()) {
+        // If file not found or not readable -> 404 Not Found
+        HttpResponse response(NOT_FOUND);
+        std::string body = "<html><body><h1>404 Not Found</h1></body></html>";
+
+        response.setHeader("Content-Type", "text/html");
+        response.setBody(body);
+        return response;
+    }
+
+    // If file found -> 200 OK
+    HttpResponse response(OK);
+    std::string mime = getMimeType(fullPath);
+    response.setHeader("Content-Type", mime);
+    response.setBody(fileContents);
+    return response;
+}
+
+std::string HttpResponse::getHttpDate()
+{
+    time_t now = time(NULL);
+    struct tm gm;
+
+    gmtime_r(&now, &gm);
+
+    char buf[64];
+    // Format: "Tue, 15 Nov 1994 08:12:31 GMT"
+    std::strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S GMT", &gm);
+    return std::string(buf);
 }
