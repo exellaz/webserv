@@ -36,6 +36,7 @@ class HttpResponse
         std::string buildStatusLine();
         void printResponseHeaders();
         void handleGetRequest(const HttpRequest& request, const std::string& docRoot);
+        void handlePostRequest(const HttpRequest& request);
 
         void setStatus(StatusCode code);
         void setHeader(const std::string& name, const std::string& value);
