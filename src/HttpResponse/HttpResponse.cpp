@@ -153,7 +153,7 @@ std::string getMimeType(const std::string& path)
 void HttpResponse::handleGetRequest(const HttpRequest& request, const std::string& docRoot)
 {
     // Map URI to filesystem path
-    std::string fullPath = mapUriToPath(docRoot, request._url);
+    std::string fullPath = mapUriToPath(docRoot, request._uri);
 
     // Read from file
     std::string fileContents = readFileToString(fullPath);

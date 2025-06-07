@@ -26,7 +26,7 @@ class HttpRequest
 
 
         std::string _method;
-        std::string _url;
+        std::string _uri;
         std::string _version;
         std::map<std::string, std::string> _headers;
         std::string _body;

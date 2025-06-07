@@ -4,7 +4,7 @@ bool HttpRequest::parseRequestLine(const std::string& line)
 {
     std::istringstream lineStream(line);
 
-    if (!(lineStream >> _method >> _url >> _version))
+    if (!(lineStream >> _method >> _uri >> _version))
         return false;
     if (_method != "GET" && _method != "POST" && _method != "DELETE")
         return false; // This should return status 405 Method not allowed
@@ -60,7 +60,7 @@ bool HttpRequest::parseRequestBody(const std::string& str)
 std::ostream& operator<<(std::ostream &stream, const HttpRequest& src)
 {
     stream << "Method: " << src._method << "\n";
-    stream << "URL: " << src._url << "\n";
+    stream << "URI: " << src._uri << "\n";
     stream << "Version: " << src._version << "\n";
     stream << "\nHeaders\n";
     for (std::map<std::string, std::string>::const_iterator It = src._headers.begin(); It != src._headers.end(); ++It)
