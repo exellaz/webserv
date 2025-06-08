@@ -88,8 +88,6 @@ std::string HttpResponse::toString() {
     }
 
     responseStream << "\r\n";
-
-    // Body if present
     responseStream << _body;
     return responseStream.str();
 }
@@ -152,7 +150,7 @@ std::string getMimeType(const std::string& path)
     return "application/octet-stream";
 }
 
-HttpResponse handleGetRequest(const HttpRequest& request, const std::string& docRoot)
+void HttpResponse::handleGetRequest(const HttpRequest& request, const std::string& docRoot)
 {
     // Map URI to filesystem path
     std::string fullPath = mapUriToPath(docRoot, request._url);
@@ -161,20 +159,17 @@ HttpResponse handleGetRequest(const HttpRequest& request, const std::string& doc
     std::string fileContents = readFileToString(fullPath);
     if (fileContents.empty()) {
         // If file not found or not readable -> 404 Not Found
-        HttpResponse response(NOT_FOUND);
         std::string body = "<html><body><h1>404 Not Found</h1></body></html>";
-
-        response.setHeader("Content-Type", "text/html");
-        response.setBody(body);
-        return response;
+        setStatus(NOT_FOUND);
+        setHeader("Content-Type", "text/html");
+        setBody(body);
+        return ;
     }
 
     // If file found -> 200 OK
-    HttpResponse response(OK);
     std::string mime = getMimeType(fullPath);
-    response.setHeader("Content-Type", mime);
-    response.setBody(fileContents);
-    return response;
+    setHeader("Content-Type", mime);
+    setBody(fileContents);
 }
 
 std::string HttpResponse::getHttpDate()

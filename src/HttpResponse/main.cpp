@@ -24,7 +24,7 @@
 
 int main()
 {
-    const std::string str("GET /epoll.cpp HTTP/1.1\r\nHost: example.com\r\nContent-Type: application/x-www-form-urlencoded\r\nContent-Length: 27\r\n\r\nfield1=value1&field2=value2\r\n");
+    const std::string str("POST /index.html HTTP/1.1\r\nHost: example.com\r\nContent-Type : application/x-www-form-urlencoded\r\nContent-Length: 27\r\n\r\nfield1=value1&field2=value2\r\n");
     HttpRequest request;
     HttpResponse response(OK);
 
@@ -34,7 +34,7 @@ int main()
         std::cout << "Invalid header\n";
     }
 
-    if (!request.parseHeaderLines(str)) {
+    if (!request.parseHeaderLines(str, response)) {
         std::cout << "Invalid header field\n";
     }
 
@@ -44,7 +44,7 @@ int main()
     std::cout << request;
 
     if (request._method == "GET") {
-        response = handleGetRequest(request, "../../experimental");
+        response.handleGetRequest(request, "../../experimental");
     }
 
     std::cout << response.toString();

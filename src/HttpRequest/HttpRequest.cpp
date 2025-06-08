@@ -13,7 +13,7 @@ bool HttpRequest::parseRequestLine(const std::string& line)
     return true;
 }
 
-bool HttpRequest::parseHeaderLines(const std::string& str)
+bool HttpRequest::parseHeaderLines(const std::string& str, HttpResponse& response)
 {
     std::istringstream stream(str);
     std::string line;
@@ -24,6 +24,8 @@ bool HttpRequest::parseHeaderLines(const std::string& str)
         size_t colon = line.find(':');
         if (colon != std::string::npos) {
             std::string key = line.substr(0, colon);
+            if ((_method == "GET" || _method == "DELETE") && (key == "Content-Length" || key == "Transfer-Encoding"))
+                response.setStatus(BAD_REQUEST);
             std::string value = line.substr(colon + 1);
             while (!value.empty() && value[0] == ' ') {
                 value = value.substr(1);

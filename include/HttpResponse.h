@@ -3,8 +3,9 @@
 
 # include <iostream>
 # include <map>
-# include "HttpRequest.h"
+// # include "HttpRequest.h"
 
+class HttpRequest;
 
 namespace HttpCodes {
     enum StatusCode {
@@ -34,6 +35,7 @@ class HttpResponse
         std::string reasonPhrase(StatusCode code);
         std::string buildStatusLine();
         void printResponseHeaders();
+        void handleGetRequest(const HttpRequest& request, const std::string& docRoot);
 
         void setStatus(StatusCode code);
         void setHeader(const std::string& name, const std::string& value);
@@ -47,7 +49,5 @@ class HttpResponse
         std::map<std::string, std::string> _headers;
         std::string _body;
     };
-
-HttpResponse handleGetRequest(const HttpRequest& request, const std::string& docRoot);
 
 #endif
