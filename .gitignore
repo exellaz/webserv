@@ -33,5 +33,5 @@
 
 webserv
 .vscode
-http-request
-http-response
+/src/http-request/http-request
+/src/http-response/http-response
