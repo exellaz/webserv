@@ -38,12 +38,16 @@ class HttpResponse
         void handleGetRequest(const HttpRequest& request, const std::string& docRoot);
         void handlePostRequest(const HttpRequest& request);
 
+        std::string getHttpDate();
+        std::string toString();
+
         void setStatus(StatusCode code);
         void setHeader(const std::string& name, const std::string& value);
         void setBody(const std::string& bodyData);
 
-        std::string getHttpDate();
-        std::string toString();
+        StatusCode getStatus();
+        std::string getHeader(const std::string &name);
+        std::string getBody();
 
     private:
         StatusCode _status;

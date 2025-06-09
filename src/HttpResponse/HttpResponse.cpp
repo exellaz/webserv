@@ -53,25 +53,6 @@ void HttpResponse::printResponseHeaders()
     std::cout << "\r\n" << _body;
 }
 
-void HttpResponse::setStatus(StatusCode code)
-{
-    _status = code;
-}
-
-void HttpResponse::setHeader(const std::string& name, const std::string& value)
-{
-    _headers[name] = value;
-}
-
-void HttpResponse::setBody(const std::string& bodyData)
-{
-    std::stringstream stream;
-
-    _body = bodyData;
-    stream << _body.size();
-    setHeader("Content-Length", stream.str());
-}
-
 std::string HttpResponse::toString() {
     std::ostringstream responseStream;
 
@@ -183,4 +164,38 @@ std::string HttpResponse::getHttpDate()
     // Format: "Tue, 15 Nov 1994 08:12:31 GMT"
     std::strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S GMT", &gm);
     return std::string(buf);
+}
+
+void HttpResponse::setStatus(StatusCode code)
+{
+    _status = code;
+}
+
+void HttpResponse::setHeader(const std::string& name, const std::string& value)
+{
+    _headers[name] = value;
+}
+
+void HttpResponse::setBody(const std::string& bodyData)
+{
+    std::stringstream stream;
+
+    _body = bodyData;
+    stream << _body.size();
+    setHeader("Content-Length", stream.str());
+}
+
+StatusCode HttpResponse::getStatus()
+{
+    return _status;
+}
+
+std::string HttpResponse::getHeader(const std::string& name)
+{
+    return _headers[name];
+}
+
+std::string HttpResponse::getBody()
+{
+    return _body;
 }

@@ -45,6 +45,9 @@ int main()
     if (request._method == "GET") {
         response.handleGetRequest(request, ".");
     }
+    if (request._method == "POST") {
+        response.handlePostRequest(request);
+    }
 
     std::cout << response.toString();
     return 0;
