@@ -19,15 +19,13 @@ int main(int argc, char **argv)
         configFile = argv[1];
     }
 
-	try {
-		std::ifstream conf(configFile.c_str());
-		Config config(conf);
+	try { std::ifstream conf(configFile.c_str()); Config config(conf);
 
         std::vector<struct pollfd> pfds;
+	    std::vector<Connection> connections;
         
         // listener Socket Fd
-        
-        int listener = setupListeningSocket(pfds, config);
+        int listener = setupListeningSocket(pfds, connections, config);
 
         while(1) {
             
@@ -46,9 +44,10 @@ int main(int argc, char **argv)
                     std::cout << "POLLIN\n";
 
                     if (pfds[i].fd == listener)
-                        acceptClient(pfds, listener);
+                        acceptClient(pfds, connections, listener, i);
                     else { 
-						receiveClientRequest(pfds[i].fd);
+						// receiveClientRequest(pfds[i].fd);
+						receiveClientRequest(connections[i]);
                     }
                 } else if (pfds[i].revents & POLLOUT) {
 					std::cout << "POLLOUT\n";

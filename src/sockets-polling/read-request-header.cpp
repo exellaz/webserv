@@ -1,11 +1,11 @@
 #include "../../include/sockets-polling.h"
 
 
-static int readFromSocket(int fd, std::string& buffer)
+static int readFromSocket(Connection &connection)
 {
 	char buf[HEADER_BUFFER_SIZE + 1];
 
-	ssize_t n = recv(fd, buf, HEADER_BUFFER_SIZE, 0);
+	ssize_t n = recv(connection.fd, buf, HEADER_BUFFER_SIZE, 0);
 	std::cout << "n: " << n << '\n';
 	
     if (n == 0)
@@ -18,13 +18,18 @@ static int readFromSocket(int fd, std::string& buffer)
     }
 
 	buf[n] = '\0';
-	buffer += buf;
+	connection.appendToBuffer(buf);
+
+	std::cout << "current buffer:" << connection.getBuffer() << '\n';
 	return n;
 }
 
-void readRequestHeader(int fd, std::string& headerStr, std::string& buffer)
+void readRequestHeader(Connection &connection, std::string& headerStr)
 {
 	std::cout << GREY << "===== readRequestHeader =====" << RESET << '\n';
+
+	const std::string& buffer = connection.getBuffer();
+	std::cout << "getBuffer: " << connection.getBuffer() << '\n';
 
 	// TODO: if End if header not found -> infinite loop
 	size_t found;
@@ -32,7 +37,7 @@ void readRequestHeader(int fd, std::string& headerStr, std::string& buffer)
 		found = buffer.find("\r\n\r\n");
 		if (found != std::string::npos)
 			break;
-		int ret = readFromSocket(fd, buffer);
+		int ret = readFromSocket(connection);
 		if (ret == RECV_OK)
 			continue;
 		else if (ret == RECV_AGAIN)
@@ -51,12 +56,14 @@ void readRequestHeader(int fd, std::string& headerStr, std::string& buffer)
 	if (buffer.begin() + found == buffer.end() - 4) {
 		std::cout << "getHeaderStr: no body found\n";
 		headerStr = buffer.substr(0, buffer.length() - 4); // exclude "abc\r\n\r\n abc"
-		buffer.clear();
+		// buffer.clear();
+		connection.clearBuffer();
 	}
 	else {
 		headerStr = buffer.substr(0, found);
 		// replace buffer with body part only
-		buffer = buffer.substr(found + 4); 
+		// buffer = buffer.substr(found + 4); 
+		connection.setBuffer(buffer.substr(found + 4));
 	}
 
 	std::cout << "\n===== Header String: =====\n";
@@ -66,6 +73,51 @@ void readRequestHeader(int fd, std::string& headerStr, std::string& buffer)
 	std::cout << buffer << '\n';
 	std::cout << "----------------------------\n";
 }
+
+// void readRequestHeader(int fd, std::string& headerStr, std::string& buffer)
+// {
+// 	std::cout << GREY << "===== readRequestHeader =====" << RESET << '\n';
+//
+// 	// TODO: if End if header not found -> infinite loop
+// 	size_t found;
+// 	while (1) {
+// 		found = buffer.find("\r\n\r\n");
+// 		if (found != std::string::npos)
+// 			break;
+// 		int ret = readFromSocket(fd, buffer);
+// 		if (ret == RECV_OK)
+// 			continue;
+// 		else if (ret == RECV_AGAIN)
+// 			return;
+// 	}
+//
+// 	// if found is end index -> headerStr = Buffer
+// 	// else -> headerstr = buffer.substr
+//
+// 	// TODO: if CRLF not found -> throw exception?
+// 	if (found == std::string::npos) {
+// 		std::cout << "getHeaderStr: Error: End of Header not found\n";
+// 		/*throw BadRequestException();*/
+// 	}
+// 	// if no body
+// 	if (buffer.begin() + found == buffer.end() - 4) {
+// 		std::cout << "getHeaderStr: no body found\n";
+// 		headerStr = buffer.substr(0, buffer.length() - 4); // exclude "abc\r\n\r\n abc"
+// 		buffer.clear();
+// 	}
+// 	else {
+// 		headerStr = buffer.substr(0, found);
+// 		// replace buffer with body part only
+// 		buffer = buffer.substr(found + 4); 
+// 	}
+//
+// 	std::cout << "\n===== Header String: =====\n";
+// 	std::cout << headerStr << '\n';
+// 	std::cout << "==========================\n\n";
+// 	std::cout << "----Leftover in Buffer: ----\n";
+// 	std::cout << buffer << '\n';
+// 	std::cout << "----------------------------\n";
+// }
 
 
 

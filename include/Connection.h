@@ -18,8 +18,10 @@ public:
 	const int index;
 	const int fd;
 	
-	void appendToBuffer(std::string str);
-	const std::string& getBuffer() const;
+	void appendToBuffer(char *str);
+	const std::string getBuffer() const;
+	void setBuffer(std::string str);
+	void clearBuffer();
 
 private:
 	std::string buffer;

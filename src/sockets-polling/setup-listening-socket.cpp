@@ -51,7 +51,7 @@ int getListenerSocket(Config& config)
 }
 
 // returns listening socket fd
-int setupListeningSocket(std::vector<struct pollfd>& pfds, Config& config) {
+int setupListeningSocket(std::vector<struct pollfd>& pfds, std::vector<Connection>& connections, Config& config) {
 
     int listener = getListenerSocket(config);
     if (listener == -1) {
@@ -70,6 +70,9 @@ int setupListeningSocket(std::vector<struct pollfd>& pfds, Config& config) {
     pfd.fd = listener;
     pfd.events = POLLIN; // Report ready to read on incoming connection
 	pfds.push_back(pfd); 
+
+	connections.push_back(Connection(0, listener));
+
 
 	return listener;
 }

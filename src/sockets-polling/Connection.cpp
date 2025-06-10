@@ -32,16 +32,25 @@ Connection::~Connection()
 }
 	
 
-void Connection::appendToBuffer(std::string str)
+void Connection::appendToBuffer(char *str)
 {
 	buffer += str;
 }
 
-const std::string& Connection::getBuffer() const
+const std::string Connection::getBuffer() const
 {
 	return buffer;
 }
 
+void Connection::setBuffer(std::string str)
+{
+	buffer = str;
+}
+
+void Connection::clearBuffer()
+{
+	buffer.clear();
+}
 
 std::ostream & operator<<( std::ostream & o, Connection const & connection )
 {

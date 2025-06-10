@@ -53,16 +53,16 @@ enum RecvResult {
 };
 
 // Setup Listening Socket
-int setupListeningSocket(std::vector<struct pollfd>& pfds, Config& config);
-
+// int setupListeningSocket(std::vector<struct pollfd>& pfds, Config& config);
+int setupListeningSocket(std::vector<struct pollfd>& pfds, std::vector<Connection>& connections, Config& config);
 // CONNECTIONS 
-void acceptClient(std::vector<struct pollfd>& pfds, int listener);
+void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Connection>& connections, int listener, int index);
 
 // Read Request Utils
 /*int readFromSocket(int fd, std::string& buffer, size_t bufferSize);*/
-void readRequestHeader(int fd, std::string& headerStr, std::string& buffer);
+void readRequestHeader(Connection &connection, std::string& headerStr);
 void readRequestBody(int fd, std::string& bodyStr, std::string& buffer, enum reqBodyType type);
-int receiveClientRequest(int fd);
+int receiveClientRequest(Connection &connection);
 
 // Utils
 void *getInAddr(struct sockaddr *sa);
