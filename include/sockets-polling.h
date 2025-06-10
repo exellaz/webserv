@@ -18,6 +18,7 @@
 #include <vector>
 #include "./Configuration.hpp"
 #include "./Buffer.h"
+#include "Connection.h"
 
 #define RESET "\033[0m"
 #define BOLD "\033[1m"

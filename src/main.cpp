@@ -1,6 +1,7 @@
 #include "../include/sockets-polling.h"
 #include "../include/Configuration.hpp"
 
+
 int main(int argc, char **argv)
 {
     std::string configFile;
@@ -46,11 +47,8 @@ int main(int argc, char **argv)
 
                     if (pfds[i].fd == listener)
                         acceptClient(pfds, listener);
-                    else { // Client socketfd
+                    else { 
 						receiveClientRequest(pfds[i].fd);
-						/*close(pfds[i].fd);*/
-						/*delFromPfds(pfds, i);*/
-						/*i--;*/
                     }
                 } else if (pfds[i].revents & POLLOUT) {
 					std::cout << "POLLOUT\n";

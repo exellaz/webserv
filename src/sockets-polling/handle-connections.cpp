@@ -47,7 +47,7 @@ int receiveClientRequest(int fd)
 	
 	// TODO: isBodyPresent()   -> check Content-Length, Transfer-Encoding, request method
 	
-	readRequestBody(fd, bodyStr, buffer, CONTENT_LENGTH); // hardcoded to 'CONTENT_LENGTH'
+	// readRequestBody(fd, bodyStr, buffer, CONTENT_LENGTH); // hardcoded to 'CONTENT_LENGTH'
 	// parseRequestBody();
     return 0;
 }
