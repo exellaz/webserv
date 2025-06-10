@@ -44,6 +44,13 @@ enum reqBodyType {
 	NO_BODY,
 };
 
+enum RecvResult {
+    RECV_OK,
+    RECV_AGAIN,
+    RECV_CLOSED,
+    RECV_ERROR
+};
+
 // Setup Listening Socket
 int setupListeningSocket(std::vector<struct pollfd>& pfds, Config& config);
 
@@ -51,7 +58,7 @@ int setupListeningSocket(std::vector<struct pollfd>& pfds, Config& config);
 void acceptClient(std::vector<struct pollfd>& pfds, int listener);
 
 // Read Request Utils
-int readFromSocket(int fd, std::string& buffer, size_t bufferSize);
+/*int readFromSocket(int fd, std::string& buffer, size_t bufferSize);*/
 void readRequestHeader(int fd, std::string& headerStr, std::string& buffer);
 void readRequestBody(int fd, std::string& bodyStr, std::string& buffer, enum reqBodyType type);
 int receiveClientRequest(int fd);
@@ -71,13 +78,14 @@ public:
 
 };
 
-class ClientCloseConnectionException : public std::exception {
+class PollErrorException : public std::exception {
 public:
 	// 'throw()' specifies that func won't throw any exceptions 
 	const char* what() const throw() {
-		return "Client close connection";
+		return "Poll error";
 	}
 
 };
+
 
 #endif

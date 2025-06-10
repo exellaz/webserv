@@ -1,5 +1,49 @@
 #include "../../include/sockets-polling.h"
 
+int readFromSocket(int fd, std::string& buffer)
+{
+	char buf[BODY_BUFFER_SIZE + 1];
+
+	ssize_t n = recv(fd, buf, BODY_BUFFER_SIZE, 0);
+	std::cout << "n: " << n << '\n';
+	
+	// NOTE: throw exceptions?
+	if (n == 0) // connection closed
+		return 0;
+	if (n == -1) {
+        // if (errno == EAGAIN || errno == EWOULDBLOCK) // WARN: cannot use errno
+        //     return NGX_AGAIN;
+        // return NGX_ERROR;
+		switch (errno) {
+           case EINTR:
+               // The call was interrupted by a signal
+               perror("recv interrupted");
+               break;
+           case EWOULDBLOCK:
+               // The socket is non-blocking and no data is available
+               perror("recv would block");
+               break;
+           case ENOTCONN:
+               // The socket is not connected
+               perror("socket not connected");
+               break;
+           case ECONNRESET:
+               // Connection reset by peer
+               perror("connection reset by peer");
+               break;
+           // Add more cases as needed
+           default:
+               // Handle other errors
+               perror("recv error");
+               break;
+       }
+		/*throw BadRequestException();*/
+    }
+
+	buf[n] = '\0';
+	buffer += buf;
+	return n;
+}
 
 void readByContentLength(int fd, std::string& bodyStr, std::string& buffer)
 {
@@ -7,7 +51,7 @@ void readByContentLength(int fd, std::string& bodyStr, std::string& buffer)
 	
 	size_t contentLength = 10000; // HARDCODED
 	while (bytesRead < contentLength) {
-		bytesRead += readFromSocket(fd, buffer, BODY_BUFFER_SIZE);
+		bytesRead += readFromSocket(fd, buffer);
 	}
 
 	bodyStr = buffer;
@@ -16,6 +60,7 @@ void readByContentLength(int fd, std::string& bodyStr, std::string& buffer)
 
 void readRequestBody(int fd, std::string& bodyStr, std::string& buffer, enum reqBodyType type)
 {
+	std::cout << GREY << "===== readRequestBody =====" << RESET << '\n';
 	(void)bodyStr;
 
 	if (type == CONTENT_LENGTH)

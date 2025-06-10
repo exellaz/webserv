@@ -34,35 +34,35 @@ int main(int argc, char **argv)
             // wait until 1 or more fds become ready for reading (POLLIN) or other events.
             int pollCount = poll(&pfds[0], pfds.size(), -1);
             if (pollCount == -1) {
-                perror("poll");
-                exit(1);
+				throw PollErrorException();
             }
-
             // Run through the existing connections looking for data to read
             for(size_t i = 0; i < pfds.size(); i++) {
 
-				// if (pfds[i].revents & (POLLHUP)) // socket can have 
-				//                 std::cout << "POLLHUP\n";
 
 				// Check if socket is ready to read
-                if (pfds[i].revents & (POLLIN )) { // socket can have 
+                if (pfds[i].revents & (POLLIN )) {
                     std::cout << "POLLIN\n";
 
                     if (pfds[i].fd == listener)
                         acceptClient(pfds, listener);
                     else { // Client socketfd
-						try {
-							receiveClientRequest(pfds[i].fd);
-							// TODO: receiveClientData: handle err/return values
-						}
-						catch (const std::exception &e) {
-							std::cerr << RED << "\nError: " << RESET << e.what() << "\n";
-						}
-                        close(pfds[i].fd);
-                        delFromPfds(pfds, i);
-                        i--;
-                    } 
-                } 
+						receiveClientRequest(pfds[i].fd);
+						/*close(pfds[i].fd);*/
+						/*delFromPfds(pfds, i);*/
+						/*i--;*/
+                    }
+                } else if (pfds[i].revents & POLLOUT) {
+					std::cout << "POLLOUT\n";
+				} else if (pfds[i].revents & (POLLHUP)) {
+					std::cout << "POLLHUP\n";
+					close(pfds[i].fd);
+					delFromPfds(pfds, i);
+					i--;
+				} else if (pfds[i].revents & (POLLERR)) {
+					std::cout << "POLLERR\n";
+				}
+
             } 
         } 
 	}

@@ -1,43 +1,20 @@
 #include "../../include/sockets-polling.h"
 
-int readFromSocket(int fd, std::string& buffer, size_t bufferSize)
-{
-	char buf[bufferSize + 1];
 
-	ssize_t n = recv(fd, buf, bufferSize, 0);
+static int readFromSocket(int fd, std::string& buffer)
+{
+	char buf[HEADER_BUFFER_SIZE + 1];
+
+	ssize_t n = recv(fd, buf, HEADER_BUFFER_SIZE, 0);
 	std::cout << "n: " << n << '\n';
 	
-	// NOTE: throw exceptions?
-	if (n == 0) // connection closed
-		throw ClientCloseConnectionException();
-	if (n == -1) {
-        // if (errno == EAGAIN || errno == EWOULDBLOCK) // WARN: cannot use errno
-        //     return NGX_AGAIN;
-        // return NGX_ERROR;
-		switch (errno) {
-           case EINTR:
-               // The call was interrupted by a signal
-               perror("recv interrupted");
-               break;
-           case EWOULDBLOCK:
-               // The socket is non-blocking and no data is available
-               perror("recv would block");
-               break;
-           case ENOTCONN:
-               // The socket is not connected
-               perror("socket not connected");
-               break;
-           case ECONNRESET:
-               // Connection reset by peer
-               perror("connection reset by peer");
-               break;
-           // Add more cases as needed
-           default:
-               // Handle other errors
-               perror("recv error");
-               break;
-       }
-		throw BadRequestException();
+    if (n == 0)
+        return RECV_CLOSED;
+    if (n == -1) {
+        if (errno == EAGAIN || errno == EWOULDBLOCK) // WARN: cannot use `errno` after read
+            return RECV_AGAIN;
+        perror("recv error");
+        return RECV_ERROR;
     }
 
 	buf[n] = '\0';
@@ -45,15 +22,21 @@ int readFromSocket(int fd, std::string& buffer, size_t bufferSize)
 	return n;
 }
 
-void getHeaderStr(int fd, std::string& buffer, std::string& headerStr)
+void readRequestHeader(int fd, std::string& headerStr, std::string& buffer)
 {
+	std::cout << GREY << "===== readRequestHeader =====" << RESET << '\n';
+
 	// TODO: if End if header not found -> infinite loop
 	size_t found;
 	while (1) {
 		found = buffer.find("\r\n\r\n");
 		if (found != std::string::npos)
 			break;
-		readFromSocket(fd, buffer, HEADER_BUFFER_SIZE);
+		int ret = readFromSocket(fd, buffer);
+		if (ret == RECV_OK)
+			continue;
+		else if (ret == RECV_AGAIN)
+			return;
 	}
 
 	// if found is end index -> headerStr = Buffer
@@ -62,7 +45,7 @@ void getHeaderStr(int fd, std::string& buffer, std::string& headerStr)
 	// TODO: if CRLF not found -> throw exception?
 	if (found == std::string::npos) {
 		std::cout << "getHeaderStr: Error: End of Header not found\n";
-		throw BadRequestException();
+		/*throw BadRequestException();*/
 	}
 	// if no body
 	if (buffer.begin() + found == buffer.end() - 4) {
@@ -75,14 +58,6 @@ void getHeaderStr(int fd, std::string& buffer, std::string& headerStr)
 		// replace buffer with body part only
 		buffer = buffer.substr(found + 4); 
 	}
-	
-}
-
-
-void readRequestHeader(int fd, std::string& headerStr, std::string& buffer)
-{
-	getHeaderStr(fd, buffer, headerStr);
-
 
 	std::cout << "\n===== Header String: =====\n";
 	std::cout << headerStr << '\n';
