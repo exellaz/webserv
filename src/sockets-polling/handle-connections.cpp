@@ -23,7 +23,7 @@ void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Connection>& con
 	connections.push_back(Connection(index, newFd));
 
 	char remoteIp[INET6_ADDRSTRLEN];
-	printf("pollserver: new connection from %s on "
+	printf("server: new connection from %s on "
 		"socket %d\n", inet_ntop(remoteAddr.ss_family,
 			getInAddr((struct sockaddr*)&remoteAddr),
 			remoteIp, INET6_ADDRSTRLEN),
@@ -41,7 +41,7 @@ int receiveClientRequest(Connection &connection)
 	std::string headerStr;
 	std::string bodyStr;
 
-	readRequestHeader(connection, headerStr);
+	return readRequestHeader(connection, headerStr);
 	// parseRequestHeader();
 
 	// TODO: isBodyPresent()   -> check Content-Length, Transfer-Encoding, request method
@@ -50,50 +50,4 @@ int receiveClientRequest(Connection &connection)
 	// parseRequestBody();
 	return 0;
 }
-
-// int receiveClientRequest(int fd)
-// {
-// 	// std::vector<Buffer> buffers;
-// 	std::string buffer;	
-// 	std::string headerStr;
-// 	std::string bodyStr;
-//
-// 	readRequestHeader(fd, headerStr, buffer);
-// 	// parseRequestHeader();
-//
-// 	// TODO: isBodyPresent()   -> check Content-Length, Transfer-Encoding, request method
-//
-// 	// readRequestBody(fd, bodyStr, buffer, CONTENT_LENGTH); // hardcoded to 'CONTENT_LENGTH'
-// 	// parseRequestBody();
-// 	return 0;
-// }
-
-// void acceptClient(std::vector<struct pollfd>& pfds, int listener)
-// {
-// 	// If listener is ready to read, handle new connection
-// 	struct sockaddr_storage remoteAddr; // Client address
-// 	socklen_t addrLen = sizeof remoteAddr;
-// 	int newFd = accept(listener, (struct sockaddr *)&remoteAddr, &addrLen);
-// 	if (newFd == -1) {
-// 		perror("accept");
-// 		return ;
-// 	}
-// 	if (set_nonblocking(newFd) == -1) {
-// 		perror("set_nonblocking (new_fd)");
-// 		close(newFd);
-// 		return ;
-// 	}
-// 	// server sends text to every client that connects
-// 	const char *hello = "Hello from server!\n";
-// 	send(newFd, hello, strlen(hello), 0);
-//
-// 	addToPfds(pfds, newFd);
-//
-// 	char remoteIp[INET6_ADDRSTRLEN];
-// 	printf("pollserver: new connection from %s on "
-// 		"socket %d\n", inet_ntop(remoteAddr.ss_family,
-// 			getInAddr((struct sockaddr*)&remoteAddr),
-// 			remoteIp, INET6_ADDRSTRLEN),
-// 		newFd);
-// }
 

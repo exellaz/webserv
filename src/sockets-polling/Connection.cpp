@@ -37,7 +37,7 @@ void Connection::appendToBuffer(char *str)
 	buffer += str;
 }
 
-const std::string Connection::getBuffer() const
+const std::string& Connection::getBuffer() const
 {
 	return buffer;
 }

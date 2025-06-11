@@ -38,7 +38,6 @@ int main(int argc, char **argv)
             // Run through the existing connections looking for data to read
             for(size_t i = 0; i < pfds.size(); i++) {
 
-
 				// Check if socket is ready to read
                 if (pfds[i].revents & (POLLIN )) {
                     std::cout << "POLLIN\n";
@@ -46,18 +45,24 @@ int main(int argc, char **argv)
                     if (pfds[i].fd == listener)
                         acceptClient(pfds, connections, listener, i);
                     else { 
-						// receiveClientRequest(pfds[i].fd);
-						receiveClientRequest(connections[i]);
+						int res = receiveClientRequest(connections[i]);
+						if (res == RECV_CLOSED || res == RECV_ERROR) {
+							disconnectClient(connections, pfds, i);
+							i--;
+						}
+						continue;
                     }
                 } else if (pfds[i].revents & POLLOUT) {
 					std::cout << "POLLOUT\n";
+					// TODO: Handle response
 				} else if (pfds[i].revents & (POLLHUP)) {
 					std::cout << "POLLHUP\n";
-					close(pfds[i].fd);
-					delFromPfds(pfds, i);
+					disconnectClient(connections, pfds, i);
 					i--;
 				} else if (pfds[i].revents & (POLLERR)) {
 					std::cout << "POLLERR\n";
+					disconnectClient(connections, pfds, i);
+					i--;
 				}
 
             } 

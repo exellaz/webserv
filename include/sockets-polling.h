@@ -38,6 +38,7 @@
 #define MAX_LARGE_BUFFERS 4
 #define BODY_BUFFER_SIZE 8192
 #define MAX_BODY_SIZE 1048576
+#define HEADER_END "\r\n\r\n"
 
 enum reqBodyType {
 	CONTENT_LENGTH,
@@ -60,7 +61,7 @@ void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Connection>& con
 
 // Read Request Utils
 /*int readFromSocket(int fd, std::string& buffer, size_t bufferSize);*/
-void readRequestHeader(Connection &connection, std::string& headerStr);
+int readRequestHeader(Connection &connection, std::string& headerStr);
 void readRequestBody(int fd, std::string& bodyStr, std::string& buffer, enum reqBodyType type);
 int receiveClientRequest(Connection &connection);
 
@@ -69,6 +70,7 @@ void *getInAddr(struct sockaddr *sa);
 int  set_nonblocking(int fd);
 void addToPfds(std::vector<struct pollfd>& pfds, int newFd);
 void delFromPfds(std::vector<struct pollfd>& pfds, int i);
+void disconnectClient(std::vector<Connection>& connections, std::vector<struct pollfd>& pfds, int index);
 
 class BadRequestException : public std::exception {
 public:

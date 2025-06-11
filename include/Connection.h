@@ -19,7 +19,7 @@ public:
 	const int fd;
 	
 	void appendToBuffer(char *str);
-	const std::string getBuffer() const;
+	const std::string& getBuffer() const;
 	void setBuffer(std::string str);
 	void clearBuffer();
 

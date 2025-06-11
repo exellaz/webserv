@@ -30,8 +30,13 @@ void addToPfds(std::vector<struct pollfd>& pfds, int newFd)
 	pfds.push_back(pfd);
 }
 
-// Remove an index from the set
-void delFromPfds(std::vector<struct pollfd>& pfds, int i)
+void disconnectClient(std::vector<Connection>& connections, std::vector<struct pollfd>& pfds, int index)
 {
-	pfds.erase(pfds.begin() + i);
+	std::cout << "server: socket " << pfds[index].fd <<  " hung up\n";
+
+	connections.erase(connections.begin() + index);
+	pfds.erase(pfds.begin() + index);
+	close(pfds[index].fd);
+	
+	std::cout << RED << "disconnected client\n" << RESET << '\n';
 }
