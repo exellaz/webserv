@@ -41,12 +41,16 @@ int receiveClientRequest(Connection &connection)
 	std::string headerStr;
 	std::string bodyStr;
 
-	return readRequestHeader(connection, headerStr);
+	int ret = readRequestHeader(connection, headerStr);
+	if (ret < 0)
+		return ret;
 	// parseRequestHeader();
 
 	// TODO: isBodyPresent()   -> check Content-Length, Transfer-Encoding, request method
+	ret = readRequestBody(connection, bodyStr);
+	if (ret < 0)
+		return ret;
 
-	// readRequestBody(fd, bodyStr, buffer, CONTENT_LENGTH); // hardcoded to 'CONTENT_LENGTH'
 	// parseRequestBody();
 	return 0;
 }

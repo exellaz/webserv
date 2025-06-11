@@ -26,7 +26,7 @@ static int readFromSocket(Connection &connection)
 	connection.appendToBuffer(buf);
 	std::cout << "curBuffer: " << connection.getBuffer() << '\n';
 
-	return RECV_OK;
+	return n;
 }
 
 int readRequestHeader(Connection &conn, std::string& headerStr)
@@ -34,10 +34,12 @@ int readRequestHeader(Connection &conn, std::string& headerStr)
 	std::cout << GREY << "===== readRequestHeader =====" << RESET << '\n';
 
 	size_t found;
+	int ret;
+
 	while (1) {
 
-		int ret = readFromSocket(conn);
-		if (ret == RECV_OK) {
+		ret = readFromSocket(conn);
+		if (ret > 0) {
 			found = conn.getBuffer().find(HEADER_END);
 			if (found != std::string::npos)
 				break;
@@ -74,6 +76,6 @@ int readRequestHeader(Connection &conn, std::string& headerStr)
 	std::cout << "----Leftover in Buffer: ----\n";
 	std::cout << buffer << '\n';
 	std::cout << "----------------------------\n";
-	return RECV_OK;
+	return ret;
 }
 

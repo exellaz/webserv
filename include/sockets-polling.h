@@ -33,10 +33,10 @@
 #define NGX_OK 0
 #define NGX_ERROR -2
 #define NGX_REQUEST_HEADER_TOO_LARGE -431
-#define HEADER_BUFFER_SIZE 1024 // defines the size of the buffer allocated 
+#define HEADER_BUFFER_SIZE 10 // defines the size of the buffer allocated 
 #define LARGE_HEADER_BUFFER_SIZE 8192
 #define MAX_LARGE_BUFFERS 4
-#define BODY_BUFFER_SIZE 8192
+#define BODY_BUFFER_SIZE 10
 #define MAX_BODY_SIZE 1048576
 #define HEADER_END "\r\n\r\n"
 
@@ -46,11 +46,11 @@ enum reqBodyType {
 	NO_BODY,
 };
 
-enum RecvResult {
-    RECV_OK,
-    RECV_AGAIN,
-    RECV_CLOSED,
-    RECV_ERROR
+enum recvResult {
+    // RECV_OK,
+    RECV_AGAIN = -1,
+    RECV_CLOSED = -2,
+    RECV_ERROR = -3
 };
 
 // Setup Listening Socket
@@ -62,7 +62,8 @@ void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Connection>& con
 // Read Request Utils
 /*int readFromSocket(int fd, std::string& buffer, size_t bufferSize);*/
 int readRequestHeader(Connection &connection, std::string& headerStr);
-void readRequestBody(int fd, std::string& bodyStr, std::string& buffer, enum reqBodyType type);
+// void readRequestBody(int fd, std::string& bodyStr, std::string& buffer, enum reqBodyType type);
+int readRequestBody(Connection &conn, std::string& bodyStr);
 int receiveClientRequest(Connection &connection);
 
 // Utils
