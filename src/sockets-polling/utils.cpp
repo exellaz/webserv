@@ -38,5 +38,5 @@ void disconnectClient(std::vector<Connection>& connections, std::vector<struct p
 	pfds.erase(pfds.begin() + index);
 	close(pfds[index].fd);
 	
-	std::cout << RED << "disconnected client\n" << RESET << '\n';
+	std::cout << RED << "server: disconnected client\n" << RESET << '\n';
 }

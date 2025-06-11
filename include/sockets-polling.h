@@ -33,10 +33,10 @@
 #define NGX_OK 0
 #define NGX_ERROR -2
 #define NGX_REQUEST_HEADER_TOO_LARGE -431
-#define HEADER_BUFFER_SIZE 10 // defines the size of the buffer allocated 
+#define HEADER_BUFFER_SIZE 1024 // defines the size of the buffer allocated 
 #define LARGE_HEADER_BUFFER_SIZE 8192
 #define MAX_LARGE_BUFFERS 4
-#define BODY_BUFFER_SIZE 10
+#define BODY_BUFFER_SIZE 8192
 #define MAX_BODY_SIZE 1048576
 #define HEADER_END "\r\n\r\n"
 

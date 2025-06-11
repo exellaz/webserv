@@ -29,7 +29,7 @@ int main(int argc, char **argv)
 
         while(1) {
             
-            std::cout << "\n+++++++ Waiting for new connection ++++++++\n\n";
+            std::cout << CYAN << "\n+++++++ Waiting for new connection ++++++++\n\n" << RESET;
             // wait until 1 or more fds become ready for reading (POLLIN) or other events.
             int pollCount = poll(&pfds[0], pfds.size(), -1);
             if (pollCount == -1) {
