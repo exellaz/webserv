@@ -4,6 +4,12 @@
 
 #include <string>
 
+enum readBodyMethod {
+	CONTENT_LENGTH,
+	CHUNKED_ENCODING,
+	NO_BODY,
+}
+
 class Connection {
 public:
 	// Constructor
@@ -17,6 +23,9 @@ public:
 
 	const int index;
 	const int fd;
+
+	// enum readBodyMethod readBodyMethod;
+	// size_t contentLength;
 	
 	void appendToBuffer(char *str);
 	const std::string& getBuffer() const;

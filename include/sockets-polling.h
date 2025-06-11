@@ -40,12 +40,6 @@
 #define MAX_BODY_SIZE 1048576
 #define HEADER_END "\r\n\r\n"
 
-enum reqBodyType {
-	CONTENT_LENGTH,
-	TRANSFER_ENCODING,
-	NO_BODY,
-};
-
 enum recvResult {
     // RECV_OK,
     RECV_AGAIN = -1,
