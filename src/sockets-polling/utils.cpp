@@ -15,6 +15,7 @@ int set_nonblocking(int fd) {
     int flags = fcntl(fd, F_GETFL, 0);
     if (flags == -1) 
 		return -1;
+	// set file status with existing flags + Non-blocking flag
     return fcntl(fd, F_SETFL, flags | O_NONBLOCK);
 }
 
