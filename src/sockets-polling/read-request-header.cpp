@@ -12,16 +12,10 @@ static int readFromSocket(Connection &connection)
 		std::cout << "RECV_CLOSED\n";
 		return RECV_CLOSED;
 	}
-    if (n == -1) {
-        if (errno == EAGAIN || errno == EWOULDBLOCK) {// WARN: cannot use `errno` after read
-			std::cout << "RECV_AGAIN\n";
-            return RECV_AGAIN;
-		}
-        perror("recv error");
-		std::cout << "RECV_ERROR\n";
-        return RECV_ERROR;
+	else if (n == -1) {
+		std::cout << "RECV_AGAIN: No data available yet, will try again next iteration.\n";
+		return RECV_AGAIN;
     }
-
 	buf[n] = '\0';
 	connection.appendToBuffer(buf);
 

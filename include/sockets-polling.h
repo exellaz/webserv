@@ -41,10 +41,9 @@
 #define HEADER_END "\r\n\r\n"
 
 enum recvResult {
-    // RECV_OK,
+    RECV_OK = 0,
     RECV_AGAIN = -1,
     RECV_CLOSED = -2,
-    RECV_ERROR = -3
 };
 
 // Setup Listening Socket

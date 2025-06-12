@@ -29,7 +29,7 @@ int main(int argc, char **argv)
 
         while(1) {
             
-            std::cout << CYAN << "\n+++++++ Waiting for new connection ++++++++\n\n" << RESET;
+            std::cout << CYAN << "\n+++++++ Waiting for new connection ++++++++" << RESET << "\n\n";
             // wait until 1 or more fds become ready for reading (POLLIN) or other events.
             int pollCount = poll(&pfds[0], pfds.size(), -1);
             if (pollCount == -1) {
@@ -46,7 +46,7 @@ int main(int argc, char **argv)
                         acceptClient(pfds, connections, listener, i);
                     else { 
 						int res = receiveClientRequest(connections[i]);
-						if (res == RECV_CLOSED || res == RECV_ERROR) {
+						if (res == RECV_CLOSED) {
 							disconnectClient(connections, pfds, i);
 							i--;
 						}
