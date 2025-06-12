@@ -8,7 +8,7 @@ enum readBodyMethod {
 	CONTENT_LENGTH,
 	CHUNKED_ENCODING,
 	NO_BODY,
-}
+};
 
 class Connection {
 public:
