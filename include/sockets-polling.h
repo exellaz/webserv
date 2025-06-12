@@ -18,6 +18,7 @@
 #include <vector>
 #include "./Configuration.hpp"
 #include "./Buffer.h"
+#include "Connection.h"
 
 #define RESET "\033[0m"
 #define BOLD "\033[1m"
@@ -37,30 +38,33 @@
 #define MAX_LARGE_BUFFERS 4
 #define BODY_BUFFER_SIZE 8192
 #define MAX_BODY_SIZE 1048576
+#define HEADER_END "\r\n\r\n"
 
-enum reqBodyType {
-	CONTENT_LENGTH,
-	TRANSFER_ENCODING,
-	NO_BODY,
+enum recvResult {
+    RECV_OK = 0,
+    RECV_AGAIN = -1,
+    RECV_CLOSED = -2,
 };
 
 // Setup Listening Socket
-int setupListeningSocket(std::vector<struct pollfd>& pfds, Config& config);
-
+// int setupListeningSocket(std::vector<struct pollfd>& pfds, Config& config);
+int setupListeningSocket(std::vector<struct pollfd>& pfds, std::vector<Connection>& connections, Config& config);
 // CONNECTIONS 
-void acceptClient(std::vector<struct pollfd>& pfds, int listener);
+void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Connection>& connections, int listener, int index);
 
 // Read Request Utils
-int readFromSocket(int fd, std::string& buffer, size_t bufferSize);
-void readRequestHeader(int fd, std::string& headerStr, std::string& buffer);
-void readRequestBody(int fd, std::string& bodyStr, std::string& buffer, enum reqBodyType type);
-int receiveClientRequest(int fd);
+/*int readFromSocket(int fd, std::string& buffer, size_t bufferSize);*/
+int readRequestHeader(Connection &connection, std::string& headerStr);
+// void readRequestBody(int fd, std::string& bodyStr, std::string& buffer, enum reqBodyType type);
+int readRequestBody(Connection &conn, std::string& bodyStr);
+int receiveClientRequest(Connection &connection);
 
 // Utils
 void *getInAddr(struct sockaddr *sa);
 int  set_nonblocking(int fd);
 void addToPfds(std::vector<struct pollfd>& pfds, int newFd);
 void delFromPfds(std::vector<struct pollfd>& pfds, int i);
+void disconnectClient(std::vector<Connection>& connections, std::vector<struct pollfd>& pfds, int index);
 
 class BadRequestException : public std::exception {
 public:
@@ -71,13 +75,14 @@ public:
 
 };
 
-class ClientCloseConnectionException : public std::exception {
+class PollErrorException : public std::exception {
 public:
 	// 'throw()' specifies that func won't throw any exceptions 
 	const char* what() const throw() {
-		return "Client close connection";
+		return "Poll error";
 	}
 
 };
+
 
 #endif

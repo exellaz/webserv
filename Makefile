@@ -19,6 +19,7 @@ SRCS_FIL = \
 		sockets-polling/setup-listening-socket.cpp \
 		sockets-polling/read-request-header.cpp \
 		sockets-polling/read-request-body.cpp \
+		sockets-polling/Connection.cpp \
 		\
 		config-parser/Configuration.cpp \
 
