@@ -1,6 +1,38 @@
 #include "../include/sockets-polling.h"
 #include "../include/Configuration.hpp"
 
+void sendResponseToClient(int fd)
+{
+    // HTML body
+    const std::string html_body =
+        "<!DOCTYPE html>\r\n"
+        "<html lang=\"en\">\r\n"
+        "<head>\r\n"
+        "  <meta charset=\"UTF-8\">\r\n"
+        "  <title>Sample HTTP Response</title>\r\n"
+        "</head>\r\n"
+        "<body>\r\n"
+        "  <h1>Hello, World!</h1>\r\n"
+        "  <p>This is a sample HTTP response with Content-Length header.</p>\r\n"
+        "</body>\r\n"
+        "</html>\r\n";
+    // Calculate content length
+    std::size_t content_length = html_body.size();
+    // Convert content_length to string
+    std::stringstream ss;
+    ss << content_length;
+    std::string content_length_str = ss.str();
+    // Entire HTTP response in one string
+    std::string response =
+        "HTTP/1.1 200 OK\r\n"
+        "Content-Type: text/html; charset=UTF-8\r\n"
+        "Content-Length: " + content_length_str + "\r\n"
+        "Connection: close\r\n"
+        "\r\n" +
+        html_body;
+	send(fd, &response[0], response.size(), 0);
+	std::cout << "server: Response sent to client.\n";
+}
 
 int main(int argc, char **argv)
 {
@@ -49,17 +81,31 @@ int main(int argc, char **argv)
 						if (res == RECV_CLOSED) {
 							disconnectClient(connections, pfds, i);
 							i--;
+							continue;
 						}
-						continue;
+						// connections[i].isResponseReady = true; // HARDCODED
+						if (connections[i].isResponseReady)
+							pfds[i].events |= POLLOUT;
                     }
-                } else if (pfds[i].revents & POLLOUT) {
+                } 
+				else if (pfds[i].revents & POLLOUT) {
 					std::cout << "POLLOUT\n";
-					// TODO: Handle response
-				} else if (pfds[i].revents & (POLLHUP)) {
+					
+					sendResponseToClient(connections[i].fd);
+
+					if (connections[i].connType == CLOSE) {
+						disconnectClient(connections, pfds, i);
+						i--;
+						continue;
+					}
+					pfds[i].events &= ~POLLOUT;
+				} 
+				else if (pfds[i].revents & POLLHUP) {
 					std::cout << "POLLHUP\n";
 					disconnectClient(connections, pfds, i);
 					i--;
-				} else if (pfds[i].revents & (POLLERR)) {
+				} 
+				else if (pfds[i].revents & POLLERR) {
 					std::cout << "POLLERR\n";
 					disconnectClient(connections, pfds, i);
 					i--;

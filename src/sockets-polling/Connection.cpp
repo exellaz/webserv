@@ -1,16 +1,20 @@
 #include "../../include/Connection.h"
 #include <iostream>
 
-Connection::Connection(int index, int fd)
-	: index(index), fd(fd), buffer("")
+Connection::Connection(int index, int fd) :
+	index(index), fd(fd), connType(KEEP_ALIVE), 
+	readBodyMethod(CONTENT_LENGTH), contentLength(0), 
+	isResponseReady(false), _buffer("")
 {
 	// std::cout << "Connection:: Constructor Called (name: " << index << ")" << std::endl;
 
 
 }
 
-Connection::Connection(const Connection& other)
-	: index(other.index), fd(other.fd), buffer(other.buffer)
+Connection::Connection(const Connection& other) : 
+	index(other.index), fd(other.fd), connType(other.connType),
+	readBodyMethod(other.readBodyMethod), contentLength(other.contentLength),
+	isResponseReady(other.isResponseReady), _buffer(other._buffer)
 {
 	// std::cout << "Connection:: Copy Constructor Called" << std::endl;
 }
@@ -21,7 +25,11 @@ Connection& Connection::operator=(const Connection& other)
 	
 	if (this == &other)
 		return *this;
-	buffer = other.buffer;
+	connType 		= other.connType;
+	readBodyMethod 	= other.readBodyMethod;
+	contentLength 	= other.contentLength;
+	isResponseReady = other.isResponseReady;
+	_buffer 			= other._buffer;
 
 	return *this;
 }
@@ -34,22 +42,22 @@ Connection::~Connection()
 
 void Connection::appendToBuffer(char *str)
 {
-	buffer += str;
+	_buffer += str;
 }
 
 const std::string& Connection::getBuffer() const
 {
-	return buffer;
+	return _buffer;
 }
 
 void Connection::setBuffer(std::string str)
 {
-	buffer = str;
+	_buffer = str;
 }
 
 void Connection::clearBuffer()
 {
-	buffer.clear();
+	_buffer.clear();
 }
 
 std::ostream & operator<<( std::ostream & o, Connection const & connection )

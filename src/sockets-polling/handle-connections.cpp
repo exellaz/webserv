@@ -16,8 +16,8 @@ void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Connection>& con
 		return ;
 	}
 	// server sends text to every client that connects
-	const char *hello = "Hello from server!\n";
-	send(newFd, hello, strlen(hello), 0);
+	// const char *hello = "Hello from server!\n";
+	// send(newFd, hello, strlen(hello), 0);
 
 	addToPfds(pfds, newFd);
 	connections.push_back(Connection(index, newFd));
@@ -47,9 +47,9 @@ int receiveClientRequest(Connection &connection)
 	// parseRequestHeader();
 
 	// TODO: isBodyPresent()   -> check Content-Length, Transfer-Encoding, request method
-	ret = readRequestBody(connection, bodyStr);
-	if (ret < 0)
-		return ret;
+	// ret = readRequestBody(connection, bodyStr);
+	// if (ret < 0)
+	// 	return ret;
 
 	// parseRequestBody();
 	return 0;

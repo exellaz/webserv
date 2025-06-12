@@ -10,6 +10,11 @@ enum readBodyMethod {
 	NO_BODY,
 };
 
+enum connectionType {
+	CLOSE,
+	KEEP_ALIVE,
+};
+
 class Connection {
 public:
 	// Constructor
@@ -23,9 +28,10 @@ public:
 
 	const int index;
 	const int fd;
-
-	// enum readBodyMethod readBodyMethod;
-	// size_t contentLength;
+	enum connectionType connType;
+	enum readBodyMethod readBodyMethod;
+	size_t contentLength;
+	bool isResponseReady;
 	
 	void appendToBuffer(char *str);
 	const std::string& getBuffer() const;
@@ -33,7 +39,7 @@ public:
 	void clearBuffer();
 
 private:
-	std::string buffer;
+	std::string _buffer;
 };
 
 std::ostream & operator<<( std::ostream & o, Connection const & connection );
