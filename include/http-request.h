@@ -23,6 +23,7 @@ class HttpRequest
         bool parseRequestLine(const std::string& line);
         bool parseHeaderLines(const std::string& line, HttpResponse& response);
         bool parseRequestBody(const std::string& str);
+        void clearRequest();
 
         const std::string& getMethod() const;
         const std::string& getURI() const;

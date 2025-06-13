@@ -97,6 +97,8 @@ int main(int argc, char **argv)
                     sendResponseToClient(connections[i].fd, connections[i].response);
                     pfds[i].events |= POLLIN;
                     connections[i].isResponseReady = false;
+                    connections[i].request.clearRequest();
+                    connections[i].response.clearResponse();
 
                     if (connections[i].connType == CLOSE) {
                         disconnectClient(connections, pfds, i);

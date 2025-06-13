@@ -57,6 +57,15 @@ bool HttpRequest::parseRequestBody(const std::string& str)
     return true;
 }
 
+void HttpRequest::clearRequest()
+{
+    _method.clear();
+    _uri.clear();
+    _version.clear();
+    _headers.clear();
+    _body.clear();
+}
+
 std::ostream& operator<<(std::ostream &stream, const HttpRequest& src)
 {
     stream << "Method: " << src.getMethod() << "\n";

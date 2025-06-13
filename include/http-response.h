@@ -37,6 +37,7 @@ class HttpResponse
         void printResponseHeaders();
         void handleGetRequest(const HttpRequest& request, const std::string& docRoot);
         void handlePostRequest(const HttpRequest& request);
+        void clearResponse();
 
         std::string getHttpDate();
         std::string toString();
