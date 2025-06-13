@@ -44,10 +44,10 @@ int main()
 
     std::cout << request << "\n";
 
-    if (request._method == "GET") {
+    if (request.getMethod() == "GET") {
         response.handleGetRequest(request, ".");
     }
-    if (request._method == "POST") {
+    if (request.getMethod() == "POST") {
         // response.handlePostRequest(request);
     }
 

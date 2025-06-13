@@ -59,12 +59,12 @@ bool HttpRequest::parseRequestBody(const std::string& str)
 
 std::ostream& operator<<(std::ostream &stream, const HttpRequest& src)
 {
-    stream << "Method: " << src._method << "\n";
-    stream << "URI: " << src._uri << "\n";
-    stream << "Version: " << src._version << "\n";
+    stream << "Method: " << src.getMethod() << "\n";
+    stream << "URI: " << src.getURI() << "\n";
+    stream << "Version: " << src.getVersion() << "\n";
     stream << "\nHeaders\n";
-    for (std::map<std::string, std::string>::const_iterator It = src._headers.begin(); It != src._headers.end(); ++It)
+    for (std::map<std::string, std::string>::const_iterator It = src.getHeaders().begin(); It != src.getHeaders().end(); ++It)
         stream << It->first << ": " << It->second << "\n";
-    stream << "\nBody\n" << src._body << "\n";
+    stream << "\nBody\n" << src.getBody() << "\n";
     return stream;
 }

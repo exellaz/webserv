@@ -9,7 +9,7 @@ CC = c++
 CFLAGS = -Wall -Wextra -Werror -std=c++98 -g3
 INC = -I../../include
 
-SRC = main.cpp http-request.cpp
+SRC = main.cpp http-request.cpp utils.cpp ../http-response/http-response.cpp
 
 OBJ = $(SRC:.cpp=.o)
 

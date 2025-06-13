@@ -108,7 +108,6 @@ std::string readFileToString(const std::string& filepath) {
         content.append(buffer, n);
     }
     close(fd);
-
     return content;
 }
 
@@ -134,7 +133,7 @@ std::string getMimeType(const std::string& path)
 void HttpResponse::handleGetRequest(const HttpRequest& request, const std::string& docRoot)
 {
     // Map URI to filesystem path
-    std::string fullPath = mapUriToPath(docRoot, request._uri);
+    std::string fullPath = mapUriToPath(docRoot, request.getURI());
 
     // Read from file
     std::string fileContents = readFileToString(fullPath);
@@ -152,6 +151,11 @@ void HttpResponse::handleGetRequest(const HttpRequest& request, const std::strin
     setHeader("Content-Type", mime);
     setBody(fileContents);
 }
+
+// void HttpResponse::handlePostRequest(const HttpRequest& request)
+// {
+
+// }
 
 std::string HttpResponse::getHttpDate()
 {
