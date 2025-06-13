@@ -32,6 +32,6 @@
 *.app
 
 webserv
-.vscode
+.vscode/
 /src/http-request/http-request
 /src/http-response/http-response
