@@ -1,8 +1,7 @@
 #include "../../include/Connection.h"
-#include <iostream>
 
-Connection::Connection(int index, int fd) :
-	index(index), fd(fd), connType(KEEP_ALIVE), 
+Connection::Connection(int index, int fd, time_t startTime) :
+	index(index), fd(fd), startTime(startTime), connType(KEEP_ALIVE), 
 	readBodyMethod(CONTENT_LENGTH), contentLength(0), 
 	isResponseReady(false), _buffer("")
 {
@@ -12,7 +11,7 @@ Connection::Connection(int index, int fd) :
 }
 
 Connection::Connection(const Connection& other) : 
-	index(other.index), fd(other.fd), connType(other.connType),
+	index(other.index), fd(other.fd), startTime(other.startTime), connType(other.connType),
 	readBodyMethod(other.readBodyMethod), contentLength(other.contentLength),
 	isResponseReady(other.isResponseReady), _buffer(other._buffer)
 {
@@ -22,9 +21,10 @@ Connection::Connection(const Connection& other) :
 Connection& Connection::operator=(const Connection& other)
 {
 	// std::cout << "Connection:: Copy Assignment Operator Called" << std::endl;
-	
+
 	if (this == &other)
 		return *this;
+	startTime 		= (other.startTime);
 	connType 		= other.connType;
 	readBodyMethod 	= other.readBodyMethod;
 	contentLength 	= other.contentLength;

@@ -39,5 +39,13 @@ void disconnectClient(std::vector<Connection>& connections, std::vector<struct p
 	pfds.erase(pfds.begin() + index);
 	close(pfds[index].fd);
 	
-	std::cout << RED << "server: disconnected client\n" << RESET << '\n';
+	std::cout << RED << "server: disconnected client socket " << connections[index].fd << "\n" << RESET << '\n';
+}
+
+
+
+time_t getNowInSeconds() {
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    return tv.tv_sec;
 }

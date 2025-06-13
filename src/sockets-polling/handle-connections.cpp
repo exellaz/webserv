@@ -20,7 +20,7 @@ void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Connection>& con
 	// send(newFd, hello, strlen(hello), 0);
 
 	addToPfds(pfds, newFd);
-	connections.push_back(Connection(index, newFd));
+	connections.push_back(Connection(index, newFd, getNowInSeconds()));
 
 	char remoteIp[INET6_ADDRSTRLEN];
 	printf("server: new connection from %s on "

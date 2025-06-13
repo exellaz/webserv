@@ -62,17 +62,34 @@ int main(int argc, char **argv)
         while(1) {
             
             std::cout << CYAN << "\n+++++++ Waiting for new connection ++++++++" << RESET << "\n\n";
+			
+			// TODO: calculate nearest Timeout among all connections, assign to poll()
+			
             // wait until 1 or more fds become ready for reading (POLLIN) or other events.
-            int pollCount = poll(&pfds[0], pfds.size(), -1);
+			int nearestTimeout = getNearestUpcomingTimeout(connections);
+			std::cout << "nearestTimeout: " << nearestTimeout << '\n';
+            int pollCount = poll(&pfds[0], pfds.size(), nearestTimeout);
+			std::cout << "pollCount: " << pollCount << '\n';
             if (pollCount == -1) {
 				throw PollErrorException();
             }
+
+			disconnectTimedOutClients(connections, pfds);
+
             // Run through the existing connections looking for data to read
             for(size_t i = 0; i < pfds.size(); i++) {
 
 				// Check if socket is ready to read
                 if (pfds[i].revents & (POLLIN )) {
                     std::cout << "POLLIN\n";
+					
+					// Check Timeout
+					if (getNowInSeconds() - connections[i].startTime >= CLIENT_HEADER_TIMEOUT) {
+						std::cout << "server: TIMEOUT for client socket" << connections[i].fd << '\n';
+						disconnectClient(connections, pfds, i);
+						i--;
+						continue;
+					}
 
                     if (pfds[i].fd == listener)
                         acceptClient(pfds, connections, listener, i);

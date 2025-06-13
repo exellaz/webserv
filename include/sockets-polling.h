@@ -34,9 +34,8 @@
 #define NGX_ERROR -2
 #define NGX_REQUEST_HEADER_TOO_LARGE -431
 #define HEADER_BUFFER_SIZE 1024 // defines the size of the buffer allocated 
-#define LARGE_HEADER_BUFFER_SIZE 8192
-#define MAX_LARGE_BUFFERS 4
 #define BODY_BUFFER_SIZE 8192
+#define CLIENT_HEADER_TIMEOUT 60 // in seconds
 #define MAX_BODY_SIZE 1048576
 #define HEADER_END "\r\n\r\n"
 
@@ -59,12 +58,17 @@ int readRequestHeader(Connection &connection, std::string& headerStr);
 int readRequestBody(Connection &conn, std::string& bodyStr);
 int receiveClientRequest(Connection &connection);
 
+// Timeout
+void disconnectTimedOutClients(std::vector<Connection>& connections, std::vector<struct pollfd>& pfds);
+
 // Utils
 void *getInAddr(struct sockaddr *sa);
 int  set_nonblocking(int fd);
 void addToPfds(std::vector<struct pollfd>& pfds, int newFd);
 void delFromPfds(std::vector<struct pollfd>& pfds, int i);
 void disconnectClient(std::vector<Connection>& connections, std::vector<struct pollfd>& pfds, int index);
+time_t getNowInSeconds();
+int getNearestUpcomingTimeout(std::vector<Connection>& connections);
 
 class BadRequestException : public std::exception {
 public:
