@@ -20,7 +20,7 @@ namespace HttpConstants
 class HttpRequest
 {
     public:
-        bool parseRequestLine(const std::string& line);
+        bool parseRequestLine(const std::string& headerStr, HttpResponse& response);
         bool parseHeaderLines(const std::string& line, HttpResponse& response);
         bool parseRequestBody(const std::string& str);
         void clearRequest();

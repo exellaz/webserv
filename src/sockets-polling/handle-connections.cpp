@@ -48,11 +48,17 @@ int receiveClientRequest(Connection &connection)
 	if (ret < 0)
 		return ret;
 	// parseRequestHeader();
-	request.parseRequestLine(headerStr);
-	request.parseHeaderLines(headerStr, response);
-	request.setBody(bodyStr);
+	try {
+		request.parseRequestLine(headerStr, response);
+		request.parseHeaderLines(headerStr, response);
+		request.setBody(bodyStr);
+	}
+	catch (std::exception &e) {
+		std::cerr << e.what();
+		connection.connType = CLOSE;
+	}
 
-	if (request.getMethod() == "GET")
+	if (response.getStatus() == OK && request.getMethod() == "GET")
 		response.handleGetRequest(request, ".");
 
 	std::cout << request;

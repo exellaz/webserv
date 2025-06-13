@@ -1,15 +1,41 @@
 #include "http-request.h"
 
-bool HttpRequest::parseRequestLine(const std::string& line)
+bool HttpRequest::parseRequestLine(const std::string& headerStr, HttpResponse& response)
 {
-    std::istringstream lineStream(line);
+    std::istringstream stream(headerStr);
+    std::string line;
 
-    if (!(lineStream >> _method >> _uri >> _version))
-        return false;
-    if (_method != "GET" && _method != "POST" && _method != "DELETE")
-        return false; // This should return status 405 Method not allowed
-    if (_version != "HTTP/1.1")
-        return false; // This should return status 400 Bad Request
+    while (std::getline(stream, line)) {
+        if (!line.empty() && line[line.size() - 1] == '\r') {
+            line.erase(line.size() - 1);
+        }
+
+        if (line.empty()) {
+            continue; // Skip empty prelude lines
+        }
+
+        // Now this is the actual request line
+        std::istringstream lineStream(line);
+        if (!(lineStream >> _method >> _uri >> _version)) {
+            response.setStatus(BAD_REQUEST);
+            throw std::logic_error("Bad request line format");
+        }
+
+        if (_method != "GET" && _method != "POST" && _method != "DELETE") {
+            response.setStatus(METHOD_NOT_ALLOWED);
+            throw std::logic_error("Method not allowed");
+        }
+
+        if (_version != "HTTP/1.1") {
+            response.setStatus(VERSION_NOT_SUPPORTED);
+            throw std::logic_error("Unsupported HTTP version");
+        }
+        return true;
+    }
+
+    // If we never found a non-empty line
+    response.setStatus(BAD_REQUEST);
+    throw std::logic_error("Missing request line");
     return true;
 }
 
