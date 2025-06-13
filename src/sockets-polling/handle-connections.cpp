@@ -1,4 +1,5 @@
 #include "../../include/sockets-polling.h"
+#include "../../include/http-request.h"
 
 void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Connection>& connections, int listener, int index)
 {
@@ -31,12 +32,12 @@ void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Connection>& con
 }
 
 /*
-NOTE: 
+NOTE:
 - `readHeader` will remove the 'header' section from `buffers`
 - if recv(HEADER_BUFFER_SIZE) reads till the 'body' section, that section of 'body' will remain in buffers after `readHeader()` is called
 
 */
-int receiveClientRequest(Connection &connection)
+int receiveClientRequest(Connection &connection, HttpRequest& request, HttpResponse& response)
 {
 	std::string headerStr;
 	std::string bodyStr;
@@ -45,6 +46,15 @@ int receiveClientRequest(Connection &connection)
 	if (ret < 0)
 		return ret;
 	// parseRequestHeader();
+	request.parseRequestLine(headerStr);
+	request.parseHeaderLines(headerStr, response);
+	request.setBody(bodyStr);
+
+	if (request.getMethod() == "GET")
+		response.handleGetRequest(request, ".");
+
+	std::cout << request;
+	connection.isResponseReady = true;
 
 	// TODO: isBodyPresent()   -> check Content-Length, Transfer-Encoding, request method
 	// ret = readRequestBody(connection, bodyStr);

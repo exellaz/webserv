@@ -3,6 +3,8 @@
 #define CONNECTION_H
 
 #include <string>
+#include "http-request.h"
+#include "http-response.h"
 
 enum readBodyMethod {
 	CONTENT_LENGTH,
@@ -32,11 +34,14 @@ public:
 	enum readBodyMethod readBodyMethod;
 	size_t contentLength;
 	bool isResponseReady;
-	
+
 	void appendToBuffer(char *str);
 	const std::string& getBuffer() const;
 	void setBuffer(std::string str);
 	void clearBuffer();
+
+	HttpRequest request;
+	HttpResponse response;
 
 private:
 	std::string _buffer;

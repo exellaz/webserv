@@ -29,6 +29,7 @@ using namespace HttpCodes;
 class HttpResponse
 {
     public:
+        HttpResponse();
         HttpResponse(StatusCode code);
 
         std::string reasonPhrase(StatusCode code);

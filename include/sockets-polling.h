@@ -19,6 +19,7 @@
 #include "./Configuration.hpp"
 #include "./Buffer.h"
 #include "Connection.h"
+#include "http-response.h"
 
 #define RESET "\033[0m"
 #define BOLD "\033[1m"
@@ -33,7 +34,7 @@
 #define NGX_OK 0
 #define NGX_ERROR -2
 #define NGX_REQUEST_HEADER_TOO_LARGE -431
-#define HEADER_BUFFER_SIZE 1024 // defines the size of the buffer allocated 
+#define HEADER_BUFFER_SIZE 1024 // defines the size of the buffer allocated
 #define LARGE_HEADER_BUFFER_SIZE 8192
 #define MAX_LARGE_BUFFERS 4
 #define BODY_BUFFER_SIZE 8192
@@ -49,7 +50,7 @@ enum recvResult {
 // Setup Listening Socket
 // int setupListeningSocket(std::vector<struct pollfd>& pfds, Config& config);
 int setupListeningSocket(std::vector<struct pollfd>& pfds, std::vector<Connection>& connections, Config& config);
-// CONNECTIONS 
+// CONNECTIONS
 void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Connection>& connections, int listener, int index);
 
 // Read Request Utils
@@ -57,7 +58,7 @@ void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Connection>& con
 int readRequestHeader(Connection &connection, std::string& headerStr);
 // void readRequestBody(int fd, std::string& bodyStr, std::string& buffer, enum reqBodyType type);
 int readRequestBody(Connection &conn, std::string& bodyStr);
-int receiveClientRequest(Connection &connection);
+int receiveClientRequest(Connection &connection, HttpRequest& request, HttpResponse& response);
 
 // Utils
 void *getInAddr(struct sockaddr *sa);
@@ -68,7 +69,7 @@ void disconnectClient(std::vector<Connection>& connections, std::vector<struct p
 
 class BadRequestException : public std::exception {
 public:
-	// 'throw()' specifies that func won't throw any exceptions 
+	// 'throw()' specifies that func won't throw any exceptions
 	const char* what() const throw() {
 		return "400: Bad Request";
 	}
@@ -77,7 +78,7 @@ public:
 
 class PollErrorException : public std::exception {
 public:
-	// 'throw()' specifies that func won't throw any exceptions 
+	// 'throw()' specifies that func won't throw any exceptions
 	const char* what() const throw() {
 		return "Poll error";
 	}
