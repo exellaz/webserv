@@ -37,10 +37,12 @@ NOTE:
 - if recv(HEADER_BUFFER_SIZE) reads till the 'body' section, that section of 'body' will remain in buffers after `readHeader()` is called
 
 */
-int receiveClientRequest(Connection &connection, HttpRequest& request, HttpResponse& response)
+int receiveClientRequest(Connection &connection)
 {
 	std::string headerStr;
 	std::string bodyStr;
+	HttpRequest& request = connection.request;
+	HttpResponse& response = connection.response;
 
 	int ret = readRequestHeader(connection, headerStr);
 	if (ret < 0)

@@ -80,7 +80,7 @@ int main(int argc, char **argv)
                     if (pfds[i].fd == listener)
                         acceptClient(pfds, connections, listener, i);
                     else {
-                        int res = receiveClientRequest(connections[i], connections[i].request, connections[i].response);
+                        int res = receiveClientRequest(connections[i]);
                         if (res == RECV_CLOSED) {
                             disconnectClient(connections, pfds, i);
                             i--;

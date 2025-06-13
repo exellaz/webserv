@@ -58,7 +58,7 @@ void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Connection>& con
 int readRequestHeader(Connection &connection, std::string& headerStr);
 // void readRequestBody(int fd, std::string& bodyStr, std::string& buffer, enum reqBodyType type);
 int readRequestBody(Connection &conn, std::string& bodyStr);
-int receiveClientRequest(Connection &connection, HttpRequest& request, HttpResponse& response);
+int receiveClientRequest(Connection &connection);
 
 // Utils
 void *getInAddr(struct sockaddr *sa);
