@@ -29,12 +29,12 @@ int readByContentLength(Connection &conn, std::string& bodyStr)
 	size_t bytesRead = conn.getBuffer().size();
 	int ret;
 	
-	size_t contentLength = 98; // HARDCODED
+	size_t contentLength = 100; // HARDCODED
 	while (bytesRead < contentLength) {
 		ret = readFromSocket(conn);
 		if (ret <= 0)
 			return ret; // RECV_AGAIN or RECV_CLOSED or RECV_ERROR
-		conn.startTime = getNowInSeconds();
+		conn.startTime = getNowInSeconds(); // reset timer
 		bytesRead += ret;
 	}
 	

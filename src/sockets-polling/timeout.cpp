@@ -6,11 +6,11 @@ int getNearestUpcomingTimeout(std::vector<Connection>& connections)
 		return -1;
 	}
 	time_t timeElasped = getNowInSeconds() - connections[1].startTime;
-	time_t nearestTimeout = CLIENT_HEADER_TIMEOUT - timeElasped;
+	time_t nearestTimeout = CLIENT_TIMEOUT - timeElasped;
 
 	for (size_t i = 2; i < connections.size(); ++i) {
 		timeElasped = getNowInSeconds() - connections[i].startTime;
-		time_t timeout = CLIENT_HEADER_TIMEOUT - timeElasped;
+		time_t timeout = CLIENT_TIMEOUT - timeElasped;
 		if (timeout < nearestTimeout)
 			nearestTimeout = timeout;
 	}
@@ -25,8 +25,7 @@ void disconnectTimedOutClients(std::vector<Connection>& connections, std::vector
 
 	for (size_t i = 1; i < connections.size(); ++i) {
 		
-		// TODO: need to check status of connection? (READING_HEADER, READING_BODY...)
-		if (getNowInSeconds() - connections[i].startTime >= CLIENT_HEADER_TIMEOUT) {
+		if (getNowInSeconds() - connections[i].startTime >= CLIENT_TIMEOUT) {
 			std::cout << "server: TIMEOUT for client socket " << connections[i].fd << '\n';
 			//TODO: send response "408 Request Timeout"
 
