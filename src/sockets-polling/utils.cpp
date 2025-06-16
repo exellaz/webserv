@@ -33,7 +33,6 @@ void addToPfds(std::vector<struct pollfd>& pfds, int newFd)
 
 void disconnectClient(std::vector<Connection>& connections, std::vector<struct pollfd>& pfds, int index)
 {
-	std::cout << "server: socket " << pfds[index].fd <<  " hung up\n";
 	std::cout << RED << "server: disconnected client socket " << connections[index].fd << "\n" << RESET << '\n';
 	close(connections[index].fd);
 

@@ -67,9 +67,7 @@ int main(int argc, char **argv)
 			
             // wait until 1 or more fds become ready for reading (POLLIN) or other events.
 			int nearestTimeout = getNearestUpcomingTimeout(connections);
-			std::cout << "nearestTimeout: " << nearestTimeout << '\n';
             int pollCount = poll(&pfds[0], pfds.size(), nearestTimeout);
-			std::cout << "pollCount: " << pollCount << '\n';
             if (pollCount == -1) {
 				throw PollErrorException();
             }
@@ -88,6 +86,7 @@ int main(int argc, char **argv)
                     else { 
 						int res = receiveClientRequest(connections[i]);
 						if (res == RECV_CLOSED) {
+							std::cout << "server: socket " << pfds[i].fd << " hung up\n";
 							disconnectClient(connections, pfds, i);
 							i--;
 							continue;

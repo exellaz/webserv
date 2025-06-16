@@ -2,16 +2,11 @@
 
 int getNearestUpcomingTimeout(std::vector<Connection>& connections)
 {
-
-	std::cout << GREY << "===== getNearestUpcomingTimeout =====" << RESET << '\n';
 	if (connections.size() == 1) { // only listener fd
 		return -1;
 	}
-	std::cout << "connections.size: " << connections.size() << '\n';
 	time_t timeElasped = getNowInSeconds() - connections[1].startTime;
 	time_t nearestTimeout = CLIENT_HEADER_TIMEOUT - timeElasped;
-
-	std::cout << "timeElasped: " << timeElasped << '\n';
 
 	for (size_t i = 2; i < connections.size(); ++i) {
 		timeElasped = getNowInSeconds() - connections[i].startTime;
@@ -24,8 +19,6 @@ int getNearestUpcomingTimeout(std::vector<Connection>& connections)
 
 void disconnectTimedOutClients(std::vector<Connection>& connections, std::vector<struct pollfd>& pfds)
 {
-	std::cout << GREY << "===== disconnectTimedOutClients =====" << RESET << '\n';
-
 	if (connections.size() == 1) { // only listener fd
 		return;
 	}
