@@ -20,7 +20,7 @@ enum connectionType {
 class Connection {
 public:
 	// Constructor
-	Connection(int index, int fd, time_t startTime);
+	Connection(int fd, time_t startTime);
 	// Copy Constructor
 	Connection(const Connection& other);
 	// Copy Assignment Operator
@@ -28,8 +28,7 @@ public:
 	// Destructor
 	~Connection();
 
-	const int index;
-	const int fd;
+	int fd;
 	time_t startTime; // Timeout
 	enum connectionType connType;
 	enum readBodyMethod readBodyMethod;

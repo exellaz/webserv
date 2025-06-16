@@ -83,16 +83,8 @@ int main(int argc, char **argv)
                 if (pfds[i].revents & (POLLIN )) {
                     std::cout << "POLLIN\n";
 					
-					// Check Timeout
-					if (getNowInSeconds() - connections[i].startTime >= CLIENT_HEADER_TIMEOUT) {
-						std::cout << "server: TIMEOUT for client socket" << connections[i].fd << '\n';
-						disconnectClient(connections, pfds, i);
-						i--;
-						continue;
-					}
-
                     if (pfds[i].fd == listener)
-                        acceptClient(pfds, connections, listener, i);
+                        acceptClient(pfds, connections, listener);
                     else { 
 						int res = receiveClientRequest(connections[i]);
 						if (res == RECV_CLOSED) {

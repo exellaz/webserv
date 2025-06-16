@@ -35,7 +35,7 @@
 #define NGX_REQUEST_HEADER_TOO_LARGE -431
 #define HEADER_BUFFER_SIZE 1024 // defines the size of the buffer allocated 
 #define BODY_BUFFER_SIZE 8192
-#define CLIENT_HEADER_TIMEOUT 60 // in seconds
+#define CLIENT_HEADER_TIMEOUT 10 // in seconds
 #define MAX_BODY_SIZE 1048576
 #define HEADER_END "\r\n\r\n"
 
@@ -49,7 +49,7 @@ enum recvResult {
 // int setupListeningSocket(std::vector<struct pollfd>& pfds, Config& config);
 int setupListeningSocket(std::vector<struct pollfd>& pfds, std::vector<Connection>& connections, Config& config);
 // CONNECTIONS 
-void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Connection>& connections, int listener, int index);
+void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Connection>& connections, int listener);
 
 // Read Request Utils
 /*int readFromSocket(int fd, std::string& buffer, size_t bufferSize);*/

@@ -34,6 +34,7 @@ int readByContentLength(Connection &conn, std::string& bodyStr)
 		ret = readFromSocket(conn);
 		if (ret <= 0)
 			return ret; // RECV_AGAIN or RECV_CLOSED or RECV_ERROR
+		conn.startTime = getNowInSeconds();
 		bytesRead += ret;
 	}
 	
