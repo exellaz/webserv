@@ -22,7 +22,11 @@ const std::map<std::string, std::string>& HttpRequest::getHeaders() const
 
 const std::string& HttpRequest::getHeader(const std::string& name) const
 {
-    return _headers.at(name);
+    static const std::string empty;
+    std::map<std::string, std::string>::const_iterator it = _headers.find(name);
+    if (it != _headers.end())
+        return it->second;
+    return empty;
 }
 
 const std::string& HttpRequest::getBody() const

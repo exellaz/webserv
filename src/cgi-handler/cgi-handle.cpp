@@ -1,6 +1,6 @@
 #include "../../include/Cgi.hpp"
 
-static std::map<std::string, std::string> initEnv(HttpRequest request);
+static std::map<std::string, std::string> initEnv(HttpRequest &request);
 static std::string readFromFd(int fd);
 static char **setEnvStrToEnvp(std::map<std::string, std::string> &env_vars,
 										std::vector<std::string> &env_str);
@@ -58,13 +58,13 @@ std::string Cgi::executeCgi(HttpRequest &request)
 
 ////////////////////////////////////////////// HELPER FUNCTIONS /////////////////////////////////////////////////////////////
 
-static std::map<std::string, std::string> initEnv(HttpRequest request)
+static std::map<std::string, std::string> initEnv(HttpRequest &request)
 {
 	std::map<std::string, std::string> env_vars;
 
 	//assign method, url, version, headers and body to env
 	env_vars["REQUEST_METHOD"] = request.getMethod(); //request method (GET, POST, DELETE, etc.)
-	env_vars["QUERY_STRING"] = request.getBody(); //body as query string (query string)
+	env_vars["QUERY_STRING"] = "";
 	env_vars["CONTENT_TYPE"] = request.getHeader("Content-Type"); // script body type
 	env_vars["CONTENT_LENGTH"] = request.getHeader("Content-Length"); // script body length
 	env_vars["REQUEST_URI"] = request.getURI(); //request url (location url)
@@ -78,7 +78,7 @@ static std::map<std::string, std::string> initEnv(HttpRequest request)
 /**
  * @brief read from file descriptor
  * @param fd file descriptor
- * @return string read from file descriptor
+ * @return string read from file descriptorx
 */
 static std::string readFromFd(int fd)
 {

@@ -69,6 +69,24 @@ int receiveClientRequest(Connection &connection, std::vector<Config>& configs)
     Config serverConfig = getServerConfigByPort(configs, choosePort);
     Location location = serverConfig.getLocationPath(request.getURI());
 
+    if (!location.cgi_path.empty())
+    {
+    	std::cout << "CGI found\n"; ////debug
+    	Cgi	cgi;
+    	std::string res =cgiOutputToHttpResponse(cgi.executeCgi(request)); //? handle by response
+    	if (res.empty())
+    	{
+    		std::string error = "HTTP/1.1 500 Internal Server Error\r\n\r\nCGI execution failed"; //! error
+    		send(connection.fd, error.c_str(), error.size(), 0);
+    	}
+    	else
+    	{
+    		std::cout << "---------- CGI Output ----------\n" << BLUE << res << RESET << std::endl;
+    		send(connection.fd, res.c_str(), res.size(), 0);
+    	}
+    }
+
+
     // parseRequestHeader();
     if (response.getStatus() == OK && request.getMethod() == "GET")
     {
@@ -83,6 +101,11 @@ int receiveClientRequest(Connection &connection, std::vector<Config>& configs)
         	// Method not allowed check
         	if (serveStaticFile(httpPath, connection.fd) == false)
         		return 1;
+        }
+        else if (location.autoIndex == true && S_ISDIR(info.st_mode) == true)
+        {
+            if (serveAutoIndex(httpPath, request.getURI(), connection.fd) == false)
+                return 1;
         }
     }
 
