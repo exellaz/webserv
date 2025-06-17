@@ -1,15 +1,42 @@
 #include "http-request.h"
 
-bool HttpRequest::parseRequestLine(const std::string& line)
+bool HttpRequest::parseRequestLine(const std::string& headerStr, HttpResponse& response)
 {
-    std::istringstream lineStream(line);
+    std::istringstream stream(headerStr);
+    std::string line;
 
-    if (!(lineStream >> _method >> _uri >> _version))
-        return false;
-    if (_method != "GET" && _method != "POST" && _method != "DELETE")
-        return false; // This should return status 405 Method not allowed
-    if (_version != "HTTP/1.1")
-        return false; // This should return status 400 Bad Request
+    while (std::getline(stream, line)) {
+        if (!line.empty() && line[line.size() - 1] == '\r') {
+            line.erase(line.size() - 1);
+        }
+
+        if (line.empty()) {
+            continue; // Skip empty prelude lines
+        }
+
+        // Now this is the actual request line
+        std::string extra;
+        std::istringstream lineStream(line);
+        if (!(lineStream >> _method >> _uri >> _version)) {
+            response.setStatus(BAD_REQUEST);
+            throw std::logic_error("Bad request line format");
+        }
+
+        if (_method != "GET" && _method != "POST" && _method != "DELETE") {
+            response.setStatus(METHOD_NOT_ALLOWED);
+            throw std::logic_error("Method not allowed");
+        }
+
+        if (_version != "HTTP/1.1") {
+            response.setStatus(VERSION_NOT_SUPPORTED);
+            throw std::logic_error("Unsupported HTTP version");
+        }
+        return true;
+    }
+
+    // If we never found a non-empty line
+    response.setStatus(BAD_REQUEST);
+    throw std::logic_error("Missing request line");
     return true;
 }
 
@@ -17,21 +44,42 @@ bool HttpRequest::parseHeaderLines(const std::string& str, HttpResponse& respons
 {
     std::istringstream stream(str);
     std::string line;
-    while (std::getline(stream, line) && line != "\r") {
-        if (!line.empty() && line[line.length() - 1] == '\r') {
-            line = line.substr(0, line.length() - 1);
-        }
+    while (std::getline(stream, line)) {
+        if (!line.empty() && line[line.size() - 1] == '\r')
+            line.erase(line.size() - 1);
+        if (line.empty())
+            continue; // Skip empty prelude lines
+
         size_t colon = line.find(':');
         if (colon != std::string::npos) {
-            std::string key = line.substr(0, colon);
-            if ((_method == "GET" || _method == "DELETE") && (key == "Content-Length" || key == "Transfer-Encoding"))
+            if (line[colon - 1] == ' ') {
                 response.setStatus(BAD_REQUEST);
+                throw std::logic_error("Whitespace before colon");
+            }
+            std::string key = line.substr(0, colon);
+            // if ((_method == "GET" || _method == "DELETE") && (key == "Content-Length" || key == "Transfer-Encoding")) {
+            //     response.setStatus(BAD_REQUEST);
+            //     throw std::logic_error("Bad request");
+            // }
             std::string value = line.substr(colon + 1);
             while (!value.empty() && value[0] == ' ') {
                 value = value.substr(1);
             }
+            if (_headers.count(key)) {
+                response.setStatus(BAD_REQUEST);
+                throw std::logic_error("Duplicate header");
+            }
             _headers[key] = value;
         }
+    }
+
+    for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); ++it) {
+    			std::cout << "Header: [" << it->first << "] = [" << it->second << "]\n";
+			}
+
+    if (_headers.find("Host") == _headers.end()) {
+        response.setStatus(BAD_REQUEST);
+        throw std::logic_error("Missing Host header");
     }
     return true;
 }
@@ -55,6 +103,15 @@ bool HttpRequest::parseRequestBody(const std::string& str)
         _body = str.substr(bodyStart, toCopy);
     }
     return true;
+}
+
+void HttpRequest::clearRequest()
+{
+    _method.clear();
+    _uri.clear();
+    _version.clear();
+    _headers.clear();
+    _body.clear();
 }
 
 std::ostream& operator<<(std::ostream &stream, const HttpRequest& src)

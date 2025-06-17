@@ -7,7 +7,7 @@ static int readFromSocket(Connection &connection)
 
 	ssize_t n = recv(connection.fd, buf, HEADER_BUFFER_SIZE, 0);
 	std::cout << "n: " << n << '\n';
-	
+
     if (n == 0) {
 		std::cout << "RECV_CLOSED\n";
 		return RECV_CLOSED;
@@ -33,13 +33,14 @@ int readRequestHeader(Connection &conn, std::string& headerStr)
 
 		ret = readFromSocket(conn);
 		if (ret > 0) {
+			conn.startTime = getNowInSeconds(); // reset timer
 			found = conn.getBuffer().find(HEADER_END);
 			if (found != std::string::npos)
 				break;
-			else 
+			else
 				continue;
 		}
-		else 
+		else
 			return ret; // RECV_AGAIN or RECV_CLOSED or RECV_ERROR
 	}
 
@@ -63,12 +64,12 @@ int readRequestHeader(Connection &conn, std::string& headerStr)
 		conn.setBuffer(buffer.substr(found + 4));
 	}
 
-	std::cout << "\n===== Header String: =====\n";
-	std::cout << headerStr << '\n';
-	std::cout << "==========================\n\n";
-	std::cout << "----Leftover in Buffer: ----\n";
-	std::cout << buffer << '\n';
-	std::cout << "----------------------------\n";
+	// std::cout << "\n===== Header String: =====\n";
+	// std::cout << headerStr << '\n';
+	// std::cout << "==========================\n\n";
+	// std::cout << "----Leftover in Buffer: ----\n";
+	// std::cout << buffer << '\n';
+	// std::cout << "----------------------------\n";
 	return ret;
 }
 
