@@ -6,7 +6,7 @@
 /*   By: welow <welow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/29 15:29:35 by welow             #+#    #+#             */
-/*   Updated: 2025/06/17 16:39:36 by welow            ###   ########.fr       */
+/*   Updated: 2025/06/17 16:52:18 by welow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,10 +31,10 @@ class Config
         std::string                 _serverName;     // server name
         std::string                 _root;  // root directory
         std::vector<std::string>    _allowMethods;   // allowed method type (GET, POST)
+        int                         _clientMaxSize;  // maximum client request size
         int                         _clientBodyBufferSize; //client body buffer size
         int                         _clientHeaderBufferSize; //client header buffer size
         int                         _clientTimeout; //size of buffer for large client header (eg: user agent, cookies)
-        int                         _clientMaxSize;  // maximum client request size
         std::map<int, std::string>  _errorPage;      // error pages(error code to file path)
         std::map<std::string, Location>	_location;       // location paths to Location obje
     public:
