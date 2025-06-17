@@ -33,7 +33,7 @@ int readRequestHeader(Connection &conn, std::string& headerStr)
 
 		ret = readFromSocket(conn);
 		if (ret > 0) {
-			std::cout << "Buff: (" << conn.getBuffer() << ")\n\n";
+			conn.startTime = getNowInSeconds(); // reset timer
 			found = conn.getBuffer().find(HEADER_END);
 			if (found != std::string::npos)
 				break;

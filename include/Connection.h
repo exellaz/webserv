@@ -5,6 +5,8 @@
 #include <string>
 #include "http-request.h"
 #include "http-response.h"
+#include <iostream>
+#include <sys/time.h>
 
 enum readBodyMethod {
 	CONTENT_LENGTH,
@@ -20,7 +22,7 @@ enum connectionType {
 class Connection {
 public:
 	// Constructor
-	Connection(int index, int fd);
+	Connection(int fd, time_t startTime);
 	// Copy Constructor
 	Connection(const Connection& other);
 	// Copy Assignment Operator
@@ -28,8 +30,8 @@ public:
 	// Destructor
 	~Connection();
 
-	const int index;
-	const int fd;
+	int fd;
+	time_t startTime; // Timeout
 	enum connectionType connType;
 	enum readBodyMethod readBodyMethod;
 	size_t contentLength;

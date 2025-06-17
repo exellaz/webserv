@@ -1,7 +1,7 @@
 #include "../../include/sockets-polling.h"
 #include "../../include/http-request.h"
 
-void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Connection>& connections, int listener, int index)
+void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Connection>& connections, int listener)
 {
 	// If listener is ready to read, handle new connection
 	struct sockaddr_storage remoteAddr; // Client address
@@ -21,7 +21,7 @@ void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Connection>& con
 	// send(newFd, hello, strlen(hello), 0);
 
 	addToPfds(pfds, newFd);
-	connections.push_back(Connection(index, newFd));
+	connections.push_back(Connection(newFd, getNowInSeconds()));
 
 	char remoteIp[INET6_ADDRSTRLEN];
 	printf("server: new connection from %s on "

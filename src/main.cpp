@@ -66,11 +66,18 @@ int main(int argc, char **argv)
         while(1) {
 
             std::cout << CYAN << "\n+++++++ Waiting for new connection ++++++++" << RESET << "\n\n";
+
+			// TODO: calculate nearest Timeout among all connections, assign to poll()
+
             // wait until 1 or more fds become ready for reading (POLLIN) or other events.
-            int pollCount = poll(&pfds[0], pfds.size(), -1);
+			int nearestTimeout = getNearestUpcomingTimeout(connections);
+            int pollCount = poll(&pfds[0], pfds.size(), nearestTimeout);
             if (pollCount == -1) {
                 throw PollErrorException();
             }
+
+			disconnectTimedOutClients(connections, pfds);
+
             // Run through the existing connections looking for data to read
             for(size_t i = 0; i < pfds.size(); i++) {
                 // Check if socket is ready to read
@@ -78,17 +85,18 @@ int main(int argc, char **argv)
                     std::cout << "POLLIN\n";
 
                     if (pfds[i].fd == listener)
-                        acceptClient(pfds, connections, listener, i);
+                        acceptClient(pfds, connections, listener);
                     else {
-                        int res = receiveClientRequest(connections[i]);
-                        if (res == RECV_CLOSED) {
-                            disconnectClient(connections, pfds, i);
-                            i--;
-                            continue;
-                        }
-                        // connections[i].isResponseReady = true; // HARDCODED
-                        if (connections[i].isResponseReady)
-                            pfds[i].events |= POLLOUT;
+						int res = receiveClientRequest(connections[i]);
+						if (res == RECV_CLOSED) {
+							std::cout << "server: socket " << pfds[i].fd << " hung up\n";
+							disconnectClient(connections, pfds, i);
+							i--;
+							continue;
+						}
+						// connections[i].isResponseReady = true; // HARDCODED
+						if (connections[i].isResponseReady)
+							pfds[i].events |= POLLOUT;
                     }
                 }
                 else if (pfds[i].revents & POLLOUT) {

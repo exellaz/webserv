@@ -30,11 +30,11 @@ int readByContentLength(Connection &conn, std::string& bodyStr)
 	int ret;
 
 	size_t contentLength = std::strtol(conn.request.getHeader("Content-Length").c_str(), NULL, 10); // HARDCODED
-	// size_t contentLength = 11;
 	while (bytesRead < contentLength) {
 		ret = readFromSocket(conn);
 		if (ret <= 0)
 			return ret; // RECV_AGAIN or RECV_CLOSED or RECV_ERROR
+		conn.startTime = getNowInSeconds(); // reset timer
 		bytesRead += ret;
 	}
 

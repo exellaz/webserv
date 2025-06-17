@@ -33,11 +33,17 @@ void addToPfds(std::vector<struct pollfd>& pfds, int newFd)
 
 void disconnectClient(std::vector<Connection>& connections, std::vector<struct pollfd>& pfds, int index)
 {
-	std::cout << "server: socket " << pfds[index].fd <<  " hung up\n";
+	std::cout << RED << "server: disconnected client socket " << connections[index].fd << "\n" << RESET << '\n';
+	close(connections[index].fd);
 
 	connections.erase(connections.begin() + index);
 	pfds.erase(pfds.begin() + index);
-	close(pfds[index].fd);
-	
-	std::cout << RED << "server: disconnected client\n" << RESET << '\n';
+}
+
+
+
+time_t getNowInSeconds() {
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    return tv.tv_sec;
 }
