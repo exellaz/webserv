@@ -82,12 +82,12 @@ int getNearestUpcomingTimeout(std::vector<Connection>& connections);
 
 // utils2
 std::string resolveAliasPath(const std::string &url, const Location &location);
-std::string readFileToString (std::ifstream &file);
+//std::string readFileToString (std::ifstream &file);
 Config getServerConfigByPort(const std::vector<Config> &configs, const std::string port);
 std::string resolveHttpPath(const HttpRequest &request, Config &config);
-bool serveStaticFile(const std::string &httpPath, int clientFd);
-bool serveAutoIndex(const std::string &httpPath, const std::string &url, int clientFd);
-
+//bool serveStaticFile(const std::string &httpPath, int clientFd);
+//bool serveAutoIndex(const std::string &httpPath, const std::string &url, int clientFd);
+std::string readDirectorytoString(const std::string &directoryPath, const HttpRequest &request);
 
 class BadRequestException : public std::exception {
 public:
