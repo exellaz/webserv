@@ -14,6 +14,12 @@ HttpResponse::HttpResponse(StatusCode code)
     _headers["Server"] = "Webserv/1.0";
 }
 
+HttpResponse::HttpResponse()
+    : _status(OK)
+{
+    _headers["Server"] = "Webserv/1.0";
+}
+
 std::string HttpResponse::reasonPhrase(StatusCode code)
 {
     switch (code) {
@@ -139,7 +145,7 @@ void HttpResponse::handleGetRequest(const HttpRequest& request, const std::strin
     std::string fileContents = readFileToString(fullPath);
     if (fileContents.empty()) {
         // If file not found or not readable -> 404 Not Found
-        std::string body = "<html><body><h1>404 Not Found</h1></body></html>";
+        std::string body = "<html><body><h1>404 Not Found</h1></body></html>\n";
         setStatus(NOT_FOUND);
         setHeader("Content-Type", "text/html");
         setBody(body);
@@ -156,6 +162,14 @@ void HttpResponse::handleGetRequest(const HttpRequest& request, const std::strin
 // {
 
 // }
+
+void HttpResponse::clearResponse()
+{
+    _status = OK;
+    _headers.clear();
+    _headers["Server"] = "Webserv/1.0";
+    _body.clear();
+}
 
 std::string HttpResponse::getHttpDate()
 {
