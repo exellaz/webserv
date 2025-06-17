@@ -8,6 +8,9 @@
 #include <unistd.h>
 #include <ctime>
 
+#include "sockets-polling.h"
+#include "Configuration.hpp"
+
 HttpResponse::HttpResponse(StatusCode code)
     : _status(code)
 {
@@ -89,6 +92,7 @@ std::string mapUriToPath(const std::string& docRoot, const std::string& uri) {
     if (safeUri == "/")
         safeUri = "/index.html";
 
+    std::cout << "Mapping URI: " << uri << " to path: " << docRoot + safeUri << "\n";
     return docRoot + safeUri;
 }
 
@@ -136,10 +140,11 @@ std::string getMimeType(const std::string& path)
     return "application/octet-stream";
 }
 
-void HttpResponse::handleGetRequest(const HttpRequest& request, const std::string& docRoot)
+void HttpResponse::handleGetRequest(const HttpRequest& request, Config &serverConfig)
 {
     // Map URI to filesystem path
-    std::string fullPath = mapUriToPath(docRoot, request.getURI());
+    //std::string fullPath = mapUriToPath(docRoot, request.getURI());
+    std::string fullPath = resolveHttpPath(request, serverConfig);
 
     // Read from file
     std::string fileContents = readFileToString(fullPath);

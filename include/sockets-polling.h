@@ -16,10 +16,16 @@
 #include <sstream>
 #include <fcntl.h>
 #include <vector>
+#include <dirent.h> //for opendir, readdir, closedir
+#include <sys/stat.h> // for stat
+#include <algorithm> // for find
 #include "./Configuration.hpp"
+#include "http-request.h"
 #include "./Buffer.h"
 #include "Connection.h"
 #include "http-response.h"
+#include "Cgi.hpp"
+
 
 #define RESET "\033[0m"
 #define BOLD "\033[1m"
@@ -27,6 +33,7 @@
 #define GREEN "\033[0;32m"
 #define RED "\033[0;31m"
 #define GREY "\033[90m"
+#define BLUE "\033[0;34m"
 
 #define PORT "8080"
 
@@ -35,6 +42,8 @@
 #define NGX_ERROR -2
 #define NGX_REQUEST_HEADER_TOO_LARGE -431
 #define HEADER_BUFFER_SIZE 1024 // defines the size of the buffer allocated
+#define LARGE_HEADER_BUFFER_SIZE 8192
+#define MAX_LARGE_BUFFERS 4
 #define BODY_BUFFER_SIZE 8192
 #define CLIENT_TIMEOUT 60 // in seconds
 #define MAX_BODY_SIZE 1048576
@@ -57,7 +66,7 @@ void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Connection>& con
 int readRequestHeader(Connection &connection, std::string& headerStr);
 // void readRequestBody(int fd, std::string& bodyStr, std::string& buffer, enum reqBodyType type);
 int readRequestBody(Connection &conn, std::string& bodyStr);
-int receiveClientRequest(Connection &connection);
+int receiveClientRequest(Connection &connection, std::vector<Config>& configs);
 
 // Timeout
 void disconnectTimedOutClients(std::vector<Connection>& connections, std::vector<struct pollfd>& pfds);
@@ -66,10 +75,19 @@ void disconnectTimedOutClients(std::vector<Connection>& connections, std::vector
 void *getInAddr(struct sockaddr *sa);
 int  set_nonblocking(int fd);
 void addToPfds(std::vector<struct pollfd>& pfds, int newFd);
-void delFromPfds(std::vector<struct pollfd>& pfds, int i);
+//void delFromPfds(std::vector<struct pollfd>& pfds, int i);
 void disconnectClient(std::vector<Connection>& connections, std::vector<struct pollfd>& pfds, int index);
 time_t getNowInSeconds();
 int getNearestUpcomingTimeout(std::vector<Connection>& connections);
+
+// utils2
+std::string resolveAliasPath(const std::string &url, const Location &location);
+std::string readFileToString (std::ifstream &file);
+Config getServerConfigByPort(const std::vector<Config> &configs, const std::string port);
+std::string resolveHttpPath(const HttpRequest &request, Config &config);
+bool serveStaticFile(const std::string &httpPath, int clientFd);
+bool serveAutoIndex(const std::string &httpPath, const std::string &url, int clientFd);
+
 
 class BadRequestException : public std::exception {
 public:

@@ -2,6 +2,7 @@
 #include "../include/Configuration.hpp"
 #include "../include/http-request.h"
 #include "../include/http-response.h"
+#include <algorithm>
 
 void sendResponseToClient(int fd, HttpResponse& response)
 {
@@ -55,13 +56,23 @@ int main(int argc, char **argv)
         configFile = argv[1];
     }
 
-    try { std::ifstream conf(configFile.c_str()); Config config(conf);
+	try {
+		std::vector<Config> configs = parseAllServers(configFile);
 
         std::vector<struct pollfd> pfds;
-        std::vector<Connection> connections;
+	    std::vector<Connection> connections;
+		std::vector<int> listeners;
+		std::map<int, std::string> listenerToConfig;
 
         // listener Socket Fd
-        int listener = setupListeningSocket(pfds, connections, config);
+        //int listener = setupListeningSocket(pfds, connections, configs);
+		for (size_t i = 0; i < configs.size(); ++i)
+		{
+			if (configs[i].getPort().empty() || configs[i].getHost().empty())
+				continue;
+			int listener = setupListeningSocket(pfds, connections, configs[i]);
+			listeners.push_back(listener);
+		}
 
         while(1) {
 
@@ -84,10 +95,12 @@ int main(int argc, char **argv)
                 if (pfds[i].revents & (POLLIN )) {
                     std::cout << "POLLIN\n";
 
-                    if (pfds[i].fd == listener)
-                        acceptClient(pfds, connections, listener);
+					//look for multiple listeners
+                    if (find(listeners.begin(), listeners.end(), pfds[i].fd) != listeners.end())
+                        acceptClient(pfds, connections, pfds[i].fd);
                     else {
-						int res = receiveClientRequest(connections[i]);
+						//int res = receiveClientRequest(connections[i]);
+						int res = receiveClientRequest(connections[i], configs); //pass multiple configs
 						if (res == RECV_CLOSED) {
 							std::cout << "server: socket " << pfds[i].fd << " hung up\n";
 							disconnectClient(connections, pfds, i);

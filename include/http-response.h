@@ -4,6 +4,11 @@
 # include <iostream>
 # include <map>
 
+//#include "sockets-polling.h"
+//#include "Configuration.hpp"
+
+class Config;
+
 class HttpRequest;
 
 namespace HttpCodes {
@@ -35,7 +40,7 @@ class HttpResponse
         std::string reasonPhrase(StatusCode code);
         std::string buildStatusLine();
         void printResponseHeaders();
-        void handleGetRequest(const HttpRequest& request, const std::string& docRoot);
+        void handleGetRequest(const HttpRequest& request, Config &serverConfig);
         void handlePostRequest(const HttpRequest& request);
         void clearResponse();
 

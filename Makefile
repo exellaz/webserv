@@ -25,7 +25,10 @@ SRCS_FIL = \
 		config-parser/Configuration.cpp \
 		http-request/http-request.cpp \
 		http-request/utils.cpp \
-		http-response/http-response.cpp
+		sockets-polling/utils2.cpp \
+		http-response/http-response.cpp \
+		cgi-handler/cgi-handle.cpp \
+		cgi-handler/cgi-response.cpp
 
 SRCS = $(addprefix $(SRCDIR), $(SRCS_FIL))
 
