@@ -6,7 +6,7 @@ static char **setEnvStrToEnvp(std::map<std::string, std::string> &env_vars,
 										std::vector<std::string> &env_str);
 
 
-Cgi::Cgi() : pid(-1), argv(NULL), envp(NULL)
+Cgi::Cgi() : status(0), pid(-1), argv(NULL), envp(NULL)
 {
 	pipefd[0] = -1;
 	pipefd[1] = -1;
@@ -14,7 +14,7 @@ Cgi::Cgi() : pid(-1), argv(NULL), envp(NULL)
 	env_vars.clear();
 }
 
-std::string Cgi::executeCgi(HttpRequest &request)
+std::string Cgi::executeCgi(HttpRequest &request, HttpResponse &response)
 {
 	Cgi cgi;
 
@@ -23,10 +23,22 @@ std::string Cgi::executeCgi(HttpRequest &request)
 	if (cgi.script_path.find(".cgi") == std::string::npos &&
 		cgi.script_path.find(".py") == std::string::npos &&
 		cgi.script_path.find(".js") == std::string::npos)
-		return "Status: 403 Forbiden\r\nContent-Type: text/plain\r\n\r\n403 Forbiden: Invalid CGI script type"; //! error
+	{
+		//return "Status: 403 Forbiden\r\nContent-Type: text/plain\r\n\r\n403 Forbiden: Invalid CGI script type"; //! error
+		response.setStatus(FORBIDDEN);
+		response.setHeader("Content-Type", "text/plain");
+		response.setBody("403 Forbiden: Invalid CGI script type");
+		return response.toString(); //! error
+	}
 	std::ifstream scriptFile(cgi.script_path.c_str());
 	if (!scriptFile.is_open())
-		return "Status: 403 Forbiden\r\nContent-Type: text/plain\r\n\r\n403 Forbiden: CGI script not found"; //! error
+	{
+		//return "Status: 403 Forbiden\r\nContent-Type: text/plain\r\n\r\n403 Forbiden: CGI script not found"; //! error
+		response.setStatus(FORBIDDEN);
+		response.setHeader("Content-Type", "text/plain");
+		response.setBody("403 Forbiden: CGI script not found");
+		return response.toString(); //! error
+	}
 	if (pipe(cgi.pipefd) == -1)
 		throw std::runtime_error("pipe error");
 	cgi.pid = fork();
@@ -50,10 +62,14 @@ std::string Cgi::executeCgi(HttpRequest &request)
 		if (request.getMethod() == "POST" || request.getMethod() == "DELETE")
 			write(cgi.pipefd[1], request.getBody().c_str(), request.getBody().size());
 		close(cgi.pipefd[1]);
-		waitpid(cgi.pid, NULL, 0);
-		return (readFromFd(cgi.pipefd[0]));
+		waitpid(cgi.pid, &status, 0);
+		std::string output = readFromFd(cgi.pipefd[0]);
+		//if exit child is not exited normally || exit code is not 0 || output is empty
+		if (!WIFEXITED(status) || WEXITSTATUS(status) != 0 || output.empty())
+			return "";
+		return (output);
 	}
-	return NULL;
+	return "";
 }
 
 ////////////////////////////////////////////// HELPER FUNCTIONS /////////////////////////////////////////////////////////////

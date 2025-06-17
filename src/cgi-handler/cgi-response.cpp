@@ -11,36 +11,37 @@ static std::map<std::string, std::string> parseHeader(std::istringstream &cgi_ou
  * @param env_vars environment variables
  * @return http response string
 */
-std::string cgiOutputToHttpResponse(const std::string &output)
+void handleCgiRequest(const std::string &output, HttpResponse &response)
 {
 	std::istringstream cgi_output(output);
 	std::string line;
 	std::map<std::string, std::string> headers;
 	std::string body;
-	std::string status_line = "200 OK\r\n";
+	std::string status_line;
 
 	headers = parseHeader(cgi_output, line, status_line);
 	body = parseBody(cgi_output, line);
 
-	//set the output response
-	std::ostringstream response;
 
-	//add status line header
-	response << "HTTP/1.1 " << status_line;
-
-	//add content-type header
-	if (headers.find("Content-Type") != headers.end())
-		response << "Content-Type: " << headers["Content-Type"] << "\r\n";
+	//set status
+	if (!status_line.empty())
+	{
+		int code = std::atoi(status_line.c_str());
+		response.setStatus(static_cast<StatusCode>(code));
+	}
 	else
-		return "HTTP/1.1 400 Bad request\r\nContent-Type: text/plain\r\n\r\nMissing Content-Type header";
-	response << "Content-Length: " << body.size() << "\r\n"; //add content-length header
-	response << "\r\n"; //add end of headers
-	response << body; //add body
+		response.setStatus(OK);
 
-	return response.str();
+	//set headers
+	for (std::map<std::string, std::string>::const_iterator it = headers.begin();
+		 it != headers.end(); ++it)
+		response.setHeader(it->first, it->second);
+
+	//set body
+	response.setBody(body);
 }
 
-//==================================== HELPER FUNCTION ==============================================//
+/////////////////////////////////////// HELPER FUNCTION ///////////////////////////////////////////////////
 
 /**
  * @brief Parse CGI output to extract headers
@@ -68,7 +69,7 @@ static std::map<std::string, std::string> parseHeader(std::istringstream &cgi_ou
 			while (!value.empty() && value[0] == ' ') //trim the leading space
 				value.erase(0, 1);
 			if (key == "Status") //check for status
-				status_line = value + "\r\n";
+				status_line = value;
 			else
 				headers[key] = value;
 		}
