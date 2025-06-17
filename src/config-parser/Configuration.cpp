@@ -6,7 +6,7 @@
 /*   By: welow <welow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/29 15:31:13 by welow             #+#    #+#             */
-/*   Updated: 2025/06/17 16:41:26 by welow            ###   ########.fr       */
+/*   Updated: 2025/06/17 16:51:35 by welow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -346,8 +346,8 @@ std::ostream &operator<<(std::ostream &cout, const Config &config)
 		cout << "client_body_buffer_size  : [" << config.getClientBodyBufferSize() << "]\n";
 	if (config.getClientHeaderBufferSize() != 0)
 		cout << "client_header_buffer_size: [" << config.getClientHeaderBufferSize() << "]\n";
-	if (config.getLargeClientHeaderBufferNumber() != 0)
-		cout << "large_client_header_buffers: [" << config.getLargeClientHeaderBufferNumber() << "] [" << config.getLargeClientHeaderBufferSize() << "]\n\n";
+	if (config.getClientTimeout() != 0)
+		cout << "client_timeout: [" << config.getClientTimeout() << "]\n\n";
 
 	for (std::map<int, std::string>::const_iterator it = config.getErrorPage().begin(); it != config.getErrorPage().end(); ++it)
 	{
