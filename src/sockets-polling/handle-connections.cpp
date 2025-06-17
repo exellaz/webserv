@@ -47,8 +47,6 @@ int receiveClientRequest(Connection &connection)
 	int ret = 0;
 	if (request.getMethod().empty()) {
 		ret = readRequestHeader(connection, headerStr);
-		std::cout << "headerStr\n" << headerStr << "\n\n";
-		std::cout << "Method is empty\n\n";
 
 		if (ret < 0)
 			return ret;
@@ -68,18 +66,14 @@ int receiveClientRequest(Connection &connection)
 	if (response.getStatus() == OK && request.getMethod() == "GET")
 		response.handleGetRequest(request, ".");
 
-
 	// TODO: isBodyPresent()   -> check Content-Length, Transfer-Encoding, request method
 
 	if (request.getHeaders().find("Content-Length") != request.getHeaders().end()) {
 		int ret2 = readRequestBody(connection, bodyStr);
 		if (ret2 < 0)
 			return ret2;
-		// if (bodyStr.size() < static_cast<size_t>(strtol(request.getHeader("Content-Length").c_str(), NULL, 10)))
-		// 	return ;
 		request.setBody(bodyStr);
 	}
-	// std::cout << "bodyStr\n" << bodyStr << "\n\n";
 	std::cout << request;
 	connection.isResponseReady = true;
 	// parseRequestBody();
