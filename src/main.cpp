@@ -41,7 +41,7 @@ int main(int argc, char **argv)
     if (argc < 2) {
         std::cout << "No config file found. Using default config file.\n";
         (void)argv;
-        configFile = "./src/config-parser/server.conf";
+        configFile = "./conf/default.conf";
     }
     else if (argc > 2) {
         std::cout << "Error: Expected 1 config file only.\n";
@@ -55,12 +55,12 @@ int main(int argc, char **argv)
 
         std::vector<struct pollfd> pfds;
 	    std::vector<Connection> connections;
-        
+
         // listener Socket Fd
         int listener = setupListeningSocket(pfds, connections, config);
 
         while(1) {
-            
+
             std::cout << CYAN << "\n+++++++ Waiting for new connection ++++++++" << RESET << "\n\n";
             // wait until 1 or more fds become ready for reading (POLLIN) or other events.
             int pollCount = poll(&pfds[0], pfds.size(), -1);
@@ -76,7 +76,7 @@ int main(int argc, char **argv)
 
                     if (pfds[i].fd == listener)
                         acceptClient(pfds, connections, listener, i);
-                    else { 
+                    else {
 						int res = receiveClientRequest(connections[i]);
 						if (res == RECV_CLOSED) {
 							disconnectClient(connections, pfds, i);
@@ -87,10 +87,10 @@ int main(int argc, char **argv)
 						if (connections[i].isResponseReady)
 							pfds[i].events |= POLLOUT;
                     }
-                } 
+                }
 				else if (pfds[i].revents & POLLOUT) {
 					std::cout << "POLLOUT\n";
-					
+
 					sendResponseToClient(connections[i].fd);
 
 					if (connections[i].connType == CLOSE) {
@@ -99,25 +99,25 @@ int main(int argc, char **argv)
 						continue;
 					}
 					pfds[i].events &= ~POLLOUT;
-				} 
+				}
 				else if (pfds[i].revents & POLLHUP) {
 					std::cout << "POLLHUP\n";
 					disconnectClient(connections, pfds, i);
 					i--;
-				} 
+				}
 				else if (pfds[i].revents & POLLERR) {
 					std::cout << "POLLERR\n";
 					disconnectClient(connections, pfds, i);
 					i--;
 				}
 
-            } 
-        } 
+            }
+        }
 	}
 	catch (const std::exception &e)
 	{
 		std::cerr << RED << "Error: " << RESET << e.what() << "\n";
 	}
-    
+
     return 0;
 }
