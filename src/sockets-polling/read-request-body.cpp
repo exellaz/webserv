@@ -6,7 +6,7 @@ static int readFromSocket(Connection &connection)
 
 	ssize_t n = recv(connection.fd, buf, BODY_BUFFER_SIZE, 0);
 	std::cout << "n: " << n << '\n';
-	
+
     if (n == 0) {
 		std::cout << "RECV_CLOSED\n";
 		return RECV_CLOSED;
@@ -28,8 +28,8 @@ int readByContentLength(Connection &conn, std::string& bodyStr)
 {
 	size_t bytesRead = conn.getBuffer().size();
 	int ret;
-	
-	size_t contentLength = 100; // HARDCODED
+
+	size_t contentLength = std::strtol(conn.request.getHeader("Content-Length").c_str(), NULL, 10); // HARDCODED
 	while (bytesRead < contentLength) {
 		ret = readFromSocket(conn);
 		if (ret <= 0)
@@ -37,7 +37,7 @@ int readByContentLength(Connection &conn, std::string& bodyStr)
 		conn.startTime = getNowInSeconds(); // reset timer
 		bytesRead += ret;
 	}
-	
+
 	if (bytesRead == contentLength) {
 		bodyStr = conn.getBuffer();
 		conn.clearBuffer();
@@ -50,7 +50,7 @@ int readByContentLength(Connection &conn, std::string& bodyStr)
 }
 int readRequestBody(Connection &conn, std::string& bodyStr)
 {
-	std::cout << GREY << "===== readRequestBody =====" << RESET << '\n';
+	// std::cout << GREY << "===== readRequestBody =====" << RESET << '\n';
 	int ret;
 	// if (type == CONTENT_LENGTH)
 		ret = readByContentLength(conn, bodyStr);
@@ -60,13 +60,13 @@ int readRequestBody(Connection &conn, std::string& bodyStr)
 	// else // NO_BODY
 	// 	return;
 	//
-	std::cout << "bodyStr size: " << bodyStr.size() << '\n';	
-	std::cout << "\n===== body String: =====\n";
-	std::cout << bodyStr << '\n';
-	std::cout << "==========================\n\n";
-	std::cout << "----Leftover in Buffer: ----\n";
-	std::cout << conn.getBuffer() << '\n';
-	std::cout << "----------------------------\n";
+	// std::cout << "bodyStr size: " << bodyStr.size() << '\n';
+	// std::cout << "\n===== body String: =====\n";
+	// std::cout << bodyStr << '\n';
+	// std::cout << "==========================\n\n";
+	// std::cout << "----Leftover in Buffer: ----\n";
+	// std::cout << conn.getBuffer() << '\n';
+	// std::cout << "----------------------------\n";
 
 	return ret;
 }

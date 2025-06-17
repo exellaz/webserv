@@ -19,6 +19,7 @@
 #include "./Configuration.hpp"
 #include "./Buffer.h"
 #include "Connection.h"
+#include "http-response.h"
 
 #define RESET "\033[0m"
 #define BOLD "\033[1m"
@@ -33,7 +34,7 @@
 #define NGX_OK 0
 #define NGX_ERROR -2
 #define NGX_REQUEST_HEADER_TOO_LARGE -431
-#define HEADER_BUFFER_SIZE 1024 // defines the size of the buffer allocated 
+#define HEADER_BUFFER_SIZE 1024 // defines the size of the buffer allocated
 #define BODY_BUFFER_SIZE 8192
 #define CLIENT_TIMEOUT 60 // in seconds
 #define MAX_BODY_SIZE 1048576
@@ -48,7 +49,7 @@ enum recvResult {
 // Setup Listening Socket
 // int setupListeningSocket(std::vector<struct pollfd>& pfds, Config& config);
 int setupListeningSocket(std::vector<struct pollfd>& pfds, std::vector<Connection>& connections, Config& config);
-// CONNECTIONS 
+// CONNECTIONS
 void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Connection>& connections, int listener);
 
 // Read Request Utils
@@ -72,7 +73,7 @@ int getNearestUpcomingTimeout(std::vector<Connection>& connections);
 
 class BadRequestException : public std::exception {
 public:
-	// 'throw()' specifies that func won't throw any exceptions 
+	// 'throw()' specifies that func won't throw any exceptions
 	const char* what() const throw() {
 		return "400: Bad Request";
 	}
@@ -81,7 +82,7 @@ public:
 
 class PollErrorException : public std::exception {
 public:
-	// 'throw()' specifies that func won't throw any exceptions 
+	// 'throw()' specifies that func won't throw any exceptions
 	const char* what() const throw() {
 		return "Poll error";
 	}

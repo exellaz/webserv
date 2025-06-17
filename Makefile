@@ -8,7 +8,7 @@ RED = \033[0;31m
 RESET = \033[0m
 ORANGE = \033[0;38;5;166m
 
-NAME = webserv 
+NAME = webserv
 
 # Source Files
 SRCDIR = src/
@@ -23,6 +23,9 @@ SRCS_FIL = \
 		sockets-polling/timeout.cpp \
 		\
 		config-parser/Configuration.cpp \
+		http-request/http-request.cpp \
+		http-request/utils.cpp \
+		http-response/http-response.cpp
 
 SRCS = $(addprefix $(SRCDIR), $(SRCS_FIL))
 
@@ -36,11 +39,11 @@ all: $(OBJDIR) $(NAME)
 $(OBJDIR):
 	@mkdir -p $(OBJDIR) $(addprefix $(OBJDIR), $(dir $(SRCDIR)))
 
-$(NAME): $(OBJS) 
+$(NAME): $(OBJS)
 	@$(CXX) $(CXXFLAGS) $(OBJS) -o $(NAME) && echo "$(GREEN)$(NAME) was created$(RESET)"
 
 
-$(OBJDIR)%.o: $(SRCDIR)%.c 
+$(OBJDIR)%.o: $(SRCDIR)%.c
 	@$(CXX) $(CXXFLAGS) -c $< -o $@ && echo "$(GREEN)object files were created$(RESET)"
 
 # Clean Up

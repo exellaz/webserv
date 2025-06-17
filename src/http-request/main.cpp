@@ -1,4 +1,4 @@
-#include "HttpRequest.h"
+#include "http-request.h"
 
 // Sample HTTP Request:
 // GET /index.html HTTP/1.1
@@ -14,13 +14,14 @@ int main()
     // const std::string str("GET /index.html HTTP/1.1\r\nHost: www.example.re\r\nUser-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.0; en-US; rv:1.1)\r\nAccept: text/html\r\nAccept-Language: en-US, en; q=0.5\r\nAccept-Encoding: gzip, deflate\r\n");
     const std::string str("POST /test HTTP/1.1\r\nHost: example.com\r\nContent-Type: application/x-www-form-urlencoded\r\nContent-Length: 27\r\n\r\nfield1=value1&field2=value2\r\n");
     HttpRequest request;
+    HttpResponse response(OK);
 
     if (!request.parseRequestLine(str)) {
         std::cout << "Invalid header\n";
         return 1;
     }
 
-    if (!request.parseHeaderLines(str)) {
+    if (!request.parseHeaderLines(str, response)) {
         std::cout << "Invalid header field\n";
         return 1;
     }
