@@ -15,6 +15,7 @@ bool HttpRequest::parseRequestLine(const std::string& headerStr, HttpResponse& r
         }
 
         // Now this is the actual request line
+        std::string extra;
         std::istringstream lineStream(line);
         if (!(lineStream >> _method >> _uri >> _version)) {
             response.setStatus(BAD_REQUEST);
@@ -43,21 +44,42 @@ bool HttpRequest::parseHeaderLines(const std::string& str, HttpResponse& respons
 {
     std::istringstream stream(str);
     std::string line;
-    while (std::getline(stream, line) && line != "\r") {
-        if (!line.empty() && line[line.length() - 1] == '\r') {
-            line = line.substr(0, line.length() - 1);
-        }
+    while (std::getline(stream, line)) {
+        if (!line.empty() && line[line.size() - 1] == '\r')
+            line.erase(line.size() - 1);
+        if (line.empty())
+            continue; // Skip empty prelude lines
+
         size_t colon = line.find(':');
         if (colon != std::string::npos) {
-            std::string key = line.substr(0, colon);
-            if ((_method == "GET" || _method == "DELETE") && (key == "Content-Length" || key == "Transfer-Encoding"))
+            if (line[colon - 1] == ' ') {
                 response.setStatus(BAD_REQUEST);
+                throw std::logic_error("Whitespace before colon");
+            }
+            std::string key = line.substr(0, colon);
+            // if ((_method == "GET" || _method == "DELETE") && (key == "Content-Length" || key == "Transfer-Encoding")) {
+            //     response.setStatus(BAD_REQUEST);
+            //     throw std::logic_error("Bad request");
+            // }
             std::string value = line.substr(colon + 1);
             while (!value.empty() && value[0] == ' ') {
                 value = value.substr(1);
             }
+            if (_headers.count(key)) {
+                response.setStatus(BAD_REQUEST);
+                throw std::logic_error("Duplicate header");
+            }
             _headers[key] = value;
         }
+    }
+
+    for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); ++it) {
+    			std::cout << "Header: [" << it->first << "] = [" << it->second << "]\n";
+			}
+
+    if (_headers.find("Host") == _headers.end()) {
+        response.setStatus(BAD_REQUEST);
+        throw std::logic_error("Missing Host header");
     }
     return true;
 }

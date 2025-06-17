@@ -95,7 +95,7 @@ int main(int argc, char **argv)
                     std::cout << "POLLOUT\n";
 
                     sendResponseToClient(connections[i].fd, connections[i].response);
-                    pfds[i].events |= POLLIN;
+                    // pfds[i].events |= POLLIN;
                     connections[i].isResponseReady = false;
                     connections[i].request.clearRequest();
                     connections[i].response.clearResponse();

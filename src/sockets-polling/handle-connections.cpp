@@ -44,32 +44,44 @@ int receiveClientRequest(Connection &connection)
 	HttpRequest& request = connection.request;
 	HttpResponse& response = connection.response;
 
-	int ret = readRequestHeader(connection, headerStr);
-	if (ret < 0)
-		return ret;
-	// parseRequestHeader();
-	try {
-		request.parseRequestLine(headerStr, response);
-		request.parseHeaderLines(headerStr, response);
-		request.setBody(bodyStr);
-	}
-	catch (std::exception &e) {
-		std::cerr << e.what();
-		connection.connType = CLOSE;
+	int ret = 0;
+	if (request.getMethod().empty()) {
+		ret = readRequestHeader(connection, headerStr);
+		std::cout << "headerStr\n" << headerStr << "\n\n";
+		std::cout << "Method is empty\n\n";
+
+		if (ret < 0)
+			return ret;
+
+		try {
+			request.parseRequestLine(headerStr, response);
+			request.parseHeaderLines(headerStr, response);
+
+		}
+		catch (std::exception &e) {
+			std::cerr << e.what() << "\n";
+			connection.connType = CLOSE;
+		}
 	}
 
+	// parseRequestHeader();
 	if (response.getStatus() == OK && request.getMethod() == "GET")
 		response.handleGetRequest(request, ".");
 
-	std::cout << request;
-	connection.isResponseReady = true;
 
 	// TODO: isBodyPresent()   -> check Content-Length, Transfer-Encoding, request method
-	// ret = readRequestBody(connection, bodyStr);
-	// if (ret < 0)
-	// 	return ret;
 
+	if (request.getHeaders().find("Content-Length") != request.getHeaders().end()) {
+		int ret2 = readRequestBody(connection, bodyStr);
+		if (ret2 < 0)
+			return ret2;
+		// if (bodyStr.size() < static_cast<size_t>(strtol(request.getHeader("Content-Length").c_str(), NULL, 10)))
+		// 	return ;
+		request.setBody(bodyStr);
+	}
+	// std::cout << "bodyStr\n" << bodyStr << "\n\n";
+	std::cout << request;
+	connection.isResponseReady = true;
 	// parseRequestBody();
 	return 0;
 }
-
