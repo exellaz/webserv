@@ -9,7 +9,7 @@ import sys
 print("Content-Type: text/plain\r\n")
 print()
 
-UPLOAD_DIR = "/home/welow/webserv-test/webserv/cgi-bin/storage"
+UPLOAD_DIR = "/home/welow/webserv/cgi-bin/storage"
 
 form = cgi.FieldStorage()
 if "file" not in form or not getattr(form["file"], "filename", None):

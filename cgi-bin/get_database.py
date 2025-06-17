@@ -4,7 +4,7 @@
 import json # call json functions to handle JSON data
 import os # call operating system functions to handle files and directories
 
-json_file = '/home/welow/webserv-test/webserv/cgi-bin/data.json' #data base
+json_file = '/home/welow/webserv/cgi-bin/data.json' #data base
 
 def load_message():
 	if not os.path.exists(json_file): # Check if the file exists

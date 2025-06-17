@@ -5,7 +5,7 @@ import sys # call shell commands and read input data
 import json # call json functions to handle JSON data
 import os # call operating system functions to handle files and directories
 
-json_file = '/home/welow/webserv-test/webserv/cgi-bin/data.json' #data base
+json_file = '/home/welow/webserv/cgi-bin/data.json' #data base
 
 def save_message(message):
 	# Load existing messages or start a new list

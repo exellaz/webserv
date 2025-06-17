@@ -2,7 +2,7 @@
 import os
 import json
 
-UPLOAD_DIR = "/home/welow/webserv-test/webserv/cgi-bin/storage"
+UPLOAD_DIR = "/home/welow/webserv/cgi-bin/storage"
 
 print("Content-Type: application/json\r\n")
 

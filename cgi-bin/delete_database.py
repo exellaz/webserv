@@ -3,7 +3,7 @@ import os
 import json
 import sys
 
-json_file = '/home/welow/webserv-test/webserv/cgi-bin/data.json'
+json_file = '/home/welow/webserv/cgi-bin/data.json'
 
 # Read input data
 content_length_str = os.environ.get('CONTENT_LENGTH', '0')

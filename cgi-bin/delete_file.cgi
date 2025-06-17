@@ -6,7 +6,7 @@ import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning) # ignore deprecation warnings
 import cgi
 
-UPLOAD_DIR = "/home/welow/webserv-test/webserv/cgi-bin/storage"
+UPLOAD_DIR = "/home/welow/webserv/cgi-bin/storage"
 
 print("Content-Type: application/json\r\n")
 
