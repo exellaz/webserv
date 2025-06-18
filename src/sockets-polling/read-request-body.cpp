@@ -16,8 +16,7 @@ static int readFromSocket(Connection &connection)
 		return RECV_AGAIN;
     }
 
-	buf[n] = '\0';
-	connection.appendToBuffer(buf);
+	connection.appendToBuffer(buf, n);
 	std::cout << "curBuffer: " << connection.getBuffer() << '\n';
 
 	return n;

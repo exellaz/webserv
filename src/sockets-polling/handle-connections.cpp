@@ -16,9 +16,6 @@ void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Connection>& con
 		close(newFd);
 		return ;
 	}
-	// server sends text to every client that connects
-	// const char *hello = "Hello from server!\n";
-	// send(newFd, hello, strlen(hello), 0);
 
 	addToPfds(pfds, newFd);
 	connections.push_back(Connection(newFd, getNowInSeconds()));

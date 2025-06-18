@@ -42,9 +42,9 @@ Connection::~Connection()
 }
 	
 
-void Connection::appendToBuffer(char *str)
+void Connection::appendToBuffer(char *str, size_t n)
 {
-	_buffer += str;
+	_buffer.append(str, n);
 }
 
 const std::string& Connection::getBuffer() const

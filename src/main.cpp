@@ -5,35 +5,6 @@
 
 void sendResponseToClient(int fd, HttpResponse& response)
 {
-    // // HTML body
-    // const std::string html_body =
-    //     "<!DOCTYPE html>\r\n"
-    //     "<html lang=\"en\">\r\n"
-    //     "<head>\r\n"
-    //     "  <meta charset=\"UTF-8\">\r\n"
-    //     "  <title>Sample HTTP Response</title>\r\n"
-    //     "</head>\r\n"
-    //     "<body>\r\n"
-    //     "  <h1>Hello, World!</h1>\r\n"
-    //     "  <p>This is a sample HTTP response with Content-Length header.</p>\r\n"
-    //     "</body>\r\n"
-    //     "</html>\r\n";
-    // // Calculate content length
-    // std::size_t content_length = html_body.size();
-    // // Convert content_length to string
-    // std::stringstream ss;
-    // ss << content_length;
-    // std::string content_length_str = ss.str();
-    // // Entire HTTP response in one string
-    // std::string response =
-    //     "HTTP/1.1 200 OK\r\n"
-    //     "Content-Type: text/html; charset=UTF-8\r\n"
-    //     "Content-Length: " + content_length_str + "\r\n"
-    //     "Connection: close\r\n"
-    //     "\r\n" +
-    //     html_body;
-    // send(fd, &response[0], response.size(), 0);
-
     send(fd, response.toString().c_str(), response.toString().size(), 0);
     std::cout << "server: Response sent to client.\n";
 }
