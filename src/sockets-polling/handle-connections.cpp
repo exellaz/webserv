@@ -63,18 +63,25 @@ int receiveClientRequest(Connection &connection, std::vector<Config>& configs)
             connection.connType = CLOSE;
         }
     }
-
+	std::cout << "header size: " << headerStr.size() << "\n"; ////debug
 
     std::string choosePort = request.getHeader("Host").substr(request.getHeader("Host").rfind(':') + 1);
     Config serverConfig = getServerConfigByPort(configs, choosePort);
     Location location = serverConfig.getLocationPath(request.getURI());
+	if (location.alias.empty() && location.root.empty())
+	{
+		response.setStatus(NOT_FOUND);
+		response.setHeader("Content-Type", "text/plain");
+		response.setBody("404 Not Found: The requested resource could not be found.\n");
+	}
 
 
 	//check for body to handle
     if (request.getHeaders().find("Content-Length") != request.getHeaders().end()) {
-        int ret2 = readRequestBody(connection, bodyStr);
+		int ret2 = readRequestBody(connection, bodyStr);
         if (ret2 < 0)
-            return ret2;
+			return ret2;
+		std::cout << "Size of body: " << bodyStr.size() << "\n"; ////debug
         request.setBody(bodyStr);
     }
 
@@ -90,39 +97,18 @@ int receiveClientRequest(Connection &connection, std::vector<Config>& configs)
 			response.setStatus(INTERNAL_ERROR);
 			response.setHeader("Content-Type", "text/plain");
 			response.setBody("500 Internal Server Error: CGI script execution failed.\n");
-            send(connection.fd, response.toString().c_str(), response.toString().size(), 0);
         }
         else
         {
 			handleCgiRequest(cgiOutput, response);
             std::cout << "---------- CGI Output ----------\n" << BLUE << response.toString() << RESET << "\n";
-            send(connection.fd, response.toString().c_str(), response.toString().size(), 0);
         }
     }
 
 
     // parseRequestHeader();
     else if (response.getStatus() == OK && request.getMethod() == "GET")
-    {
         response.handleGetRequest(request, serverConfig);
-        send(connection.fd, response.toString().c_str(), response.toString().size(), 0);
-
-        //? hardcode
-        //std::string httpPath = resolveHttpPath(request,serverConfig);
-
-        //struct stat info;
-        //if (stat(httpPath.c_str(), &info) == 0 && S_ISREG(info.st_mode) == true)
-        //{
-            // Method not allowed check
-        //	if (serveStaticFile(httpPath, connection.fd) == false)
-        //		return 1;
-        //}
-        //else if (location.autoIndex == true && S_ISDIR(info.st_mode) == true)
-        //{
-        //    if (serveAutoIndex(httpPath, request.getURI(), connection.fd) == false)
-        //        return 1;
-        //}
-    }
 
 
     // TODO: isBodyPresent()   -> check Content-Length, Transfer-Encoding, request method
