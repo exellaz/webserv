@@ -37,7 +37,7 @@ public:
 	size_t contentLength;
 	bool isResponseReady;
 
-	void appendToBuffer(char *str, size_t n);
+	void appendToBuffer(const char *str, size_t n);
 	// void appendToBuffer(char *str);
 	const std::string& getBuffer() const;
 	void setBuffer(std::string str);

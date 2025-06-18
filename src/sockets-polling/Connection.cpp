@@ -42,7 +42,7 @@ Connection::~Connection()
 }
 	
 
-void Connection::appendToBuffer(char *str, size_t n)
+void Connection::appendToBuffer(const char *str, size_t n)
 {
 	_buffer.append(str, n);
 }
