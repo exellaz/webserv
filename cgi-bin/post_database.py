@@ -5,7 +5,8 @@ import sys # call shell commands and read input data
 import json # call json functions to handle JSON data
 import os # call operating system functions to handle files and directories
 
-json_file = '/home/welow/webserv/cgi-bin/data.json' #data base
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+json_file = os.path.join(SCRIPT_DIR, "data.json")
 
 def save_message(message):
 	# Load existing messages or start a new list

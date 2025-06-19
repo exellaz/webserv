@@ -2,7 +2,8 @@
 import os
 import json
 
-UPLOAD_DIR = "/home/welow/webserv/cgi-bin/storage"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+UPLOAD_DIR = os.path.join(SCRIPT_DIR, "storage")
 
 print("Content-Type: application/json\r\n")
 

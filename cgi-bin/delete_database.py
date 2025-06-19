@@ -3,7 +3,8 @@ import os
 import json
 import sys
 
-json_file = '/home/welow/webserv/cgi-bin/data.json'
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+json_file = os.path.join(SCRIPT_DIR, "data.json")
 
 # Read input data
 content_length_str = os.environ.get('CONTENT_LENGTH', '0')

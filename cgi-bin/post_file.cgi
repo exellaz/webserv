@@ -1,4 +1,4 @@
-#!/usr/bin/python3.12
+#!/usr/bin/python3
 
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning) # Ignore deprecation warnings for CGI usage
@@ -9,7 +9,8 @@ import sys
 print("Content-Type: text/plain\r\n")
 print()
 
-UPLOAD_DIR = "/home/welow/webserv/cgi-bin/storage"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+UPLOAD_DIR = os.path.join(SCRIPT_DIR, "storage")
 
 form = cgi.FieldStorage()
 if "file" not in form or not getattr(form["file"], "filename", None):
