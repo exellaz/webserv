@@ -48,100 +48,18 @@ int readByContentLength(Connection &conn, std::string& bodyStr)
 	return ret;
 }
 
-static int readFromSocket2(int fd, std::string& buffer)
-{
-	char buf[BODY_BUFFER_SIZE + 1];
-
-	ssize_t n = recv(fd, buf, BODY_BUFFER_SIZE, 0);
-	std::cout << "n: " << n << '\n';
-
-    if (n == 0) {
-		std::cout << "RECV_CLOSED\n";
-		return RECV_CLOSED;
-	}
-	else if (n == -1) {
-		std::cout << "RECV_AGAIN: No data available yet, will try again next iteration.\n";
-		return RECV_AGAIN;
-    }
-
-	buffer.append(buf, n);
-	std::cout << "curBuffer: " << buffer << '\n';
-
-	return n;
-}
-
-bool isChunkSizeLineComplete(const std::string& buffer, size_t parsePos)
-{
-	// find "\r\n"
-	size_t pos = buffer.find(CRLF, parsePos);
-	if (pos != std::string::npos)
-		return true;
-	else return false;
-}
-
-size_t extractChunkSize(std::string& buffer, size_t parsePos)
-{
-	for (int i = parsePos; i < buffer.length(); ++i) {
-
-	}
-
-}
-
-int readByChunkedEncoding(Connection &conn, std::string& bodyStr)
-{
-	int ret = RECV_OK; 
-	enum decodingChunkedRequestStatus status = READ_CHUNK_SIZE;
-	std::string buffer;
-	size_t parsePos = 0;
-
-	while (status != DONE) {
-		
-		ret = readFromSocket2(conn.fd, buffer);
-		if (ret <= 0)
-			return ret; // RECV_AGAIN or RECV_CLOSED or RECV_ERROR
-		conn.startTime = getNowInSeconds(); // reset timer
-
-		while (parsePos < buffer.size()) {
-			
-			switch (status) {
-				case READ_CHUNK_SIZE:
-					if (isChunkSizeLineComplete(buffer, parsePos)) {
-						int chunkSize = extractChunkSize(buffer, parsePos\);
-						if (chunkSize == 0)
-		  					status = DONE;
-		 				else 
-		 					status = READ_CHUNK_DATA;
-					}
-					break;
-				case READ_CHUNK_DATA:
-
-					break;
-				case EXPECT_CRLF_AFTER_DATA:
-
-					break;
-				case DONE:
-
-					break;
-			}
-		}
-	}
-
-	return ret;
-}
-
-
-
 int readRequestBody(Connection &conn, std::string& bodyStr)
 {
-	// std::cout << GREY << "===== readRequestBody =====" << RESET << '\n';
+	std::cout << GREY << "===== readRequestBody =====" << RESET << '\n';
 	int ret;
-	// if (type == CONTENT_LENGTH)
+	if (conn.readBodyMethod == CONTENT_LENGTH)
 		ret = readByContentLength(conn, bodyStr);
-	// else if (type == TRANSFER_ENCODING) {
-	//
-	// }
-	// else // NO_BODY
-	// 	return;
+	else if (conn.readBodyMethod == CHUNKED_ENCODING) {
+		std::cout << "CHUNKED ENCODING\n";
+		ret = readByChunkedEncoding(conn, bodyStr);
+	}
+	else // NO_BODY
+		return RECV_OK;
 	//
 	// std::cout << "bodyStr size: " << bodyStr.size() << '\n';
 	// std::cout << "\n===== body String: =====\n";

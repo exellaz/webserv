@@ -65,7 +65,8 @@ int receiveClientRequest(Connection &connection)
 
 	// TODO: isBodyPresent()   -> check Content-Length, Transfer-Encoding, request method
 
-	if (request.getHeaders().find("Content-Length") != request.getHeaders().end()) {
+	if (request.getHeaders().find("Content-Length") != request.getHeaders().end() || 
+		request.getHeaders().find("Transfer-Encoding") != request.getHeaders().end()) {
 		int ret2 = readRequestBody(connection, bodyStr);
 		if (ret2 < 0)
 			return ret2;
