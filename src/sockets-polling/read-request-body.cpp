@@ -17,8 +17,8 @@ static int readFromSocket(Connection &connection)
     }
 
 	buf[n] = '\0';
-	connection.appendToBuffer(buf);
-	std::cout << "curBuffer: " << connection.getBuffer() << '\n';
+	connection.appendToBuffer(buf, n);
+	std::cout << "curBuffer: " << connection.getBuffer() << '\n'; ////debug
 
 	return n;
 }
@@ -33,9 +33,10 @@ int readByContentLength(Connection &conn, std::string& bodyStr)
 	while (bytesRead < contentLength) {
 		ret = readFromSocket(conn);
 		if (ret <= 0)
-			return ret; // RECV_AGAIN or RECV_CLOSED or RECV_ERROR
+		return ret; // RECV_AGAIN or RECV_CLOSED or RECV_ERROR
 		conn.startTime = getNowInSeconds(); // reset timer
 		bytesRead += ret;
+		std::cout << "bytesRead: " << bytesRead << '\n'; ////debug
 	}
 
 	if (bytesRead == contentLength) {

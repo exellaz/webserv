@@ -1,8 +1,8 @@
 #include "../../include/Connection.h"
 
 Connection::Connection(int fd, time_t startTime) :
-	fd(fd), startTime(startTime), connType(KEEP_ALIVE), 
-	readBodyMethod(CONTENT_LENGTH), contentLength(0), 
+	fd(fd), startTime(startTime), connType(KEEP_ALIVE),
+	readBodyMethod(CONTENT_LENGTH), contentLength(0),
 	isResponseReady(false), _buffer("")
 {
 	// std::cout << "Connection:: Constructor Called (name: " << index << ")" << std::endl;
@@ -10,7 +10,7 @@ Connection::Connection(int fd, time_t startTime) :
 
 }
 
-Connection::Connection(const Connection& other) : 
+Connection::Connection(const Connection& other) :
 	fd(other.fd), startTime(other.startTime), connType(other.connType),
 	readBodyMethod(other.readBodyMethod), contentLength(other.contentLength),
 	isResponseReady(other.isResponseReady), _buffer(other._buffer)
@@ -40,11 +40,11 @@ Connection::~Connection()
 {
 	// std::cout << "Connection:: Destructor Called (name: " << index << ")" << std::endl;
 }
-	
 
-void Connection::appendToBuffer(char *str)
+
+void Connection::appendToBuffer(char* str, size_t n)
 {
-	_buffer += str;
+	_buffer.append(str, n);
 }
 
 const std::string& Connection::getBuffer() const
@@ -64,7 +64,7 @@ void Connection::clearBuffer()
 
 std::ostream & operator<<( std::ostream & o, Connection const & connection )
 {
-	o << "\nConnection: \n" 
+	o << "\nConnection: \n"
 		<< "fd    : " << connection.fd << '\n'
 		<< "buffer: "<< connection.getBuffer() << '\n';
 	return o;

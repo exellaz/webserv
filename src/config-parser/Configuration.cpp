@@ -6,35 +6,31 @@
 /*   By: welow <welow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/29 15:31:13 by welow             #+#    #+#             */
-/*   Updated: 2025/06/04 16:37:08 by welow            ###   ########.fr       */
+/*   Updated: 2025/06/17 16:51:35 by welow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/Configuration.hpp"
 
 static std::string ft_trim(const std::string &str);
-static void skipBlock(std::ifstream &conf);
 static std::string	checkComment(const std::string &line);
 static std::string	extractLine(const std::string &line);
 
 /**
  * @brief Config constructor
 */
-Config::Config(std::ifstream &conf)
+Config::Config(std::istream &conf)
 	: _port(""),
 	  _host(""),
 	  _serverName(""),
-	  _rootDirectory(""),
+	  _root(""),
 	  _clientMaxSize(0),
 	  _clientBodyBufferSize(0),
 	  _clientHeaderBufferSize(0),
-	  _largeClientHeaderBufferNumber(0),
-	  _largeClientHeaderBufferSize(0),
+	  _clientTimeout(0),
 	  _errorPage()
 {
-	if (!conf.is_open())
-		throw std::runtime_error("config file not found or cannot open");
-	else if (conf.peek() == std::ifstream::traits_type::eof())
+	if (conf.peek() == std::ifstream::traits_type::eof())
 		throw std::runtime_error("config file is empty");
 	for (std::string line; std::getline(conf,line);)
 	{
@@ -46,10 +42,10 @@ Config::Config(std::ifstream &conf)
 			if (colon != std::string::npos)
 			{
 				this->_host = listen.substr(0, colon);
-				_port = listen.substr(colon + 1);
+				this->_port = listen.substr(colon + 1);
 			}
 			else
-				_port = listen.substr(colon + 1);
+				this->_port = listen.substr(colon + 1);
 		}
 		else if (line.find("server_name") != std::string::npos)
 		{
@@ -59,7 +55,20 @@ Config::Config(std::ifstream &conf)
 		else if (line.find("root") != std::string::npos)
 		{
 			std::string rootPath = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
-			this->_rootDirectory = rootPath;
+			this->_root = rootPath;
+		}
+		else if (line.find("allowed_method") != std::string::npos)
+		{
+			std::istringstream iss(line);
+			std::string keyword, method;
+			iss >> keyword; // skip "allowed_method"
+			while (iss >> method)
+			{
+				if (!method.empty() && method[method.size() - 1] == ';') // check if method ends with ';'
+					method.erase(method.size() - 1); //if not erase the last character
+				if (!method.empty()) // check if method is not empty
+					this->_allowMethods.push_back(method); //get the current method to the vector
+			}
 		}
 		else if (line.find("client_max_body_size") != std::string::npos)
 		{
@@ -76,14 +85,10 @@ Config::Config(std::ifstream &conf)
 			std::string clientHeaderBufferSize = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
 			this->_clientHeaderBufferSize = std::strtol(clientHeaderBufferSize.c_str(), NULL, 10);
 		}
-		else if (line.find("large_client_header_buffers") != std::string::npos)
+		else if (line.find("client_timeout") != std::string::npos)
 		{
-			std::string numBuffer = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
-			std::string bufferSize = numBuffer.substr(numBuffer.find(' ') + 1);
-			int numBuffers = std::strtol(numBuffer.c_str(), NULL, 10);
-			int sizeBuffer = std::strtol(bufferSize.c_str(), NULL, 10);
-			this->_largeClientHeaderBufferNumber = numBuffers;
-			this->_largeClientHeaderBufferSize = sizeBuffer;
+			std::string clientTimeout = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
+			this->_clientTimeout = std::strtol(clientTimeout.c_str(), NULL, 10);
 		}
 		else if (line.find("error_page") != std::string::npos)
 		{
@@ -109,10 +114,10 @@ Config::Config(std::ifstream &conf)
 /**
  * @brief Location constructor
 */
-Location::Location(std::ifstream &conf, const std::string &locName)
+Location::Location(std::istream &conf, const std::string &locName)
 	: locationPath(""),
 	  index(""),
-	  rootDirectory(""),
+	  root(""),
 	  alias(""),
 	  allowMethods(),
 	  returnPath(),
@@ -136,23 +141,21 @@ Location::Location(std::ifstream &conf, const std::string &locName)
 		else if (line.find("index") != std::string::npos)
 			this->index = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
 		else if (line.find("root") != std::string::npos)
-		{
-			this->rootDirectory = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
-			this->rootDirectory.append(this->locationPath);
-		}
+			this->root = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
 		else if (line.find("alias") != std::string::npos)
 			this->alias = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
-		else if (line.find("limit_except") != std::string::npos)
+		else if (line.find("allowed_method") != std::string::npos)
 		{
-			std::string allowMethod = extractLine(line);
-			std::istringstream iss(allowMethod);
-			for (std::string method; iss >> method;)
+			std::istringstream iss(line);
+			std::string keyword, method;
+			iss >> keyword; // skip "allowed_method"
+			while (iss >> method)
 			{
-				if (method != "GET" && method != "POST")
-					throw std::runtime_error("invalid method");
-				this->allowMethods.push_back(method);
+				if (!method.empty() && method[method.size() - 1] == ';') // check if method ends with ';'
+					method.erase(method.size() - 1); //if not erase the last character
+				if (!method.empty()) // check if method is not empty
+					this->allowMethods.push_back(method); //get the current method to the vector
 			}
-			skipBlock(conf);
 		}
 		else if (line.find("return") != std::string::npos)
 		{
@@ -170,15 +173,19 @@ Location::Location(std::ifstream &conf, const std::string &locName)
 			std::string clientMaxSize = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
 			this->clientMaxSize = std::strtol(clientMaxSize.c_str(), NULL, 10);
 		}
+		else if (line.find("cgi_path") != std::string::npos)
+			this->cgi_path = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
 		else if (line.find("}") != std::string::npos)
 			break;
 	}
 }
 
+/////////////////////////////////////////////// GETTER & SETTER /////////////////////////////////////////////////////////////
+
 /**
  * @brief get port number
 */
-std::string	Config::getPort() const
+const std::string	&Config::getPort() const
 {
 	return (this->_port);
 }
@@ -186,7 +193,7 @@ std::string	Config::getPort() const
 /**
  * @brief get ip address or DNS name
 */
-std::string	Config::getHost() const
+const std::string	&Config::getHost() const
 {
 	return (this->_host);
 }
@@ -194,7 +201,7 @@ std::string	Config::getHost() const
 /**
  * @brief get server name
 */
-std::string	Config::getServerName() const
+const std::string	&Config::getServerName() const
 {
 	return (this->_serverName);
 }
@@ -202,9 +209,17 @@ std::string	Config::getServerName() const
 /**
  * @brief get root directory
 */
-std::string	Config::getRootDirectory() const
+const std::string	&Config::getRoot() const
 {
-	return (this->_rootDirectory);
+	return (this->_root);
+}
+
+/**
+ * @brief get allowed methods
+*/
+const std::vector<std::string>	&Config::getAllowMethods() const
+{
+	return (this->_allowMethods);
 }
 
 /**
@@ -234,25 +249,9 @@ int	Config::getClientHeaderBufferSize() const
 /**
  * @brief get large client header buffer number
 */
-int	Config::getLargeClientHeaderBufferNumber() const
+int	Config::getClientTimeout() const
 {
-	return (this->_largeClientHeaderBufferNumber);
-}
-
-/**
- * @brief get large client header buffer size
-*/
-int Config::getLargeClientHeaderBufferSize() const
-{
-	return (this->_largeClientHeaderBufferSize);
-}
-
-/**
- * @brief get location
-*/
-const std::map<std::string, Location>	&Config::getLocations() const
-{
-	return (this->_location);
+	return (this->_clientTimeout);
 }
 
 /**
@@ -264,22 +263,10 @@ const std::map<int, std::string>	&Config::getErrorPage() const
 }
 
 /**
- * @brief get location contain
- * @param path location path
-*/
-Location Config::getLocationPath(const std::string &path)
-{
-	std::map<std::string, Location>::iterator it = this->_location.find(path);
-	if (it != this->_location.end())
-		return it->second;
-	throw std::runtime_error("location not found");
-}
-
-/**
  * @brief get error log by code
  * @param errorCode error code
 */
-std::string Config::getErrorPageByCode(int errorCode) const
+const std::string &Config::getErrorPageByCode(int errorCode) const
 {
 	std::map<int, std::string>::const_iterator it = this->_errorPage.find(errorCode);
 	if (it != this->_errorPage.end())
@@ -288,77 +275,158 @@ std::string Config::getErrorPageByCode(int errorCode) const
 }
 
 /**
- * @brief get allowed methods by index
+ * @brief get location
 */
-std::string Location::getAllowedMethods(size_t index) const
+const std::map<std::string, Location>	&Config::getLocations() const
 {
-	if (index <= this->allowMethods.size())
-		return this->allowMethods[index];
-	throw std::runtime_error("method unavailable");
+	return (this->_location);
 }
+
+/**
+ * @brief get location contain
+ * @param path location path
+ * @note 1. if the location is "/", return the location if it matches the path
+ * @note 2. if prefix match and (length is equal or next char is '/'), return the location
+*/
+Location Config::getLocationPath(const std::string &path)
+{
+	std::string match;
+	for (std::map<std::string, Location>::iterator it = this->_location.begin(); it != this->_location.end(); ++it)
+	{
+		const std::string& loc = it->first;
+		if (loc == "/")
+		{
+			if (loc == path)
+				return it->second;
+			continue;
+		}
+
+		bool prefixMatch = path.compare(0, loc.length(), loc) == 0;
+		bool exactMatch = path.length() == loc.length();
+		bool nextCharSlash = path.length() > loc.length() && path[loc.length()] == '/';
+		if (prefixMatch && (exactMatch || nextCharSlash))
+				match = loc;
+	}
+	if (!match.empty())
+		return this->_location[match];
+	return Location();
+}
+
+////////////////////////////////////////////// OUTPUT OPERATOR //////////////////////////////////////////////////////////////
 
 /**
  * @brief print configuration information
 */
 std::ostream &operator<<(std::ostream &cout, const Config &config)
 {
-	if (config.getPort().empty())
+	if (!config.getPort().empty())
 		cout << "port           : [" << config.getPort() << "]\n";
 	if (!config.getHost().empty())
 		cout << "host           : [" << config.getHost() << "]\n";
 	if (!config.getServerName().empty())
-		cout << "server_name    : [" << config.getServerName() << "]\n";
-	if (!config.getRootDirectory().empty())
-		cout << "root_directory : [" << config.getRootDirectory() << "]\n";
+		cout << "server_name    : [" << config.getServerName() << "]\n\n";
+
+	if (!config.getRoot().empty())
+		cout << "root_directory : [" << config.getRoot() << "]\n\n";
+
+	if (!config.getAllowMethods().empty())
+	{
+		cout << "allow_methods  : ";
+		for (std::vector<std::string>::const_iterator methodIt = config.getAllowMethods().begin();
+				methodIt != config.getAllowMethods().end(); ++methodIt)
+		{
+			cout << "[" << *methodIt << "]";
+		}
+		cout << "\n\n";
+	}
+
 	if (config.getClientMaxSize() != 0)
-		cout << "client_max_size: [" << config.getClientMaxSize() << "]\n";
+		cout << "client_max_size          : [" << config.getClientMaxSize() << "]\n";
 	if (config.getClientBodyBufferSize() != 0)
-		cout << "client_body_buffer_size: [" << config.getClientBodyBufferSize() << "]\n";
+		cout << "client_body_buffer_size  : [" << config.getClientBodyBufferSize() << "]\n";
 	if (config.getClientHeaderBufferSize() != 0)
 		cout << "client_header_buffer_size: [" << config.getClientHeaderBufferSize() << "]\n";
-	cout << "large_client_header_buffers: ";
-	if (config.getLargeClientHeaderBufferNumber() != 0)
-		cout << "[" << config.getLargeClientHeaderBufferNumber() << "] [" << config.getLargeClientHeaderBufferSize() << "]\n";
-	for (std::map<int, std::string>::const_iterator it = config.getErrorPage().begin();
-			it != config.getErrorPage().end(); ++it)
+	if (config.getClientTimeout() != 0)
+		cout << "client_timeout: [" << config.getClientTimeout() << "]\n\n";
+
+	for (std::map<int, std::string>::const_iterator it = config.getErrorPage().begin(); it != config.getErrorPage().end(); ++it)
 	{
 		cout << "error_log      : [" << it->first << "] [" << it->second << "]\n";
 	}
+	std::cout << "\n";
+
 	for (std::map<std::string, Location>::const_iterator it = config.getLocations().begin();
 			it != config.getLocations().end(); ++it)
 	{
 		const Location &loc = it->second;
 
 		if (!loc.locationPath.empty())
-			cout << "	location        : [" << loc.locationPath << "]\n";
+			cout << "location        : [" << loc.locationPath << "]\n";
 		if (!loc.index.empty())
-			cout << "	files           : [" << loc.index << "]\n";
-		if (!loc.rootDirectory.empty())
-			cout << "	root_directory  : [" << loc.rootDirectory << "]\n";
+			cout << "files           : [" << loc.index << "]\n";
+		if (!loc.root.empty())
+			cout << "root_directory  : [" << loc.root << "]\n";
 		if (!loc.alias.empty())
-			cout << "	alias_directory : [" << loc.alias << "]\n";
-		for (std::vector<std::string>::const_iterator methodIt = loc.allowMethods.begin();
-				methodIt != loc.allowMethods.end(); ++methodIt)
+			cout << "alias_directory : [" << loc.alias << "]\n";
+		if (!loc.allowMethods.empty())
 		{
-			cout << "	allow_method    : [" << *methodIt << "]\n";
+			cout << "allow_methods   : ";
+			for (std::vector<std::string>::const_iterator methodIt = loc.allowMethods.begin();
+					methodIt != loc.allowMethods.end(); ++methodIt)
+			{
+				cout << "[" << *methodIt << "]";
+			}
+			cout << "\n";
 		}
-		for (std::map<int, std::string>::const_iterator retIt = loc.returnPath.begin();
-				retIt != loc.returnPath.end(); ++retIt)
+		if (!loc.returnPath.empty())
 		{
-			cout << "	return_path     : [" << retIt->first << "] [" << retIt->second << "]\n";
+			cout << "return_path     : ";
+			for (std::map<int, std::string>::const_iterator retIt = loc.returnPath.begin();
+					retIt != loc.returnPath.end(); ++retIt)
+			{
+				cout << "[" << retIt->first << "] [" << retIt->second << "]";
+			}
+			cout << "\n";
 		}
 		if (loc.clientMaxSize != 0)
-			cout << "	client_max_size : [" << loc.clientMaxSize << "]\n";
+			cout << "client_max_size : [" << loc.clientMaxSize << "]\n";
 		if (loc.autoIndex)
-			cout << "	list_directory  : [on]\n";
-		cout << "	-------------------------------------------------\n";
+			cout << "list_directory  : [on]\n";
+		if (!loc.cgi_path.empty())
+			cout << "cgi_path        : [" << loc.cgi_path << "]\n";
+		std::cout << "\n";
 	}
 	return cout;
 }
 
-Config::~Config() {}
-Location::Location() {}
-Location::~Location() {}
+///////////////////////////////////////////// HELPER FUNCTION ///////////////////////////////////////////////////////////////
+
+std::vector<Config> parseAllServers(const std::string &filename)
+{
+	std::ifstream conf(filename.c_str());
+	std::vector<Config> servers;
+	std::stringstream block;
+
+	if (!conf.is_open())
+		throw std::runtime_error("File not found");
+
+	for (std::string line; std::getline(conf, line);)
+	{
+		if (line.find("server") != std::string::npos && line.find("{") != std::string::npos)
+		{
+			block << line << "\n";
+			int braceCount = 1; //look for the next "}"
+			while (braceCount != 0 && std::getline(conf, line)) {
+				if (line.find('{') != std::string::npos) braceCount++;
+				if (line.find('}') != std::string::npos) braceCount--;
+				block << line << "\n"; // if not keep parse the line
+			}
+			Config serverConfig(block);
+			servers.push_back(serverConfig);
+		}
+	}
+	return servers;
+}
 
 /**
  * @brief trim front and back whitespace from a string
@@ -372,25 +440,6 @@ static std::string ft_trim(const std::string &str)
 		return "";
 	size_t last = str.find_last_not_of(" \t\n\r\f\v");
 	return str.substr(first, (last - first + 1));
-}
-
-/**
- * @brief skip block in config file
- * @param conf config file
- * @note 1. if found '{', increment braceCount (but it already incremented by 1)
- * @note 2. if found '}', decrement braceCount (so it will skip the whole block)
-*/
-static void skipBlock(std::ifstream &conf) {
-	int braceCount = 1;
-	std::string line;
-	while (std::getline(conf, line)) {
-		if (line.find('{') != std::string::npos)
-			braceCount++;
-		if (line.find('}') != std::string::npos)
-			braceCount--;
-		if (braceCount == 0)
-			break;
-	}
 }
 
 /**
@@ -413,9 +462,8 @@ static std::string	checkComment(const std::string &line)
 */
 static std::string	extractLine(const std::string &line)
 {
-	size_t	start = line.find(' ') + 1;
-	size_t	end = line.find('{');
-	if (start == 0 || end == 0 || start >= end)
-		throw std::runtime_error("invalid line");
-	return ft_trim(line.substr(start, end - start));
+	std::istringstream iss(line);
+	std::string keyword, path;
+	iss >> keyword >> path;
+	return ft_trim(path);
 }
