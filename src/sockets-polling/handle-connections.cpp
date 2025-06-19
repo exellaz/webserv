@@ -63,44 +63,44 @@ int receiveClientRequest(Connection &connection, std::vector<Config>& configs)
             connection.connType = CLOSE;
         }
     }
-	std::cout << "header size: " << headerStr.size() << "\n"; ////debug
+    std::cout << "header size: " << headerStr.size() << "\n"; ////debug
 
     std::string choosePort = request.getHeader("Host").substr(request.getHeader("Host").rfind(':') + 1);
     Config serverConfig = getServerConfigByPort(configs, choosePort);
     Location location = serverConfig.getLocationPath(request.getURI());
-	if (location.alias.empty() && location.root.empty())
-	{
-		response.setStatus(NOT_FOUND);
-		response.setHeader("Content-Type", "text/plain");
-		response.setBody("404 Not Found: The requested resource could not be found.\n");
-	}
+    if (location.alias.empty() && location.root.empty())
+    {
+        response.setStatus(NOT_FOUND);
+        response.setHeader("Content-Type", "text/plain");
+        response.setBody("404 Not Found: The requested resource could not be found.\n");
+    }
 
 
-	//check for body to handle
+    //check for body to handle
     if (request.getHeaders().find("Content-Length") != request.getHeaders().end()) {
-		int ret2 = readRequestBody(connection, bodyStr);
+        int ret2 = readRequestBody(connection, bodyStr);
         if (ret2 < 0)
-			return ret2;
-		std::cout << "Size of body: " << bodyStr.size() << "\n"; ////debug
+            return ret2;
+        std::cout << "Size of body: " << bodyStr.size() << "\n"; ////debug
         request.setBody(bodyStr);
     }
 
-	// get the cgi path
+    // get the cgi path
     if (!location.cgi_path.empty())
     {
         std::cout << GREEN "CGI found\n" RESET; ////debug
         Cgi	cgi;
         std::string cgiOutput = cgi.executeCgi(request, response); //? handle by response
-		std::cerr << "cgiOutput: " << cgiOutput << "\n";
-		if (cgiOutput.empty() || cgiOutput == "")
+        std::cerr << "cgiOutput: " << cgiOutput << "\n";
+        if (cgiOutput.empty() || cgiOutput == "")
         {
-			response.setStatus(INTERNAL_ERROR);
-			response.setHeader("Content-Type", "text/plain");
-			response.setBody("500 Internal Server Error: CGI script execution failed.\n");
+            response.setStatus(INTERNAL_ERROR);
+            response.setHeader("Content-Type", "text/plain");
+            response.setBody("500 Internal Server Error: CGI script execution failed.\n");
         }
         else
         {
-			handleCgiRequest(cgiOutput, response);
+            handleCgiRequest(cgiOutput, response);
             std::cout << "---------- CGI Output ----------\n" << BLUE << response.toString() << RESET << "\n";
         }
     }
