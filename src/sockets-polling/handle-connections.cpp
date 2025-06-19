@@ -63,6 +63,11 @@ int receiveClientRequest(Connection &connection, std::vector<Config>& configs)
             connection.connType = CLOSE;
         }
     }
+
+    // Refactor later
+    if (request.getHeader("Connection") == "close")
+        connection.connType = CLOSE;
+
     std::cout << "header size: " << headerStr.size() << "\n"; ////debug
 
     std::string choosePort = request.getHeader("Host").substr(request.getHeader("Host").rfind(':') + 1);
