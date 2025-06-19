@@ -59,7 +59,8 @@ std::string resolveHttpPath(const HttpRequest &request, Config &config)
     else if (!location.root.empty())
     {
         std::cout << "Root found\n"; ////debug
-        return location.root + request.getURI() + "/" + location.index;
+        std::cout << "Root path: " << getFullPath(request.getURI() + "/" + location.index) << "\n";
+        return getFullPath(request.getURI() + "/" + location.index);
     }
     return "";
 }
