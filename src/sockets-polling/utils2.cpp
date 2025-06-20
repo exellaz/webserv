@@ -70,10 +70,17 @@ std::string resolveHttpPath(const HttpRequest &request, Server &server)
     else if (!location.root.empty())
     {
         std::cout << "Root found\n"; ////debug
-        //std::cout << "Root path: " << getFullPath(request.getURI() + "/" + location.index) << "\n";
-        //return getFullPath(request.getURI() + "/" + location.index);
-		std::cout << "Full Root path: " << getFullPath(location.root + request.getURI()) << "\n";
-		return getFullPath(location.root + request.getURI());
+		std::string relativeUri = request.getURI().substr(location.locationPath.length());
+		if ((!location.index.empty()) && (relativeUri.empty() || relativeUri == "/"))
+		{
+			std::cout << "Root path with index: " << getFullPath(location.root + request.getURI() + "/" + location.index) << "\n"; ////debug
+			return getFullPath(location.root + request.getURI() + "/" + location.index);
+		}
+		else
+		{
+			std::cout << "Root path without index: " << getFullPath(location.root + relativeUri) << "\n"; ////debug
+			return getFullPath(location.root + relativeUri);
+		}
     }
     return "";
 }
