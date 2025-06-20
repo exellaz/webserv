@@ -31,21 +31,29 @@ bool isLineComplete(const std::string& buffer, size_t parsePos)
 	else return false;
 }
 
-/*
- 
-- extract substr before "\r\n"
-- convert substr => size_t
+size_t hexStrToSizeT(const std::string& hexStr)
+{
+	size_t n = 0;
+	std::stringstream ss;
+	ss << std::hex << hexStr;
+	ss >> n;
+	return n;
+}
 
-*/
-size_t extractChunkSize(std::string& buffer, size_t parsePos)
+// function increments `parsePos`
+size_t extractChunkSize(std::string& buffer, size_t& parsePos)
 {
 	size_t chunkSize = 0;
 	size_t pos = buffer.find(CRLF, parsePos);
+	// TODO: if CRLF not found
 
 	std::string sizeStr = buffer.substr(parsePos, pos);
 	std::cout << "sizeStr: " << sizeStr << '\n';
 	
-	
+	chunkSize = hexStrToSizeT(sizeStr);
+	std::cout << "chunkSzie: " << chunkSize << '\n';
+	parsePos += sizeStr.length() + CRLF_LENGTH;
+	std::cout << "parsePos: " << parsePos << '\n';
 	return chunkSize;
 }
 
@@ -53,7 +61,7 @@ int readByChunkedEncoding(Connection &conn, std::string& bodyStr)
 {
 	(void)bodyStr;
 	int ret = RECV_OK; 
-	enum decodingChunkedRequestStatus status = READ_CHUNK_SIZE;
+	enum readChunkedRequestStatus& status = conn.readChunkedRequestStatus;
 	std::string buffer;
 	size_t parsePos = 0;
 
@@ -66,32 +74,25 @@ int readByChunkedEncoding(Connection &conn, std::string& bodyStr)
 
 		while (parsePos < buffer.size()) {
 			
-			switch (status) {
-				case READ_CHUNK_SIZE:
-					if (isLineComplete(buffer, parsePos)) {
-						int chunkSize = extractChunkSize(buffer, parsePos);
-						// TODO: increment `parsePos`
-						if (chunkSize == 0)
-							status = DONE;
-						else 
-							status = READ_CHUNK_DATA;
-					}
-					break;
+			if (status == READ_CHUNK_SIZE) {
+				std::cout << "READ_CHUNK_SIZE\n";
+				if (isLineComplete(buffer, parsePos)) {
+					int chunkSize = extractChunkSize(buffer, parsePos);
+					// TODO: increment `parsePos`
+					if (chunkSize == 0)
+						status = DONE;
+					else 
+						status = READ_CHUNK_DATA;
+				}
+				break;
+			}
+			else if (status == READ_CHUNK_DATA) {
+				std::cout << "READ_CHUNK_DATA\n";
 
-				case READ_CHUNK_DATA:
-					if (isLineComplete(buffer, parsePos)) {
+				if (isLineComplete(buffer, parsePos)) {
 
-						// TODO: increment `parsePos`
-					}
-
-
-					break;
-				case EXPECT_CRLF_AFTER_DATA:
-
-					break;
-				case DONE:
-
-					break;
+					// TODO: increment `parsePos`
+				}
 			}
 		}
 	}

@@ -52,14 +52,18 @@ int readRequestBody(Connection &conn, std::string& bodyStr)
 {
 	std::cout << GREY << "===== readRequestBody =====" << RESET << '\n';
 	int ret;
-	if (conn.readBodyMethod == CONTENT_LENGTH)
+	if (conn.readBodyMethod == CONTENT_LENGTH) {
+		std::cout << "CONTENT_LENGTH\n";
 		ret = readByContentLength(conn, bodyStr);
+	}
 	else if (conn.readBodyMethod == CHUNKED_ENCODING) {
 		std::cout << "CHUNKED ENCODING\n";
 		ret = readByChunkedEncoding(conn, bodyStr);
 	}
-	else // NO_BODY
+	else {// NO_BODY
+		std::cout << "NO BODY\n";
 		return RECV_OK;
+	}
 	//
 	// std::cout << "bodyStr size: " << bodyStr.size() << '\n';
 	// std::cout << "\n===== body String: =====\n";

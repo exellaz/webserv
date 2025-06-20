@@ -63,17 +63,20 @@ int receiveClientRequest(Connection &connection)
 	if (response.getStatus() == OK && request.getMethod() == "GET")
 		response.handleGetRequest(request, ".");
 
-	// TODO: isBodyPresent()   -> check Content-Length, Transfer-Encoding, request method
-	if (!request.getHeader("Content-Length").empty())
-		connection.readBodyMethod = CONTENT_LENGTH;
-	else if (!request.getHeader("Transfer-Encoding").empty())
-		connection.readBodyMethod = CHUNKED_ENCODING;
+	// Initialise `readBodyMethod`
+	if (request.getHeaders().find("Content-Length") != request.getHeaders().end()) {
+		if (!request.getHeader("Content-Length").empty())
+			connection.readBodyMethod = CONTENT_LENGTH;
+	}
+	else if (request.getHeaders().find("Transfer-Encoding") != request.getHeaders().end()) {
+		if (!request.getHeader("Transfer-Encoding").empty())
+			connection.readBodyMethod = CHUNKED_ENCODING;
+	}
 	else
 		connection.readBodyMethod = NO_BODY;
-	std::cout << "CHECK\n";	
 
-	if (request.getHeaders().find("Content-Length") != request.getHeaders().end() || 
-		request.getHeaders().find("Transfer-Encoding") != request.getHeaders().end()) {
+	if (connection.readBodyMethod != NO_BODY) {
+
 		int ret2 = readRequestBody(connection, bodyStr);
 		if (ret2 < 0)
 			return ret2;

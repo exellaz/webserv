@@ -40,18 +40,12 @@
 #define MAX_BODY_SIZE 1048576
 #define HEADER_END "\r\n\r\n"
 #define CRLF "\r\n"
+#define CRLF_LENGTH 2
 
 enum recvResult {
     RECV_OK = 0,
     RECV_AGAIN = -1,
     RECV_CLOSED = -2,
-};
-
-enum decodingChunkedRequestStatus {
-	READ_CHUNK_SIZE,
-	READ_CHUNK_DATA,
-	EXPECT_CRLF_AFTER_DATA,
-	DONE
 };
 
 // Setup Listening Socket

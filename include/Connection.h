@@ -8,15 +8,21 @@
 #include <iostream>
 #include <sys/time.h>
 
+enum connectionType {
+	CLOSE,
+	KEEP_ALIVE,
+};
+
 enum readBodyMethod {
 	CONTENT_LENGTH,
 	CHUNKED_ENCODING,
 	NO_BODY,
 };
 
-enum connectionType {
-	CLOSE,
-	KEEP_ALIVE,
+enum readChunkedRequestStatus {
+	READ_CHUNK_SIZE,
+	READ_CHUNK_DATA,
+	DONE
 };
 
 class Connection {
@@ -35,6 +41,7 @@ public:
 	enum connectionType connType;
 	enum readBodyMethod readBodyMethod;
 	size_t contentLength;
+	enum readChunkedRequestStatus readChunkedRequestStatus;
 	bool isResponseReady;
 
 	void appendToBuffer(const char *str, size_t n);
