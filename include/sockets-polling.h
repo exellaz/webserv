@@ -57,7 +57,7 @@ enum recvResult {
 
 // Setup Listening Socket
 // int setupListeningSocket(std::vector<struct pollfd>& pfds, Config& config);
-int setupListeningSocket(std::vector<struct pollfd>& pfds, std::vector<Connection>& connections, Config& config);
+int setupListeningSocket(std::vector<struct pollfd>& pfds, std::vector<Connection>& connections, Server& server);
 // CONNECTIONS
 void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Connection>& connections, int listener);
 
@@ -66,7 +66,7 @@ void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Connection>& con
 int readRequestHeader(Connection &connection, std::string& headerStr);
 // void readRequestBody(int fd, std::string& bodyStr, std::string& buffer, enum reqBodyType type);
 int readRequestBody(Connection &conn, std::string& bodyStr);
-int receiveClientRequest(Connection &connection, std::vector<Config>& configs);
+int receiveClientRequest(Connection &connection, std::vector<Server>& servers);
 
 // Timeout
 void disconnectTimedOutClients(std::vector<Connection>& connections, std::vector<struct pollfd>& pfds);
@@ -83,8 +83,8 @@ int getNearestUpcomingTimeout(std::vector<Connection>& connections);
 // utils2
 std::string resolveAliasPath(const std::string &url, const Location &location);
 //std::string readFileToString (std::ifstream &file);
-Config getServerConfigByPort(const std::vector<Config> &configs, const std::string port);
-std::string resolveHttpPath(const HttpRequest &request, Config &config);
+Server getServerConfigByPort(const std::vector<Server> &servers, const std::string port);
+std::string resolveHttpPath(const HttpRequest &request, Server &server);
 //bool serveStaticFile(const std::string &httpPath, int clientFd);
 //bool serveAutoIndex(const std::string &httpPath, const std::string &url, int clientFd);
 std::string readDirectorytoString(const std::string &directoryPath, const HttpRequest &request);

@@ -163,7 +163,7 @@ std::string getMimeType(const std::string& path)
 //    setHeader("Content-Type", mime);
 //    setBody(fileContents);
 //}
-void HttpResponse::handleGetRequest(const HttpRequest& request, Config &serverConfig)
+void HttpResponse::handleGetRequest(const HttpRequest& request, Server &serverConfig)
 {
     // Map URI to filesystem path (able to handle aliases or root)
     std::string fullPath = resolveHttpPath(request, serverConfig);

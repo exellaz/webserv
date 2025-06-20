@@ -6,7 +6,7 @@
 /*   By: welow <welow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/29 15:29:35 by welow             #+#    #+#             */
-/*   Updated: 2025/06/17 16:52:18 by welow            ###   ########.fr       */
+/*   Updated: 2025/06/20 14:17:49 by welow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@
 
 class Location;
 
-class Config
+class Server
 {
     private:
         std::string                 _port;           // port number
@@ -38,9 +38,9 @@ class Config
         std::map<int, std::string>  _errorPage;      // error pages(error code to file path)
         std::map<std::string, Location>	_location;       // location paths to Location obje
     public:
-        Config() {}; // Default constructor
-        Config(std::istream &conf);
-        ~Config() {};
+        Server() {}; // Default constructor
+        Server(std::istream &conf);
+        ~Server() {};
 
         const std::string                       &getPort() const;
         const std::string                       &getHost() const;
@@ -75,7 +75,7 @@ class Location
         ~Location() {};
 };
 
-std::vector<Config> parseAllServers(const std::string &filename);
-std::ostream &operator<<(std::ostream &cout, const Config &config);
+std::vector<Server> parseAllServers(const std::string &filename);
+std::ostream &operator<<(std::ostream &cout, const Server &server);
 
 #endif

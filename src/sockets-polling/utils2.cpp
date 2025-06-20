@@ -37,19 +37,19 @@ std::string resolveAliasPath(const std::string &url, const Location &location)
 //    return content;
 //}
 
-Config getServerConfigByPort(const std::vector<Config> &configs, const std::string port)
+Server getServerConfigByPort(const std::vector<Server> &servers, const std::string port)
 {
-    for (std::vector<Config>::const_iterator it = configs.begin(); it != configs.end(); ++it)
+    for (std::vector<Server>::const_iterator it = servers.begin(); it != servers.end(); ++it)
     {
         if (it->getPort() == port)
             return *it;
     }
-    return Config();
+    return Server();
 }
 
-std::string resolveHttpPath(const HttpRequest &request, Config &config)
+std::string resolveHttpPath(const HttpRequest &request, Server &server)
 {
-    const Location location = config.getLocationPath(request.getURI());
+    const Location location = server.getLocationPath(request.getURI());
 
     if (!location.alias.empty())
     {

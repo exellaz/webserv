@@ -37,7 +37,7 @@ NOTE:
 - if recv(HEADER_BUFFER_SIZE) reads till the 'body' section, that section of 'body' will remain in buffers after `readHeader()` is called
 
 */
-int receiveClientRequest(Connection &connection, std::vector<Config>& configs)
+int receiveClientRequest(Connection &connection, std::vector<Server>& servers)
 {
     std::string headerStr;
     std::string bodyStr;
@@ -71,7 +71,7 @@ int receiveClientRequest(Connection &connection, std::vector<Config>& configs)
     std::cout << "header size: " << headerStr.size() << "\n"; ////debug
 
     std::string choosePort = request.getHeader("Host").substr(request.getHeader("Host").rfind(':') + 1);
-    Config serverConfig = getServerConfigByPort(configs, choosePort);
+    Server serverConfig = getServerConfigByPort(servers, choosePort);
     Location location = serverConfig.getLocationPath(request.getURI());
     if (location.alias.empty() && location.root.empty())
     {

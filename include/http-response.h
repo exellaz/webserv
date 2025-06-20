@@ -7,7 +7,7 @@
 //#include "sockets-polling.h"
 //#include "Configuration.hpp"
 
-class Config;
+class Server;
 
 class HttpRequest;
 
@@ -40,7 +40,7 @@ class HttpResponse
         std::string reasonPhrase(StatusCode code);
         std::string buildStatusLine();
         void printResponseHeaders();
-        void handleGetRequest(const HttpRequest& request, Config &serverConfig);
+        void handleGetRequest(const HttpRequest& request, Server &serverConfig);
         void handlePostRequest(const HttpRequest& request);
         void clearResponse();
 
