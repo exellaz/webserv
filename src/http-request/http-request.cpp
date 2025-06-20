@@ -1,6 +1,19 @@
 #include "http-request.h"
 #include "http-exception.h"
 
+bool isTChar(char c) {
+    const std::string tcharSymbols = "!#$%&'*+-.^_`|~";
+    return std::isalnum(static_cast<unsigned char>(c)) || tcharSymbols.find(c) != std::string::npos;
+}
+
+bool isValidToken(const std::string& token) {
+    for (std::string::const_iterator It = token.begin(); It != token.end(); ++It) {
+        if (!isTChar(*It))
+            return false;
+    }
+    return !token.empty();
+}
+
 bool HttpRequest::parseRequestLine(const std::string& headerStr)
 {
     std::istringstream stream(headerStr);
@@ -46,17 +59,16 @@ bool HttpRequest::parseHeaderLines(const std::string& str)
 
         size_t colon = line.find(':');
         if (colon != std::string::npos) {
-            if (line[colon - 1] == ' ')
-                throw HttpException(BAD_REQUEST, "Whitespace before colon");
+            // if (line[colon - 1] == ' ')
+            //     throw HttpException(BAD_REQUEST, "Whitespace before colon");
 
             std::string key = line.substr(0, colon);
-            // if ((_method == "GET" || _method == "DELETE") && (key == "Content-Length" || key == "Transfer-Encoding")) {
-            //     response.setStatus(BAD_REQUEST);
-            //     throw std::logic_error("Bad request");
-            // }
+            if (!isValidToken(key))
+                throw HttpException(BAD_REQUEST, "Invalid token as header field");
+
             std::string value = line.substr(colon + 1);
             while (!value.empty() && value[0] == ' ')
-                value = value.substr(1);
+            value = value.substr(1);
 
             if (_headers.count(key))
                 throw HttpException(BAD_REQUEST, "Duplicate header");
@@ -64,11 +76,16 @@ bool HttpRequest::parseHeaderLines(const std::string& str)
         }
     }
 
+    if ((_method == "GET" || _method == "DELETE") && (hasHeader("Content-Length") || hasHeader("Transfer-Encoding")))
+        throw HttpException(BAD_REQUEST, "No body expected for this method");
+
+    // if ()
+
     for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); ++it) {
     			std::cout << "Header: [" << it->first << "] = [" << it->second << "]\n";
 			}
 
-    if (_headers.find("Host") == _headers.end())
+    if (!hasHeader("Host"))
         throw HttpException(BAD_REQUEST, "Missing Host header");
     return true;
 }

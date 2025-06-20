@@ -24,6 +24,8 @@ class HttpRequest
         bool parseRequestBody(const std::string& str);
         void clearRequest();
 
+        bool hasHeader(const std::string& name) const;
+
         const std::string& getMethod() const;
         const std::string& getURI() const;
         const std::string& getVersion() const;

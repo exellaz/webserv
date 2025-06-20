@@ -1,5 +1,10 @@
 #include "http-request.h"
 
+bool HttpRequest::hasHeader(const std::string& name) const
+{
+    return _headers.find(name) != _headers.end();
+}
+
 const std::string& HttpRequest::getMethod() const
 {
     return _method;
