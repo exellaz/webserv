@@ -5,7 +5,6 @@
 # include <sstream>
 # include <map>
 # include <cstdlib>
-# include "http-response.h"
 
 namespace HttpConstants
 {
@@ -20,8 +19,8 @@ namespace HttpConstants
 class HttpRequest
 {
     public:
-        bool parseRequestLine(const std::string& headerStr, HttpResponse& response);
-        bool parseHeaderLines(const std::string& line, HttpResponse& response);
+        bool parseRequestLine(const std::string& headerStr);
+        bool parseHeaderLines(const std::string& line);
         bool parseRequestBody(const std::string& str);
         void clearRequest();
 

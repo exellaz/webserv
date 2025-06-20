@@ -5,6 +5,7 @@
 #include <string>
 #include "http-request.h"
 #include "http-response.h"
+#include "http-exception.h"
 #include <iostream>
 #include <sys/time.h>
 

@@ -1,6 +1,7 @@
 #include "http-request.h"
+#include "http-exception.h"
 
-bool HttpRequest::parseRequestLine(const std::string& headerStr, HttpResponse& response)
+bool HttpRequest::parseRequestLine(const std::string& headerStr)
 {
     std::istringstream stream(headerStr);
     std::string line;
@@ -10,37 +11,30 @@ bool HttpRequest::parseRequestLine(const std::string& headerStr, HttpResponse& r
             line.erase(line.size() - 1);
         }
 
-        if (line.empty()) {
+        if (line.empty())
             continue; // Skip empty prelude lines
-        }
 
         // Now this is the actual request line
         std::string extra;
         std::istringstream lineStream(line);
-        if (!(lineStream >> _method >> _uri >> _version)) {
-            response.setStatus(BAD_REQUEST);
-            throw std::logic_error("Bad request line format");
-        }
+        if (!(lineStream >> _method >> _uri >> _version))
+            throw HttpException(BAD_REQUEST, "Bad request line format");
 
-        if (_method != "GET" && _method != "POST" && _method != "DELETE") {
-            response.setStatus(METHOD_NOT_ALLOWED);
-            throw std::logic_error("Method not allowed");
-        }
+        if (_method != "GET" && _method != "POST" && _method != "DELETE")
+            throw HttpException(METHOD_NOT_ALLOWED, "Method not allowed");
 
-        if (_version != "HTTP/1.1") {
-            response.setStatus(VERSION_NOT_SUPPORTED);
-            throw std::logic_error("Unsupported HTTP version");
-        }
+        if (_version != "HTTP/1.1")
+            throw HttpException(VERSION_NOT_SUPPORTED, "HTTP version not supported");
+
         return true;
     }
 
     // If we never found a non-empty line
-    response.setStatus(BAD_REQUEST);
-    throw std::logic_error("Missing request line");
+    throw HttpException(BAD_REQUEST, "Missing request line");
     return true;
 }
 
-bool HttpRequest::parseHeaderLines(const std::string& str, HttpResponse& response)
+bool HttpRequest::parseHeaderLines(const std::string& str)
 {
     std::istringstream stream(str);
     std::string line;
@@ -52,23 +46,20 @@ bool HttpRequest::parseHeaderLines(const std::string& str, HttpResponse& respons
 
         size_t colon = line.find(':');
         if (colon != std::string::npos) {
-            if (line[colon - 1] == ' ') {
-                response.setStatus(BAD_REQUEST);
-                throw std::logic_error("Whitespace before colon");
-            }
+            if (line[colon - 1] == ' ')
+                throw HttpException(BAD_REQUEST, "Whitespace before colon");
+
             std::string key = line.substr(0, colon);
             // if ((_method == "GET" || _method == "DELETE") && (key == "Content-Length" || key == "Transfer-Encoding")) {
             //     response.setStatus(BAD_REQUEST);
             //     throw std::logic_error("Bad request");
             // }
             std::string value = line.substr(colon + 1);
-            while (!value.empty() && value[0] == ' ') {
+            while (!value.empty() && value[0] == ' ')
                 value = value.substr(1);
-            }
-            if (_headers.count(key)) {
-                response.setStatus(BAD_REQUEST);
-                throw std::logic_error("Duplicate header");
-            }
+
+            if (_headers.count(key))
+                throw HttpException(BAD_REQUEST, "Duplicate header");
             _headers[key] = value;
         }
     }
@@ -77,10 +68,8 @@ bool HttpRequest::parseHeaderLines(const std::string& str, HttpResponse& respons
     			std::cout << "Header: [" << it->first << "] = [" << it->second << "]\n";
 			}
 
-    if (_headers.find("Host") == _headers.end()) {
-        response.setStatus(BAD_REQUEST);
-        throw std::logic_error("Missing Host header");
-    }
+    if (_headers.find("Host") == _headers.end())
+        throw HttpException(BAD_REQUEST, "Missing Host header");
     return true;
 }
 
