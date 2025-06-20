@@ -16,15 +16,26 @@ bool HttpRequest::isValidToken(const std::string& token) const
     return !token.empty();
 }
 
+bool HttpRequest::isValidHeaderValue(const std::string& value) const
+{
+    for (std::string::const_iterator It = value.begin(); It != value.end(); ++It) {
+        unsigned char c = static_cast<unsigned char>(*It);
+        if (c == 9 || (c >= 32 && c <= 126) || c >= 128)
+            continue;
+
+        return false;
+    }
+    return true;
+}
+
 bool HttpRequest::parseRequestLine(const std::string& headerStr)
 {
     std::istringstream stream(headerStr);
     std::string line;
 
     while (std::getline(stream, line)) {
-        if (!line.empty() && line[line.size() - 1] == '\r') {
+        if (!line.empty() && line[line.size() - 1] == '\r')
             line.erase(line.size() - 1);
-        }
 
         if (line.empty())
             continue; // Skip empty prelude lines
@@ -61,16 +72,15 @@ bool HttpRequest::parseHeaderLines(const std::string& str)
 
         size_t colon = line.find(':');
         if (colon != std::string::npos) {
-            // if (line[colon - 1] == ' ')
-            //     throw HttpException(BAD_REQUEST, "Whitespace before colon");
-
             std::string key = line.substr(0, colon);
             if (!isValidToken(key))
                 throw HttpException(BAD_REQUEST, "Invalid token as header field");
 
             std::string value = line.substr(colon + 1);
+            if (!isValidHeaderValue(value))
+                throw HttpException(BAD_REQUEST, "Invalid header value");
             while (!value.empty() && value[0] == ' ')
-            value = value.substr(1);
+                value = value.substr(1);
 
             if (_headers.count(key))
                 throw HttpException(BAD_REQUEST, "Duplicate header");
@@ -82,8 +92,8 @@ bool HttpRequest::parseHeaderLines(const std::string& str)
         throw HttpException(BAD_REQUEST, "No body expected for this method");
 
     for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); ++it) {
-    			std::cout << "Header: [" << it->first << "] = [" << it->second << "]\n";
-			}
+        std::cout << "Header: [" << it->first << "] = [" << it->second << "]\n";
+    }
 
     if (!hasHeader("Host"))
         throw HttpException(BAD_REQUEST, "Missing Host header");
