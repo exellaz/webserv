@@ -20,6 +20,7 @@
 #include "./Buffer.h"
 #include "Connection.h"
 #include "http-response.h"
+#include <algorithm>
 
 #define RESET "\033[0m"
 #define BOLD "\033[1m"
@@ -57,7 +58,7 @@ void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Connection>& con
 int readRequestHeader(Connection &connection, std::string& headerStr);
 int readRequestBody(Connection &conn, std::string& bodyStr);
 int receiveClientRequest(Connection &connection);
-int readByChunkedEncoding(Connection &conn, std::string& bodyStr); 
+int readByChunkedEncoding(Connection &conn, std::string& bodyStr);
 
 // Timeout
 void disconnectTimedOutClients(std::vector<Connection>& connections, std::vector<struct pollfd>& pfds);

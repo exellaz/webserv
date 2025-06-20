@@ -22,6 +22,7 @@ enum readBodyMethod {
 enum readChunkedRequestStatus {
 	READ_CHUNK_SIZE,
 	READ_CHUNK_DATA,
+	EXPECT_CRLF_AFTER_ZERO_CHUNK_SIZE,
 	DONE
 };
 
@@ -42,6 +43,7 @@ public:
 	enum readBodyMethod readBodyMethod;
 	size_t contentLength;
 	enum readChunkedRequestStatus readChunkedRequestStatus;
+	size_t chunkSize;
 	bool isResponseReady;
 
 	void appendToBuffer(const char *str, size_t n);

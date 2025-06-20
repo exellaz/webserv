@@ -22,10 +22,10 @@ static int readFromSocket2(int fd, std::string& buffer)
 	return n;
 }
 
-bool isLineComplete(const std::string& buffer, size_t parsePos)
+bool doesLineHaveCRLF(const std::string& buffer)
 {
 	// find "\r\n"
-	size_t pos = buffer.find(CRLF, parsePos);
+	size_t pos = buffer.find(CRLF, 0);
 	if (pos != std::string::npos)
 		return true;
 	else return false;
@@ -40,59 +40,96 @@ size_t hexStrToSizeT(const std::string& hexStr)
 	return n;
 }
 
+void clearStrSection(std::string& buffer, int startIndex)
+{
+	buffer = buffer.substr(startIndex);
+}
+
 // function increments `parsePos`
-size_t extractChunkSize(std::string& buffer, size_t& parsePos)
+size_t extractChunkSize(std::string& buffer)
 {
 	size_t chunkSize = 0;
-	size_t pos = buffer.find(CRLF, parsePos);
+	size_t pos = buffer.find(CRLF, 0);
 	// TODO: if CRLF not found
 
-	std::string sizeStr = buffer.substr(parsePos, pos);
+	if (pos == 0) {
+		// TODO: if there's no "0"
+		std::cout << "no '0' in last chunk\n";
+	}
+	std::string sizeStr = buffer.substr(0, pos);
 	std::cout << "sizeStr: " << sizeStr << '\n';
-	
+
 	chunkSize = hexStrToSizeT(sizeStr);
 	std::cout << "chunkSzie: " << chunkSize << '\n';
-	parsePos += sizeStr.length() + CRLF_LENGTH;
-	std::cout << "parsePos: " << parsePos << '\n';
+
+	buffer.erase(0, sizeStr.length() + CRLF_LENGTH);
 	return chunkSize;
+}
+
+std::string extractChunkData(std::string& buffer, size_t chunkSize)
+{
+	// TODO: if (chunkSize > buffer.size())
+	std::cout << "buffer: " << buffer << '\n';
+	std::cout << "chunkSize: " << chunkSize << '\n';
+	std::string dataStr = buffer.substr(0, chunkSize);
+
+	std::cout << "data: " << dataStr << '\n';
+
+	buffer.erase(0, dataStr.length() + CRLF_LENGTH);
+	return dataStr;
 }
 
 int readByChunkedEncoding(Connection &conn, std::string& bodyStr)
 {
 	(void)bodyStr;
-	int ret = RECV_OK; 
+	int ret = RECV_OK;
 	enum readChunkedRequestStatus& status = conn.readChunkedRequestStatus;
 	std::string buffer;
-	size_t parsePos = 0;
 
 	while (status != DONE) {
-		
+
 		ret = readFromSocket2(conn.fd, buffer);
 		if (ret <= 0)
 			return ret; // RECV_AGAIN or RECV_CLOSED or RECV_ERROR
 		conn.startTime = getNowInSeconds(); // reset timer
 
-		while (parsePos < buffer.size()) {
-			
+		while (buffer.size() > 0) {
+
 			if (status == READ_CHUNK_SIZE) {
 				std::cout << "READ_CHUNK_SIZE\n";
-				if (isLineComplete(buffer, parsePos)) {
-					int chunkSize = extractChunkSize(buffer, parsePos);
-					// TODO: increment `parsePos`
-					if (chunkSize == 0)
-						status = DONE;
-					else 
-						status = READ_CHUNK_DATA;
-				}
-				break;
+				if (!doesLineHaveCRLF(buffer))
+					break;
+				conn.chunkSize = extractChunkSize(buffer);
+				if (conn.chunkSize == 0)
+					status = EXPECT_CRLF_AFTER_ZERO_CHUNK_SIZE;
+				else
+					status = READ_CHUNK_DATA;
 			}
 			else if (status == READ_CHUNK_DATA) {
 				std::cout << "READ_CHUNK_DATA\n";
 
-				if (isLineComplete(buffer, parsePos)) {
+				if (buffer.size() < conn.chunkSize + CRLF_LENGTH)
+					break;
+				std::string chunkData = extractChunkData(buffer, conn.chunkSize);
+				conn.appendToBuffer(chunkData.c_str(), chunkData.length());
 
-					// TODO: increment `parsePos`
+				// Now verify CRLF
+				if (buffer[conn.chunkSize] != '\r' || buffer[conn.chunkSize + 1] != '\n') { // Malformed request
+					// TODO: return RECV_ERR
 				}
+
+				buffer.erase(0, conn.chunkSize + CRLF_LENGTH);
+				status = READ_CHUNK_SIZE;
+			}
+			else if (status == EXPECT_CRLF_AFTER_ZERO_CHUNK_SIZE) {
+
+				std::cout << "EXPECT_CRLF_AFTER_ZERO_CHUNK_SIE\n";
+				// TODO: segfault if [0] or [1] is not initialised?
+				if (buffer[0] != '\r' || buffer[1] != '\n') { // Malformed request
+					// TODO: return RECV_ERR
+				}
+				status = DONE;
+				buffer.erase(0, CRLF_LENGTH);
 			}
 		}
 	}
