@@ -85,5 +85,7 @@ int receiveClientRequest(Connection &connection)
 	std::cout << request;
 	connection.isResponseReady = true;
 	// parseRequestBody();
+
+	connection.clearBuffer();
 	return 0;
 }
