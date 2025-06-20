@@ -25,6 +25,8 @@ class HttpRequest
         void clearRequest();
 
         bool hasHeader(const std::string& name) const;
+        bool isValidToken(const std::string& token) const;
+        bool isTChar(char c) const;
 
         const std::string& getMethod() const;
         const std::string& getURI() const;

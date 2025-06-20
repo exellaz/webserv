@@ -1,12 +1,14 @@
 #include "http-request.h"
 #include "http-exception.h"
 
-bool isTChar(char c) {
+bool HttpRequest::isTChar(char c) const
+{
     const std::string tcharSymbols = "!#$%&'*+-.^_`|~";
     return std::isalnum(static_cast<unsigned char>(c)) || tcharSymbols.find(c) != std::string::npos;
 }
 
-bool isValidToken(const std::string& token) {
+bool HttpRequest::isValidToken(const std::string& token) const
+{
     for (std::string::const_iterator It = token.begin(); It != token.end(); ++It) {
         if (!isTChar(*It))
             return false;
@@ -78,8 +80,6 @@ bool HttpRequest::parseHeaderLines(const std::string& str)
 
     if ((_method == "GET" || _method == "DELETE") && (hasHeader("Content-Length") || hasHeader("Transfer-Encoding")))
         throw HttpException(BAD_REQUEST, "No body expected for this method");
-
-    // if ()
 
     for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); ++it) {
     			std::cout << "Header: [" << it->first << "] = [" << it->second << "]\n";
