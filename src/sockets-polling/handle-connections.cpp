@@ -73,8 +73,8 @@ int receiveClientRequest(Connection &connection, std::vector<Server>& servers)
     std::string choosePort = extractPortFromHost(request.getHeader("Host"));
     if (choosePort.empty())
         choosePort = servers[0].getPort();
-    Server serverConfig = getServerByPort(servers, choosePort);
-    Location location = serverConfig.getLocationPath(request.getURI());
+    Server server = getServerByPort(servers, choosePort);
+    Location location = server.getLocationPath(request.getURI());
     if (location.alias.empty() && location.root.empty())
     {
         response.setStatus(NOT_FOUND);
@@ -115,7 +115,7 @@ int receiveClientRequest(Connection &connection, std::vector<Server>& servers)
 
     // parseRequestHeader();
     else if (response.getStatus() == OK && request.getMethod() == "GET")
-        response.handleGetRequest(request, serverConfig);
+        response.handleGetRequest(request, server);
 
 
     // TODO: isBodyPresent()   -> check Content-Length, Transfer-Encoding, request method
