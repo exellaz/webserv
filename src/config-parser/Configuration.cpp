@@ -6,7 +6,7 @@
 /*   By: welow <welow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/29 15:31:13 by welow             #+#    #+#             */
-/*   Updated: 2025/06/20 14:21:08 by welow            ###   ########.fr       */
+/*   Updated: 2025/06/20 20:24:40 by welow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -302,9 +302,9 @@ Location Server::getLocationPath(const std::string &path)
 		}
 
 		bool prefixMatch = path.compare(0, loc.length(), loc) == 0;
-		bool exactMatch = path.length() == loc.length();
-		bool nextCharSlash = path.length() > loc.length() && path[loc.length()] == '/';
-		if (prefixMatch && (exactMatch || nextCharSlash))
+		//bool exactMatch = path.length() == loc.length();
+		//bool nextCharSlash = path.length() > loc.length() && path[loc.length()] == '/';
+		if (prefixMatch)
 				match = loc;
 	}
 	if (!match.empty())

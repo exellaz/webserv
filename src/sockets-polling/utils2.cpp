@@ -54,13 +54,26 @@ std::string resolveHttpPath(const HttpRequest &request, Server &server)
     if (!location.alias.empty())
     {
         std::cout << "Alias found\n"; ////debug"
-        return getFullPath(resolveAliasPath(request.getURI(), location));
+		std::string relativeUri = request.getURI().substr(location.locationPath.length());
+		std::cout << "Relative path: " << relativeUri << "\n"; ////debug
+		if ((!location.index.empty()) && (relativeUri.empty() || relativeUri == "/"))
+		{
+			std::cout << "Alias path with index: " << getFullPath(location.alias + relativeUri + "/" + location.index) << "\n"; ////debug
+			return getFullPath(location.alias + relativeUri + "/" + location.index);
+		}
+		else
+		{
+			std::cout << "Alias path without index: " << getFullPath(location.alias + relativeUri) << "\n"; ////debug
+			return getFullPath(location.alias + relativeUri);
+		}
     }
     else if (!location.root.empty())
     {
         std::cout << "Root found\n"; ////debug
-        std::cout << "Root path: " << getFullPath(request.getURI() + "/" + location.index) << "\n";
-        return getFullPath(request.getURI() + "/" + location.index);
+        //std::cout << "Root path: " << getFullPath(request.getURI() + "/" + location.index) << "\n";
+        //return getFullPath(request.getURI() + "/" + location.index);
+		std::cout << "Full Root path: " << getFullPath(location.root + request.getURI()) << "\n";
+		return getFullPath(location.root + request.getURI());
     }
     return "";
 }
@@ -113,6 +126,9 @@ std::string resolveHttpPath(const HttpRequest &request, Server &server)
 //    return true;
 //}
 
+/**
+ * @brief Reads the contents of a directory and generates an HTML index page
+*/
 std::string readDirectorytoString(const std::string &directoryPath, const HttpRequest &request)
 {
     std::stringstream htmlOutput;
@@ -136,6 +152,9 @@ std::string readDirectorytoString(const std::string &directoryPath, const HttpRe
     return htmlOutput.str();
 }
 
+/**
+ * @brief Extracts the port number from a host string.
+*/
 std::string extractPortFromHost(const std::string &host)
 {
     size_t colon = host.find(':');
