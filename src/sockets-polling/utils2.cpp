@@ -1,43 +1,38 @@
 #include "../../include/sockets-polling.h"
 
-std::string resolveAliasPath(const std::string &url, const Location &location)
-{
-    std::string pathInLocation;
-    std::string fullAliasPath;
-    std::string locationPath = location.locationPath;
-    std::string alias = location.alias;
-
-    //if locationPath is empty
-    if (url.find(locationPath) == 0)
-        pathInLocation = url.substr(locationPath.length());
-    else
-        pathInLocation = "";
-    //check if alias is empty && if pathInLocation is empty
-    if (!pathInLocation.empty() && pathInLocation[0] != '/')
-        pathInLocation = "/" + pathInLocation;
-    //if location is empty or pathLocation ends with '/'
-    if (pathInLocation.empty() || pathInLocation[pathInLocation.size() - 1] == '/')
-        pathInLocation += location.index;
-    //if alias is not empty && alias end with '/' && pathInLocation starts with '/'
-    if (!alias.empty() && alias[alias.size() - 1] == '/' && pathInLocation[0] == '/')
-        fullAliasPath = alias.substr(0, alias.size() - 1) + pathInLocation;
-    //if alias end is not '/' && pathInLocation does not start with '/'
-    else if (alias[alias.size() - 1] != '/' && pathInLocation[0] != '/')
-        fullAliasPath = alias + "/" + pathInLocation;
-    else
-        fullAliasPath = alias + pathInLocation;
-    return fullAliasPath;
-}
-
-//std::string readFileToString (std::ifstream &file)
+//std::string resolveAliasPath(const std::string &url, const Location &location)
 //{
-//    std::string content;
-//    for (std::string line; std::getline(file, line);)
-//        content += line + "\n";
-//    return content;
+//    std::string pathInLocation;
+//    std::string fullAliasPath;
+//    std::string locationPath = location.locationPath;
+//    std::string alias = location.alias;
+
+//    //if locationPath is empty
+//    if (url.find(locationPath) == 0)
+//        pathInLocation = url.substr(locationPath.length());
+//    else
+//        pathInLocation = "";
+//    //check if alias is empty && if pathInLocation is empty
+//    if (!pathInLocation.empty() && pathInLocation[0] != '/')
+//        pathInLocation = "/" + pathInLocation;
+//    //if location is empty or pathLocation ends with '/'
+//    if (pathInLocation.empty() || pathInLocation[pathInLocation.size() - 1] == '/')
+//        pathInLocation += location.index;
+//    //if alias is not empty && alias end with '/' && pathInLocation starts with '/'
+//    if (!alias.empty() && alias[alias.size() - 1] == '/' && pathInLocation[0] == '/')
+//        fullAliasPath = alias.substr(0, alias.size() - 1) + pathInLocation;
+//    //if alias end is not '/' && pathInLocation does not start with '/'
+//    else if (alias[alias.size() - 1] != '/' && pathInLocation[0] != '/')
+//        fullAliasPath = alias + "/" + pathInLocation;
+//    else
+//        fullAliasPath = alias + pathInLocation;
+//    return fullAliasPath;
 //}
 
-Server getServerConfigByPort(const std::vector<Server> &servers, const std::string port)
+/**
+ * @brief get the server by port
+*/
+Server getServerByPort(const std::vector<Server> &servers, const std::string port)
 {
     for (std::vector<Server>::const_iterator it = servers.begin(); it != servers.end(); ++it)
     {
@@ -47,6 +42,22 @@ Server getServerConfigByPort(const std::vector<Server> &servers, const std::stri
     return Server();
 }
 
+/**
+ * @brief normalize the multiple "/" in the relative uri to one "/"
+*/
+std::string normalizeSlash(const std::string &relativeUri)
+{
+	for(size_t i = 0; i < relativeUri.size(); ++i)
+	{
+		if (relativeUri[i] != '/')
+			return relativeUri; // Contains something else, return as is
+	}
+	return relativeUri.empty() ? "" : "/"; // Only slashes (and not empty)
+}
+
+/**
+ * @brief get full path from the uri
+*/
 std::string resolveHttpPath(const HttpRequest &request, Server &server)
 {
     const Location location = server.getLocationPath(request.getURI());
@@ -54,7 +65,8 @@ std::string resolveHttpPath(const HttpRequest &request, Server &server)
     if (!location.alias.empty())
     {
         std::cout << "Alias found\n"; ////debug"
-		std::string relativeUri = request.getURI().substr(location.locationPath.length());
+		std::string getRelativeUri = request.getURI().substr(location.locationPath.length());
+		std::string relativeUri = normalizeSlash(getRelativeUri);
 		std::cout << "Relative path: " << relativeUri << "\n"; ////debug
 		if ((!location.index.empty()) && (relativeUri.empty() || relativeUri == "/"))
 		{
@@ -70,7 +82,8 @@ std::string resolveHttpPath(const HttpRequest &request, Server &server)
     else if (!location.root.empty())
     {
         std::cout << "Root found\n"; ////debug
-		std::string relativeUri = request.getURI().substr(location.locationPath.length());
+		std::string getRelativeUri = request.getURI().substr(location.locationPath.length());
+		std::string relativeUri = normalizeSlash(getRelativeUri);
 		if ((!location.index.empty()) && (relativeUri.empty() || relativeUri == "/"))
 		{
 			std::cout << "Root path with index: " << getFullPath(location.root + request.getURI() + "/" + location.index) << "\n"; ////debug

@@ -81,9 +81,9 @@ time_t getNowInSeconds();
 int getNearestUpcomingTimeout(std::vector<Connection>& connections);
 
 // utils2
-std::string resolveAliasPath(const std::string &url, const Location &location);
+//std::string resolveAliasPath(const std::string &url, const Location &location);
 //std::string readFileToString (std::ifstream &file);
-Server getServerConfigByPort(const std::vector<Server> &servers, const std::string port);
+Server getServerByPort(const std::vector<Server> &servers, const std::string port);
 std::string resolveHttpPath(const HttpRequest &request, Server &server);
 //bool serveStaticFile(const std::string &httpPath, int clientFd);
 //bool serveAutoIndex(const std::string &httpPath, const std::string &url, int clientFd);

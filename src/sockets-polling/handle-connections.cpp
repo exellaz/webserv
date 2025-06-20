@@ -73,7 +73,7 @@ int receiveClientRequest(Connection &connection, std::vector<Server>& servers)
     std::string choosePort = extractPortFromHost(request.getHeader("Host"));
     if (choosePort.empty())
         choosePort = servers[0].getPort();
-    Server serverConfig = getServerConfigByPort(servers, choosePort);
+    Server serverConfig = getServerByPort(servers, choosePort);
     Location location = serverConfig.getLocationPath(request.getURI());
     if (location.alias.empty() && location.root.empty())
     {
