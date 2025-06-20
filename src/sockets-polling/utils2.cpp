@@ -135,3 +135,11 @@ std::string readDirectorytoString(const std::string &directoryPath, const HttpRe
     htmlOutput << "</ul><hr></body></html>";
     return htmlOutput.str();
 }
+
+std::string extractPortFromHost(const std::string &host)
+{
+    size_t colon = host.find(':');
+    if (colon == std::string::npos)
+        return "";
+    return host.substr(colon + 1);
+}

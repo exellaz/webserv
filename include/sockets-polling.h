@@ -88,6 +88,7 @@ std::string resolveHttpPath(const HttpRequest &request, Server &server);
 //bool serveStaticFile(const std::string &httpPath, int clientFd);
 //bool serveAutoIndex(const std::string &httpPath, const std::string &url, int clientFd);
 std::string readDirectorytoString(const std::string &directoryPath, const HttpRequest &request);
+std::string extractPortFromHost(const std::string &host);
 
 class BadRequestException : public std::exception {
 public:
