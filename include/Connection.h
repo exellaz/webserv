@@ -51,6 +51,10 @@ public:
 	const std::string& getBuffer() const;
 	void setBuffer(std::string str);
 	void clearBuffer();
+	void eraseBufferFromStart(size_t n);
+	size_t bufferSize() const;
+	bool compareBuffer(const std::string str);
+	size_t findInBuffer(const std::string str, size_t pos);
 
 	HttpRequest request;
 	HttpResponse response;

@@ -79,6 +79,11 @@ int receiveClientRequest(Connection &connection)
 			int ret2 = readRequestBody(connection, bodyStr);
 			if (ret2 < 0)
 				return ret2;
+
+			std::cout << "\n===== body String: =====\n";
+			std::cout << bodyStr << '\n';
+			std::cout << "==========================\n\n";
+
 			request.setBody(bodyStr);
 		}
 		catch (std::exception& e) {

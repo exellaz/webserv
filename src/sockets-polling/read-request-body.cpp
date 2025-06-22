@@ -15,7 +15,7 @@ static int readFromSocket(Connection &connection)
 		std::cout << "RECV_AGAIN: No data available yet, will try again next iteration.\n";
 		return RECV_AGAIN;
     }
-
+	buf[n] = '\0';
 	connection.appendToBuffer(buf, n);
 	std::cout << "curBuffer: " << connection.getBuffer() << '\n';
 

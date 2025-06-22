@@ -67,6 +67,28 @@ void Connection::clearBuffer()
 	_buffer.clear();
 }
 
+void Connection::eraseBufferFromStart(size_t n)
+{
+	_buffer.erase(0, n);
+}
+
+size_t Connection::bufferSize() const
+{
+	return _buffer.size();
+}
+
+bool Connection::compareBuffer(const std::string str)
+{
+	if (_buffer == str)
+		return true;
+	return false;
+}
+
+size_t Connection::findInBuffer(const std::string str, size_t pos)
+{
+	return _buffer.find(str, pos);
+}
+
 std::ostream & operator<<( std::ostream & o, Connection const & connection )
 {
 	o << "\nConnection: \n"
@@ -74,5 +96,3 @@ std::ostream & operator<<( std::ostream & o, Connection const & connection )
 		<< "buffer: "<< connection.getBuffer() << '\n';
 	return o;
 }
-
-
