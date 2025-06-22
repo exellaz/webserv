@@ -64,14 +64,6 @@ int readRequestBody(Connection &conn, std::string& bodyStr)
 		std::cout << "NO BODY\n";
 		return RECV_OK;
 	}
-	//
-	// std::cout << "bodyStr size: " << bodyStr.size() << '\n';
-	// std::cout << "\n===== body String: =====\n";
-	// std::cout << bodyStr << '\n';
-	// std::cout << "==========================\n\n";
-	// std::cout << "----Leftover in Buffer: ----\n";
-	// std::cout << conn.getBuffer() << '\n';
-	// std::cout << "----------------------------\n";
 
 	return ret;
 }

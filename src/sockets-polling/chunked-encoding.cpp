@@ -58,11 +58,14 @@ size_t extractChunkSize(std::string& buffer, Connection& conn)
 {
 	size_t chunkSize = 0;
 	size_t pos = buffer.find(CRLF, 0);
-	// TODO: if CRLF not found
 
-	if (pos == 0) {
-		// TODO: if there's no "0"
-		std::cout << "no '0' in last chunk\n";
+	if (buffer == "\r\n") { // no hex digits in chunk size line
+		// TODO: no hex digits
+		std::cout << "no hex digits in chunk size line\n";
+		// 400 Bad Request
+		conn.response.setStatus(BAD_REQUEST);
+		throw std::logic_error("Bad request line format");
+
 	}
 	std::string sizeStr = buffer.substr(0, pos);
 
@@ -85,7 +88,6 @@ std::string extractChunkData(std::string& buffer, size_t chunkSize)
 
 	std::cout << "data: " << dataStr << '\n';
 
-	buffer.erase(0, dataStr.length() + CRLF_LENGTH);
 	return dataStr;
 }
 
@@ -105,12 +107,6 @@ int readByChunkedEncoding(Connection &conn, std::string& bodyStr)
 
 		while (buffer.size() > 0) {
 
-			if (buffer == "\r\n") { // Invalid Case: line with just CRLF
-				// Bad Request
-				conn.response.setStatus(BAD_REQUEST);
-				throw std::logic_error("Bad request line format");
-
-			}
 			if (status == READ_CHUNK_SIZE) {
 				std::cout << "READ_CHUNK_SIZE\n";
 				if (!doesLineHaveCRLF(buffer))
@@ -142,6 +138,7 @@ int readByChunkedEncoding(Connection &conn, std::string& bodyStr)
 				std::cout << "EXPECT_CRLF_AFTER_ZERO_CHUNK_SIE\n";
 
 				if (buffer != "\r\n") { // line after chunkSize 0 is not CRLF only
+					std::cout << "line after chunkSize 0 is not CRLF only\n";
 					// 400 Bad Request
 					conn.response.setStatus(BAD_REQUEST);
 					throw std::logic_error("Bad request line format");

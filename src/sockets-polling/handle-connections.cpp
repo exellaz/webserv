@@ -44,7 +44,6 @@ int receiveClientRequest(Connection &connection)
 	int ret = 0;
 	if (request.getMethod().empty()) {
 		ret = readRequestHeader(connection, headerStr);
-
 		if (ret < 0)
 			return ret;
 
