@@ -5,7 +5,6 @@ static int readFromSocket2(int fd, std::string& buffer)
 	char buf[BODY_BUFFER_SIZE + 1];
 
 	ssize_t n = recv(fd, buf, BODY_BUFFER_SIZE, 0);
-	std::cout << "n: " << n << '\n';
 
     if (n == 0) {
 		std::cout << "RECV_CLOSED\n";
@@ -45,6 +44,15 @@ void clearStrSection(std::string& buffer, int startIndex)
 	buffer = buffer.substr(startIndex);
 }
 
+bool isStrHex(const std::string& str)
+{
+	for (size_t i = 0; i < str.length(); ++i) {
+		if (!std::isxdigit(str[i]))
+			return false;
+	}
+	return true;
+}
+
 // function increments `parsePos`
 size_t extractChunkSize(std::string& buffer)
 {
@@ -57,10 +65,14 @@ size_t extractChunkSize(std::string& buffer)
 		std::cout << "no '0' in last chunk\n";
 	}
 	std::string sizeStr = buffer.substr(0, pos);
-	std::cout << "sizeStr: " << sizeStr << '\n';
+
+	if (!isStrHex(sizeStr)) {
+		// TODO: 400 Bad Request
+		std::cout << "chunkSize string contains non-Hex characters\n";
+	}
 
 	chunkSize = hexStrToSizeT(sizeStr);
-	std::cout << "chunkSzie: " << chunkSize << '\n';
+	std::cout << "chunkSize: " << chunkSize << '\n';
 
 	buffer.erase(0, sizeStr.length() + CRLF_LENGTH);
 	return chunkSize;
@@ -68,9 +80,6 @@ size_t extractChunkSize(std::string& buffer)
 
 std::string extractChunkData(std::string& buffer, size_t chunkSize)
 {
-	// TODO: if (chunkSize > buffer.size())
-	std::cout << "buffer: " << buffer << '\n';
-	std::cout << "chunkSize: " << chunkSize << '\n';
 	std::string dataStr = buffer.substr(0, chunkSize);
 
 	std::cout << "data: " << dataStr << '\n';
@@ -84,7 +93,7 @@ int readByChunkedEncoding(Connection &conn, std::string& bodyStr)
 	(void)bodyStr;
 	int ret = RECV_OK;
 	enum readChunkedRequestStatus& status = conn.readChunkedRequestStatus;
-	std::string buffer;
+	std::string& buffer = conn.chunkReqBuf;
 
 	while (status != DONE) {
 
@@ -95,6 +104,10 @@ int readByChunkedEncoding(Connection &conn, std::string& bodyStr)
 
 		while (buffer.size() > 0) {
 
+			if (buffer == "\r\n") {
+				std::cout << "Invalid Case: line with just CRLF\n";
+				// TODO: 400 Bad Request
+			}
 			if (status == READ_CHUNK_SIZE) {
 				std::cout << "READ_CHUNK_SIZE\n";
 				if (!doesLineHaveCRLF(buffer))
@@ -108,25 +121,25 @@ int readByChunkedEncoding(Connection &conn, std::string& bodyStr)
 			else if (status == READ_CHUNK_DATA) {
 				std::cout << "READ_CHUNK_DATA\n";
 
-				if (buffer.size() < conn.chunkSize + CRLF_LENGTH)
+				if (buffer.size() < conn.chunkSize + CRLF_LENGTH) // must have CRLF for a complete line
 					break;
 				std::string chunkData = extractChunkData(buffer, conn.chunkSize);
 				conn.appendToBuffer(chunkData.c_str(), chunkData.length());
 
 				// Now verify CRLF
 				if (buffer[conn.chunkSize] != '\r' || buffer[conn.chunkSize + 1] != '\n') { // Malformed request
-					// TODO: return RECV_ERR
+					// TODO: 400 Bad Request
 				}
 
 				buffer.erase(0, conn.chunkSize + CRLF_LENGTH);
 				status = READ_CHUNK_SIZE;
 			}
 			else if (status == EXPECT_CRLF_AFTER_ZERO_CHUNK_SIZE) {
-
 				std::cout << "EXPECT_CRLF_AFTER_ZERO_CHUNK_SIE\n";
-				// TODO: segfault if [0] or [1] is not initialised?
-				if (buffer[0] != '\r' || buffer[1] != '\n') { // Malformed request
-					// TODO: return RECV_ERR
+
+				if (buffer != "\r\n") {
+					std::cout << "Invalid Case: line after chunkSize 0 is not CRLF only\n";
+					// TODO: 400 Bad Request
 				}
 				status = DONE;
 				buffer.erase(0, CRLF_LENGTH);

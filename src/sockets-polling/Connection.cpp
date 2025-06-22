@@ -3,7 +3,7 @@
 Connection::Connection(int fd, time_t startTime) :
 	fd(fd), startTime(startTime), connType(KEEP_ALIVE),
 	readBodyMethod(CONTENT_LENGTH), contentLength(0),
-	readChunkedRequestStatus(READ_CHUNK_SIZE), chunkSize(0),
+	readChunkedRequestStatus(READ_CHUNK_SIZE), chunkSize(0), chunkReqBuf(""),
 	isResponseReady(false), _buffer("")
 {
 	// std::cout << "Connection:: Constructor Called (name: " << index << ")" << std::endl;
@@ -14,7 +14,7 @@ Connection::Connection(int fd, time_t startTime) :
 Connection::Connection(const Connection& other) :
 	fd(other.fd), startTime(other.startTime), connType(other.connType),
 	readBodyMethod(other.readBodyMethod), contentLength(other.contentLength),
-	readChunkedRequestStatus(other.readChunkedRequestStatus), chunkSize(other.chunkSize),
+	readChunkedRequestStatus(other.readChunkedRequestStatus), chunkSize(other.chunkSize), chunkReqBuf(other.chunkReqBuf),
 	isResponseReady(other.isResponseReady), _buffer(other._buffer)
 {
 	// std::cout << "Connection:: Copy Constructor Called" << std::endl;
@@ -34,6 +34,7 @@ Connection& Connection::operator=(const Connection& other)
 	contentLength 	= other.contentLength;
 	readChunkedRequestStatus = other.readChunkedRequestStatus;
 	chunkSize = other.chunkSize;
+	chunkReqBuf = other.chunkReqBuf;
 	isResponseReady = other.isResponseReady;
 	_buffer 		= other._buffer;
 

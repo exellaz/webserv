@@ -44,10 +44,10 @@ public:
 	size_t contentLength;
 	enum readChunkedRequestStatus readChunkedRequestStatus;
 	size_t chunkSize;
+	std::string chunkReqBuf;
 	bool isResponseReady;
 
 	void appendToBuffer(const char *str, size_t n);
-	// void appendToBuffer(char *str);
 	const std::string& getBuffer() const;
 	void setBuffer(std::string str);
 	void clearBuffer();
