@@ -54,7 +54,7 @@ bool isStrHex(const std::string& str)
 }
 
 // function increments `parsePos`
-size_t extractChunkSize(std::string& buffer)
+size_t extractChunkSize(std::string& buffer, Connection& conn)
 {
 	size_t chunkSize = 0;
 	size_t pos = buffer.find(CRLF, 0);
@@ -66,9 +66,10 @@ size_t extractChunkSize(std::string& buffer)
 	}
 	std::string sizeStr = buffer.substr(0, pos);
 
-	if (!isStrHex(sizeStr)) {
-		// TODO: 400 Bad Request
-		std::cout << "chunkSize string contains non-Hex characters\n";
+	if (!isStrHex(sizeStr)) { // chunkSize string contains non-Hex characters
+		// Bad Request
+		conn.response.setStatus(BAD_REQUEST);
+		throw std::logic_error("Bad request line format");
 	}
 
 	chunkSize = hexStrToSizeT(sizeStr);
@@ -104,15 +105,17 @@ int readByChunkedEncoding(Connection &conn, std::string& bodyStr)
 
 		while (buffer.size() > 0) {
 
-			if (buffer == "\r\n") {
-				std::cout << "Invalid Case: line with just CRLF\n";
-				// TODO: 400 Bad Request
+			if (buffer == "\r\n") { // Invalid Case: line with just CRLF
+				// Bad Request
+				conn.response.setStatus(BAD_REQUEST);
+				throw std::logic_error("Bad request line format");
+
 			}
 			if (status == READ_CHUNK_SIZE) {
 				std::cout << "READ_CHUNK_SIZE\n";
 				if (!doesLineHaveCRLF(buffer))
 					break;
-				conn.chunkSize = extractChunkSize(buffer);
+				conn.chunkSize = extractChunkSize(buffer, conn);
 				if (conn.chunkSize == 0)
 					status = EXPECT_CRLF_AFTER_ZERO_CHUNK_SIZE;
 				else
@@ -126,9 +129,10 @@ int readByChunkedEncoding(Connection &conn, std::string& bodyStr)
 				std::string chunkData = extractChunkData(buffer, conn.chunkSize);
 				conn.appendToBuffer(chunkData.c_str(), chunkData.length());
 
-				// Now verify CRLF
-				if (buffer[conn.chunkSize] != '\r' || buffer[conn.chunkSize + 1] != '\n') { // Malformed request
-					// TODO: 400 Bad Request
+				if (buffer[conn.chunkSize] != '\r' || buffer[conn.chunkSize + 1] != '\n') {
+					// 400 Bad Request
+					conn.response.setStatus(BAD_REQUEST);
+					throw std::logic_error("Bad request line format");
 				}
 
 				buffer.erase(0, conn.chunkSize + CRLF_LENGTH);
@@ -137,16 +141,16 @@ int readByChunkedEncoding(Connection &conn, std::string& bodyStr)
 			else if (status == EXPECT_CRLF_AFTER_ZERO_CHUNK_SIZE) {
 				std::cout << "EXPECT_CRLF_AFTER_ZERO_CHUNK_SIE\n";
 
-				if (buffer != "\r\n") {
-					std::cout << "Invalid Case: line after chunkSize 0 is not CRLF only\n";
-					// TODO: 400 Bad Request
+				if (buffer != "\r\n") { // line after chunkSize 0 is not CRLF only
+					// 400 Bad Request
+					conn.response.setStatus(BAD_REQUEST);
+					throw std::logic_error("Bad request line format");
 				}
 				status = DONE;
 				buffer.erase(0, CRLF_LENGTH);
 			}
 		}
 	}
-
 
 	return ret;
 }

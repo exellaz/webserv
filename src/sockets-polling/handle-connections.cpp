@@ -76,11 +76,16 @@ int receiveClientRequest(Connection &connection)
 		connection.readBodyMethod = NO_BODY;
 
 	if (connection.readBodyMethod != NO_BODY) {
-
-		int ret2 = readRequestBody(connection, bodyStr);
-		if (ret2 < 0)
-			return ret2;
-		request.setBody(bodyStr);
+		try {
+			int ret2 = readRequestBody(connection, bodyStr);
+			if (ret2 < 0)
+				return ret2;
+			request.setBody(bodyStr);
+		}
+		catch (std::exception& e) {
+			std::cerr << e.what() << "\n";
+			connection.connType = CLOSE;
+		}
 	}
 	std::cout << request;
 	connection.isResponseReady = true;
