@@ -36,9 +36,7 @@ int main(int argc, char **argv)
 
         while(1) {
 
-            std::cout << CYAN << "\n+++++++ Waiting for new connection ++++++++" << RESET << "\n\n";
-
-			// TODO: calculate nearest Timeout among all connections, assign to poll()
+            std::cout << CYAN << "\n+++++++ Waiting for POLL event ++++++++" << RESET << "\n\n";
 
             // wait until 1 or more fds become ready for reading (POLLIN) or other events.
 			int nearestTimeout = getNearestUpcomingTimeout(connections);
@@ -74,7 +72,6 @@ int main(int argc, char **argv)
                     std::cout << "POLLOUT\n";
 
                     sendResponseToClient(connections[i].fd, connections[i].response);
-                    // pfds[i].events |= POLLIN;
                     connections[i].isResponseReady = false;
                     connections[i].request.clearRequest();
                     connections[i].response.clearResponse();

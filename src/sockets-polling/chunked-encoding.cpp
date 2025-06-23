@@ -1,26 +1,5 @@
 #include "../../include/sockets-polling.h"
 
-// static int readFromSocket2(int fd, std::string& buffer)
-// {
-// 	char buf[BODY_BUFFER_SIZE + 1];
-
-// 	ssize_t n = recv(fd, buf, BODY_BUFFER_SIZE, 0);
-
-//     if (n == 0) {
-// 		std::cout << "RECV_CLOSED\n";
-// 		return RECV_CLOSED;
-// 	}
-// 	else if (n == -1) {
-// 		std::cout << "RECV_AGAIN: No data available yet, will try again next iteration.\n";
-// 		return RECV_AGAIN;
-//     }
-
-// 	buffer.append(buf, n);
-// 	std::cout << "curBuffer: " << buffer << '\n';
-
-// 	return n;
-// }
-
 static int readFromSocket(Connection &connection)
 {
 	char buf[BODY_BUFFER_SIZE + 1];
@@ -75,11 +54,9 @@ bool isStrHex(const std::string& str)
 	return true;
 }
 
-// function increments `parsePos`
 size_t extractChunkSize(Connection& conn)
 {
 	size_t chunkSize = 0;
-	// size_t pos = buffer.find(CRLF, 0);
 	size_t pos = conn.findInBuffer(CRLF, 0);
 
 	if (conn.compareBuffer(CRLF)) { // no hex digits in chunk size line
@@ -115,6 +92,14 @@ std::string extractChunkData(const std::string& buffer, size_t chunkSize)
 	return dataStr;
 }
 
+void resetChunkEnodingVariables(Connection &conn)
+{
+	// RESET chunkEncoding
+	conn.readChunkedRequestStatus = READ_CHUNK_SIZE;
+	conn.chunkReqBuf.clear();
+	conn.chunkSize = 0;
+}
+
 int readByChunkedEncoding(Connection &conn, std::string& bodyStr)
 {
 	int ret = RECV_OK;
@@ -123,7 +108,6 @@ int readByChunkedEncoding(Connection &conn, std::string& bodyStr)
 	while (status != DONE) {
 
 		if (conn.bufferSize() == 0) {
-			// ret = readFromSocket2(conn.fd, buffer);
 			ret = readFromSocket(conn);
 			if (ret <= 0)
 				return ret; // RECV_AGAIN or RECV_CLOSED or RECV_ERROR
@@ -148,7 +132,6 @@ int readByChunkedEncoding(Connection &conn, std::string& bodyStr)
 				if (conn.bufferSize() < conn.chunkSize + CRLF_LENGTH) // must have CRLF for a complete line
 					break;
 				std::string chunkData = extractChunkData(conn.getBuffer(), conn.chunkSize);
-				// conn.appendToBuffer(chunkData.c_str(), chunkData.length());
 				conn.chunkReqBuf.append(chunkData.c_str(), chunkData.length());
 
 				if (conn.getBuffer()[conn.chunkSize] != '\r' || conn.getBuffer()[conn.chunkSize + 1] != '\n') {
@@ -158,7 +141,6 @@ int readByChunkedEncoding(Connection &conn, std::string& bodyStr)
 					throw std::logic_error("Bad request line format");
 				}
 
-				// buffer.erase(0, conn.chunkSize + CRLF_LENGTH);
 				conn.eraseBufferFromStart(conn.chunkSize + CRLF_LENGTH);
 				status = READ_CHUNK_SIZE;
 			}
@@ -173,14 +155,12 @@ int readByChunkedEncoding(Connection &conn, std::string& bodyStr)
 				}
 				status = DONE;
 				conn.eraseBufferFromStart(CRLF_LENGTH);
-				// buffer.erase(0, CRLF_LENGTH);
 			}
 		}
 	}
-
-	std::cout << "conn.chunkReqbuf: " << conn.chunkReqBuf << '\n';
+	
 	bodyStr.append(conn.chunkReqBuf.c_str(), conn.chunkReqBuf.length());
-	std::cout << "bodyStr: " << bodyStr << '\n';
+	resetChunkEnodingVariables(conn);
 
 	return ret;
 }
