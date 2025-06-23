@@ -39,14 +39,20 @@ public:
 
 	int fd;
 	time_t startTime; // Timeout
+	
 	enum connectionType connType;
 	enum readBodyMethod readBodyMethod;
+	
 	size_t contentLength;
+
+	// Chunked Encoding
 	enum readChunkedRequestStatus readChunkedRequestStatus;
 	size_t chunkSize;
 	std::string chunkReqBuf;
-	bool isResponseReady;
 
+	bool isResponseReady;
+	
+	// Buffer methods
 	void appendToBuffer(const char *str, size_t n);
 	const std::string& getBuffer() const;
 	void setBuffer(std::string str);

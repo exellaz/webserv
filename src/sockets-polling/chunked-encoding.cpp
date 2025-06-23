@@ -1,27 +1,5 @@
 #include "../../include/sockets-polling.h"
 
-static int readFromSocket(Connection &connection)
-{
-	char buf[BODY_BUFFER_SIZE + 1];
-
-	ssize_t n = recv(connection.fd, buf, BODY_BUFFER_SIZE, 0);
-	std::cout << "n: " << n << '\n';
-
-    if (n == 0) {
-		std::cout << "RECV_CLOSED\n";
-		return RECV_CLOSED;
-	}
-	else if (n == -1) {
-		std::cout << "RECV_AGAIN: No data available yet, will try again next iteration.\n";
-		return RECV_AGAIN;
-    }
-	buf[n] = '\0';
-	connection.appendToBuffer(buf, n);
-	std::cout << "curBuffer: " << connection.getBuffer() << '\n';
-
-	return n;
-}
-
 bool doesLineHaveCRLF(const std::string& buffer)
 {
 	// find "\r\n"
@@ -78,7 +56,6 @@ size_t extractChunkSize(Connection& conn)
 	chunkSize = hexStrToSizeT(sizeStr);
 	std::cout << "chunkSize: " << chunkSize << '\n';
 
-	// buffer.erase(0, sizeStr.length() + CRLF_LENGTH);
 	conn.eraseBufferFromStart(sizeStr.length() + CRLF_LENGTH);
 	return chunkSize;
 }
@@ -108,7 +85,7 @@ int readByChunkedEncoding(Connection &conn, std::string& bodyStr)
 	while (status != DONE) {
 
 		if (conn.bufferSize() == 0) {
-			ret = readFromSocket(conn);
+			ret = recvBodyFromSocket(conn);
 			if (ret <= 0)
 				return ret; // RECV_AGAIN or RECV_CLOSED or RECV_ERROR
 			conn.startTime = getNowInSeconds(); // reset timer

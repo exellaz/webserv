@@ -1,6 +1,6 @@
 #include "../../include/sockets-polling.h"
 
-static int readFromSocket(Connection &connection)
+int recvBodyFromSocket(Connection &connection)
 {
 	char buf[BODY_BUFFER_SIZE + 1];
 
@@ -30,7 +30,7 @@ int readByContentLength(Connection &conn, std::string& bodyStr)
 
 	size_t contentLength = std::strtol(conn.request.getHeader("Content-Length").c_str(), NULL, 10); // HARDCODED
 	while (bytesRead < contentLength) {
-		ret = readFromSocket(conn);
+		ret = recvBodyFromSocket(conn);
 		if (ret <= 0)
 			return ret; // RECV_AGAIN or RECV_CLOSED or RECV_ERROR
 		conn.startTime = getNowInSeconds(); // reset timer
