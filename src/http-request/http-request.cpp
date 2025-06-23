@@ -75,6 +75,7 @@ bool HttpRequest::parseHeaderLines(const std::string& str)
             std::string key = line.substr(0, colon);
             if (!isValidToken(key))
                 throw HttpException(BAD_REQUEST, "Invalid token as header field");
+            key = toLower(key);
 
             std::string value = line.substr(colon + 1);
             if (!isValidHeaderValue(value))
@@ -97,6 +98,9 @@ bool HttpRequest::parseHeaderLines(const std::string& str)
 
     if (!hasHeader("Host"))
         throw HttpException(BAD_REQUEST, "Missing Host header");
+
+    if (hasHeader("Content-Length") && !isDigitsOnly(getHeader("Content-Length")))
+        throw HttpException(BAD_REQUEST, "Invalid content length");
     return true;
 }
 
