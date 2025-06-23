@@ -1,7 +1,7 @@
 #include "../../include/sockets-polling.h"
 
 
-static int readFromSocket(Connection &connection)
+int recvHeaderFromSocket(Connection &connection)
 {
 	char buf[HEADER_BUFFER_SIZE + 1];
 
@@ -31,7 +31,7 @@ int readRequestHeader(Connection &conn, std::string& headerStr)
 
 	while (1) {
 
-		ret = readFromSocket(conn);
+		ret = recvHeaderFromSocket(conn);
 		if (ret > 0) {
 			conn.startTime = getNowInSeconds(); // reset timer
 			found = conn.getBuffer().find(HEADER_END);

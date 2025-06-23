@@ -3,6 +3,7 @@
 Connection::Connection(int fd, time_t startTime) :
 	fd(fd), startTime(startTime), connType(KEEP_ALIVE),
 	readBodyMethod(CONTENT_LENGTH), contentLength(0),
+	readChunkedRequestStatus(READ_CHUNK_SIZE), chunkSize(0), chunkReqBuf(""),
 	isResponseReady(false), _buffer("")
 {
 	// std::cout << "Connection:: Constructor Called (name: " << index << ")" << std::endl;
@@ -13,6 +14,7 @@ Connection::Connection(int fd, time_t startTime) :
 Connection::Connection(const Connection& other) :
 	fd(other.fd), startTime(other.startTime), connType(other.connType),
 	readBodyMethod(other.readBodyMethod), contentLength(other.contentLength),
+	readChunkedRequestStatus(other.readChunkedRequestStatus), chunkSize(other.chunkSize), chunkReqBuf(other.chunkReqBuf),
 	isResponseReady(other.isResponseReady), _buffer(other._buffer)
 {
 	// std::cout << "Connection:: Copy Constructor Called" << std::endl;
@@ -30,6 +32,9 @@ Connection& Connection::operator=(const Connection& other)
 	connType 		= other.connType;
 	readBodyMethod 	= other.readBodyMethod;
 	contentLength 	= other.contentLength;
+	readChunkedRequestStatus = other.readChunkedRequestStatus;
+	chunkSize = other.chunkSize;
+	chunkReqBuf = other.chunkReqBuf;
 	isResponseReady = other.isResponseReady;
 	_buffer 		= other._buffer;
 
@@ -42,7 +47,7 @@ Connection::~Connection()
 }
 
 
-void Connection::appendToBuffer(char* str, size_t n)
+void Connection::appendToBuffer(const char *str, size_t n)
 {
 	_buffer.append(str, n);
 }
@@ -62,6 +67,28 @@ void Connection::clearBuffer()
 	_buffer.clear();
 }
 
+void Connection::eraseBufferFromStart(size_t n)
+{
+	_buffer.erase(0, n);
+}
+
+size_t Connection::bufferSize() const
+{
+	return _buffer.size();
+}
+
+bool Connection::compareBuffer(const std::string str)
+{
+	if (_buffer == str)
+		return true;
+	return false;
+}
+
+size_t Connection::findInBuffer(const std::string str, size_t pos)
+{
+	return _buffer.find(str, pos);
+}
+
 std::ostream & operator<<( std::ostream & o, Connection const & connection )
 {
 	o << "\nConnection: \n"
@@ -69,5 +96,3 @@ std::ostream & operator<<( std::ostream & o, Connection const & connection )
 		<< "buffer: "<< connection.getBuffer() << '\n';
 	return o;
 }
-
-
