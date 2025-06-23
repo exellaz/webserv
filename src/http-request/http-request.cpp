@@ -46,11 +46,17 @@ bool HttpRequest::parseRequestLine(const std::string& headerStr)
         if (!(lineStream >> _method >> _uri >> _version))
             throw HttpException(BAD_REQUEST, "Bad request line format");
 
+        if (lineStream >> extra)
+            throw HttpException(BAD_REQUEST, "Too many elements in request line");
+
+        if (_uri.empty() || _uri[0] != '/')
+            throw HttpException(BAD_REQUEST, "Invalid request-target");
+
         if (_method != "GET" && _method != "POST" && _method != "DELETE")
             throw HttpException(METHOD_NOT_ALLOWED, "Method not allowed");
 
         if (_version != "HTTP/1.1")
-            throw HttpException(VERSION_NOT_SUPPORTED, "HTTP version not supported");
+            throw HttpException(VERSION_NOT_SUPPORTED, "Only HTTP/1.1 supported");
 
         return true;
     }
