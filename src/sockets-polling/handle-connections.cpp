@@ -78,15 +78,11 @@ int receiveClientRequest(Connection &connection, std::vector<Config>& configs)
         response.setBody("404 Not Found: The requested resource could not be found.\n");
     }
 
-	// Initialise `readBodyMethod`
-	if (request.getHeaders().find("Content-Length") != request.getHeaders().end()) {
-		if (!request.getHeader("Content-Length").empty())
-			connection.readBodyMethod = CONTENT_LENGTH;
-	}
-	else if (request.getHeaders().find("Transfer-Encoding") != request.getHeaders().end()) {
-		if (!request.getHeader("Transfer-Encoding").empty())
-			connection.readBodyMethod = CHUNKED_ENCODING;
-	}
+	// Initialise `readBodyMethod
+	if (request.hasHeader("Content-Length"))
+		connection.readBodyMethod = CONTENT_LENGTH;
+	else if (request.hasHeader("Transfer-Encoding"))
+		connection.readBodyMethod = CHUNKED_ENCODING;
 	else
 		connection.readBodyMethod = NO_BODY;
 
