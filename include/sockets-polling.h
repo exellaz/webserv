@@ -24,6 +24,8 @@
 #include "./Buffer.h"
 #include "Connection.h"
 #include "http-response.h"
+#include <algorithm>
+#include <cctype>
 #include "Cgi.hpp"
 
 
@@ -48,6 +50,8 @@
 #define CLIENT_TIMEOUT 60 // in seconds
 #define MAX_BODY_SIZE 1048576
 #define HEADER_END "\r\n\r\n"
+#define CRLF "\r\n"
+#define CRLF_LENGTH 2
 
 enum recvResult {
     RECV_OK = 0,
@@ -56,15 +60,14 @@ enum recvResult {
 };
 
 // Setup Listening Socket
-// int setupListeningSocket(std::vector<struct pollfd>& pfds, Config& config);
 int setupListeningSocket(std::vector<struct pollfd>& pfds, std::vector<Connection>& connections, Config& config);
 // CONNECTIONS
 void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Connection>& connections, int listener);
 
 // Read Request Utils
-/*int readFromSocket(int fd, std::string& buffer, size_t bufferSize);*/
 int readRequestHeader(Connection &connection, std::string& headerStr);
-// void readRequestBody(int fd, std::string& bodyStr, std::string& buffer, enum reqBodyType type);
+int recvBodyFromSocket(Connection &connection);
+int readByChunkedEncoding(Connection &conn, std::string& bodyStr);
 int readRequestBody(Connection &conn, std::string& bodyStr);
 int receiveClientRequest(Connection &connection, std::vector<Config>& configs);
 

@@ -60,7 +60,7 @@ int main(int argc, char **argv)
 
         while(1) {
 
-            std::cout << CYAN << "\n+++++++ Waiting for new connection ++++++++" << RESET << "\n\n";
+            std::cout << CYAN << "\n+++++++ Waiting for POLL event ++++++++" << RESET << "\n\n";
 
             // wait until 1 or more fds become ready for reading (POLLIN) or other events.
             int nearestTimeout = getNearestUpcomingTimeout(connections);

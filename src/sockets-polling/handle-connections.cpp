@@ -3,22 +3,19 @@
 
 void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Connection>& connections, int listener)
 {
-    // If listener is ready to read, handle new connection
-    struct sockaddr_storage remoteAddr; // Client address
-    socklen_t addrLen = sizeof(remoteAddr);
-    int newFd = accept(listener, (struct sockaddr *)&remoteAddr, &addrLen);
-    if (newFd == -1) {
-        perror("accept");
-        return ;
-    }
-    if (set_nonblocking(newFd) == -1) {
-        perror("set_nonblocking (new_fd)");
-        close(newFd);
-        return ;
-    }
-    // server sends text to every client that connects
-    // const char *hello = "Hello from server!\n";
-    // send(newFd, hello, strlen(hello), 0);
+	// If listener is ready to read, handle new connection
+	struct sockaddr_storage remoteAddr; // Client address
+	socklen_t addrLen = sizeof remoteAddr;
+	int newFd = accept(listener, (struct sockaddr *)&remoteAddr, &addrLen);
+	if (newFd == -1) {
+		perror("accept");
+		return ;
+	}
+	if (set_nonblocking(newFd) == -1) {
+		perror("set_nonblocking (new_fd)");
+		close(newFd);
+		return ;
+	}
 
     addToPfds(pfds, newFd);
     connections.push_back(Connection(newFd, getNowInSeconds()));
@@ -43,7 +40,6 @@ int receiveClientRequest(Connection &connection, std::vector<Config>& configs)
     std::string bodyStr;
     HttpRequest& request = connection.request;
     HttpResponse& response = connection.response;
-
 
 
     int ret = 0;
@@ -81,14 +77,35 @@ int receiveClientRequest(Connection &connection, std::vector<Config>& configs)
     }
 
 
-    //check for body to handle
-    if (request.getHeaders().find("Content-Length") != request.getHeaders().end()) {
-        int ret2 = readRequestBody(connection, bodyStr);
-        if (ret2 < 0)
-            return ret2;
-        std::cout << "Size of body: " << bodyStr.size() << "\n"; ////debug
-        request.setBody(bodyStr);
-    }
+	// Initialise `readBodyMethod`
+	if (request.getHeaders().find("Content-Length") != request.getHeaders().end()) {
+		if (!request.getHeader("Content-Length").empty())
+			connection.readBodyMethod = CONTENT_LENGTH;
+	}
+	else if (request.getHeaders().find("Transfer-Encoding") != request.getHeaders().end()) {
+		if (!request.getHeader("Transfer-Encoding").empty())
+			connection.readBodyMethod = CHUNKED_ENCODING;
+	}
+	else
+		connection.readBodyMethod = NO_BODY;
+
+	if (connection.readBodyMethod != NO_BODY) {
+		try {
+			int ret2 = readRequestBody(connection, bodyStr);
+			if (ret2 < 0)
+				return ret2;
+
+			std::cout << "\n===== body String: =====\n";
+			std::cout << bodyStr << '\n';
+			std::cout << "==========================\n\n";
+
+			request.setBody(bodyStr);
+		}
+		catch (std::exception& e) {
+			std::cerr << e.what() << "\n";
+			connection.connType = CLOSE;
+		}
+	}
 
     // get the cgi path
     if (!location.cgi_path.empty())
@@ -109,24 +126,13 @@ int receiveClientRequest(Connection &connection, std::vector<Config>& configs)
             std::cout << "---------- CGI Output ----------\n" << BLUE << response.toString() << RESET << "\n";
         }
     }
-
-
-    // parseRequestHeader();
     else if (response.getStatus() == OK && request.getMethod() == "GET")
         response.handleGetRequest(request, serverConfig);
 
-
-    // TODO: isBodyPresent()   -> check Content-Length, Transfer-Encoding, request method
-
-    //if (request.getHeaders().find("Content-Length") != request.getHeaders().end()) {
-    //    int ret2 = readRequestBody(connection, bodyStr);
-    //    if (ret2 < 0)
-    //        return ret2;
-    //    request.setBody(bodyStr);
-    //}
     std::cout << request;
     connection.isResponseReady = true;
-    // parseRequestBody();
+	connection.clearBuffer();
 
     return 0;
 }
+
