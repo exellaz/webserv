@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<style>
+		body {
+			background: #181a1b;
+			color: #f1f3f4;
+			font-family: Arial, sans-serif;
+			margin: 40px;
+		}
+		form#uploadForm {
+			background: #23272a;
+			padding: 40px;
+			border-radius: 8px;
+			box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+			max-width: 400px;
+			margin-bottom: 20px;
+		}
+		input[type="file"] {
+			background: #2c2f33;
+			color: #f1f3f4;
+			border: 1px solid #444;
+			border-radius: 5px;
+			padding: 10px;
+			width: 100%;
+			margin-bottom: 10px;
+		}
+		input[type="submit"] {
+			background: #f8d568;
+			color: #23272a;
+			border: none;
+			border-radius: 5px;
+			padding: 10px 18px;
+			font-weight: bold;
+			cursor: pointer;
+			transition: background 0.2s;
+		}
+		input[type="submit"]:hover {
+			background: #ffe082;
+		}
+		#result {
+			margin-top: 16px;
+			color: #8bc34a;
+		}
+	</style>
+</head>
+<body>
+	<h1>FILE UPLOAD</h1>
+	<form id="uploadForm" enctype="multipart/form-data" method="post">
+		<input type="file" name="file" required>
+		<input type="submit" value="Upload">
+	</form>
+	<div id="result"></div>
+
+	<script>
+		document.getElementById('uploadForm').onsubmit = async function(e) {
+			e.preventDefault();
+
+			const form = document.getElementById('uploadForm');
+			const formData = new FormData(form);
+
+			try {
+				const response = await fetch('/cgi-bin/post_file.cgi', {
+					method: 'POST',
+					body: formData
+				});
+
+				const text = await response.text();
+				if (response.ok) {
+					document.getElementById('result').innerHTML = 'Upload successful!';
+				} else {
+					document.getElementById('result').innerHTML = 'Upload failed.';
+					console.error(text);
+				}
+			} catch (err) {
+				document.getElementById('result').innerHTML = 'Upload error.';
+				console.error(err);
+			}
+		};
+	</script>
+</body>
+</html>

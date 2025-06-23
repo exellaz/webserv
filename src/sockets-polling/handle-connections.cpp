@@ -17,15 +17,15 @@ void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Connection>& con
 		return ;
 	}
 
-	addToPfds(pfds, newFd);
-	connections.push_back(Connection(newFd, getNowInSeconds()));
+    addToPfds(pfds, newFd);
+    connections.push_back(Connection(newFd, getNowInSeconds()));
 
-	char remoteIp[INET6_ADDRSTRLEN];
-	printf("server: new connection from %s on "
-		"socket %d\n", inet_ntop(remoteAddr.ss_family,
-			getInAddr((struct sockaddr*)&remoteAddr),
-			remoteIp, INET6_ADDRSTRLEN),
-		newFd);
+    char remoteIp[INET6_ADDRSTRLEN];
+    printf("server: new connection from %s on "
+        "socket %d\n", inet_ntop(remoteAddr.ss_family,
+            getInAddr((struct sockaddr*)&remoteAddr),
+            remoteIp, INET6_ADDRSTRLEN),
+        newFd);
 }
 
 /*
@@ -34,33 +34,48 @@ NOTE:
 - if recv(HEADER_BUFFER_SIZE) reads till the 'body' section, that section of 'body' will remain in buffers after `readHeader()` is called
 
 */
-int receiveClientRequest(Connection &connection)
+int receiveClientRequest(Connection &connection, std::vector<Config>& configs)
 {
-	std::string headerStr;
-	std::string bodyStr;
-	HttpRequest& request = connection.request;
-	HttpResponse& response = connection.response;
+    std::string headerStr;
+    std::string bodyStr;
+    HttpRequest& request = connection.request;
+    HttpResponse& response = connection.response;
 
-	int ret = 0;
-	if (request.getMethod().empty()) {
-		ret = readRequestHeader(connection, headerStr);
-		if (ret < 0)
-			return ret;
 
-		try {
-			request.parseRequestLine(headerStr, response);
-			request.parseHeaderLines(headerStr, response);
+    int ret = 0;
+    if (request.getMethod().empty()) {
+        ret = readRequestHeader(connection, headerStr);
 
-		}
-		catch (std::exception &e) {
-			std::cerr << e.what() << "\n";
-			connection.connType = CLOSE;
-		}
-	}
+        if (ret < 0)
+            return ret;
 
-	// parseRequestHeader();
-	if (response.getStatus() == OK && request.getMethod() == "GET")
-		response.handleGetRequest(request, ".");
+        try {
+            request.parseRequestLine(headerStr, response);
+            request.parseHeaderLines(headerStr, response);
+
+        }
+        catch (std::exception &e) {
+            std::cerr << e.what() << "\n";
+            connection.connType = CLOSE;
+        }
+    }
+
+    // Refactor later
+    if (request.getHeader("Connection") == "close")
+        connection.connType = CLOSE;
+
+    std::cout << "header size: " << headerStr.size() << "\n"; ////debug
+
+    std::string choosePort = request.getHeader("Host").substr(request.getHeader("Host").rfind(':') + 1);
+    Config serverConfig = getServerConfigByPort(configs, choosePort);
+    Location location = serverConfig.getLocationPath(request.getURI());
+    if (location.alias.empty() && location.root.empty())
+    {
+        response.setStatus(NOT_FOUND);
+        response.setHeader("Content-Type", "text/plain");
+        response.setBody("404 Not Found: The requested resource could not be found.\n");
+    }
+
 
 	// Initialise `readBodyMethod`
 	if (request.getHeaders().find("Content-Length") != request.getHeaders().end()) {
@@ -91,10 +106,33 @@ int receiveClientRequest(Connection &connection)
 			connection.connType = CLOSE;
 		}
 	}
-	std::cout << request;
-	connection.isResponseReady = true;
-	// parseRequestBody();
 
+    // get the cgi path
+    if (!location.cgi_path.empty())
+    {
+        std::cout << GREEN "CGI found\n" RESET; ////debug
+        Cgi	cgi;
+        std::string cgiOutput = cgi.executeCgi(request, response); //? handle by response
+        std::cerr << "cgiOutput: " << cgiOutput << "\n";
+        if (cgiOutput.empty() || cgiOutput == "")
+        {
+            response.setStatus(INTERNAL_ERROR);
+            response.setHeader("Content-Type", "text/plain");
+            response.setBody("500 Internal Server Error: CGI script execution failed.\n");
+        }
+        else
+        {
+            handleCgiRequest(cgiOutput, response);
+            std::cout << "---------- CGI Output ----------\n" << BLUE << response.toString() << RESET << "\n";
+        }
+    }
+    else if (response.getStatus() == OK && request.getMethod() == "GET")
+        response.handleGetRequest(request, serverConfig);
+
+    std::cout << request;
+    connection.isResponseReady = true;
 	connection.clearBuffer();
-	return 0;
+
+    return 0;
 }
+

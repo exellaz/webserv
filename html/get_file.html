@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<style>
+		body {
+			background: #181a1b;
+			color: #f1f3f4;
+			font-family: Arial, sans-serif;
+			margin: 40px;
+		}
+		ul {
+			list-style-type: none;
+			padding-left: 0;
+		}
+		li a {
+			color: #8ab4f8;
+			text-decoration: none;
+		}
+		li a:hover {
+			text-decoration: underline;
+		}
+	</style>
+</head>
+<body>
+	<h2>Uploaded Files</h2>
+	<ul id="fileList">Loading...</ul>
+
+	<script>
+		async function fetchFiles() {
+			try {
+				const response = await fetch('/cgi-bin/get_file.cgi');
+				const data = await response.json();
+				const list = document.getElementById('fileList');
+				list.innerHTML = ''; // clear existing
+
+				if (data.files && data.files.length > 0) {
+					data.files.forEach(filename => {
+						const li = document.createElement('li');
+						li.textContent = filename;
+						list.appendChild(li);
+					});
+				} else {
+					list.innerHTML = '<li><em>No files uploaded.</em></li>';
+				}
+			} catch (error) {
+				document.getElementById('fileList').innerHTML =
+					'<li style="color: red;">Error loading files.</li>';
+				console.error(error);
+			}
+		}
+
+		fetchFiles();
+	</script>
+</body>
+</html>

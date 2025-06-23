@@ -32,9 +32,10 @@ int readByContentLength(Connection &conn, std::string& bodyStr)
 	while (bytesRead < contentLength) {
 		ret = recvBodyFromSocket(conn);
 		if (ret <= 0)
-			return ret; // RECV_AGAIN or RECV_CLOSED or RECV_ERROR
+		return ret; // RECV_AGAIN or RECV_CLOSED or RECV_ERROR
 		conn.startTime = getNowInSeconds(); // reset timer
 		bytesRead += ret;
+		std::cout << "bytesRead: " << bytesRead << '\n'; ////debug
 	}
 
 	if (bytesRead == contentLength) {
