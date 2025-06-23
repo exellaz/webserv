@@ -31,6 +31,24 @@ void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Connection>& con
         newFd);
 }
 
+/**
+ * @brief Get the port number of the socket
+ * @note 1. getSockName() retrieves the local address of the socket
+ * @note 2. ntohs() converts the port number from network byte order to host byte ( mean from big-endian to 16-bit number)
+ * @note 3. sockaddr is used to store the address of the socket
+ * @note 4. sockaddr_in is used to store the address of the socket in IPv4 format
+*/
+std::string getSocketPortNumber(int fd)
+{
+    std::stringstream intToString;
+    struct sockaddr_storage remoteAddr;
+    socklen_t addrLen = sizeof(remoteAddr);
+    getsockname(fd, (struct sockaddr *)&remoteAddr, &addrLen);
+    int localPort = ntohs(((struct sockaddr_in*)&remoteAddr)->sin_port);
+    intToString << localPort;
+    return (intToString.str());
+}
+
 /*
 NOTE:
 - `readHeader` will remove the 'header' section from `buffers`
@@ -70,9 +88,7 @@ int receiveClientRequest(Connection &connection, std::vector<Server>& servers)
 
     std::cout << "header size: " << headerStr.size() << "\n"; ////debug
 
-    std::string choosePort = extractPortFromHost(request.getHeader("Host"));
-    if (choosePort.empty())
-        choosePort = servers[0].getPort();
+    std::string choosePort = getSocketPortNumber(connection.fd);
     Server server = getServerByPort(servers, choosePort);
     Location location = server.getLocationPath(request.getURI());
     if (location.alias.empty() && location.root.empty())

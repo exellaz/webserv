@@ -54,9 +54,9 @@ int main(int argc, char **argv)
             int listener = setupListeningSocket(pfds, connections, servers[i]);
             listeners.push_back(listener);
         }
-		for (std::vector<int>::iterator it = listeners.begin(); it != listeners.end(); ++it) { ////debug
-			std::cout << "Listener socket fd: " << *it << "\n";
-		}
+        for (std::vector<int>::iterator it = listeners.begin(); it != listeners.end(); ++it) { ////debug
+            std::cout << "Listener socket fd: " << *it << "\n";
+        }
 
         while(1) {
 

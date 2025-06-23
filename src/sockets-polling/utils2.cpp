@@ -47,12 +47,12 @@ Server getServerByPort(const std::vector<Server> &servers, const std::string por
 */
 std::string normalizeSlash(const std::string &relativeUri)
 {
-	for(size_t i = 0; i < relativeUri.size(); ++i)
-	{
-		if (relativeUri[i] != '/')
-			return relativeUri; // Contains something else, return as is
-	}
-	return relativeUri.empty() ? "" : "/"; // Only slashes (and not empty)
+    for(size_t i = 0; i < relativeUri.size(); ++i)
+    {
+        if (relativeUri[i] != '/')
+            return relativeUri; // Contains something else, return as is
+    }
+    return relativeUri.empty() ? "" : "/"; // Only slashes (and not empty)
 }
 
 /**
@@ -65,35 +65,35 @@ std::string resolveHttpPath(const HttpRequest &request, Server &server)
     if (!location.alias.empty())
     {
         std::cout << "Alias found\n"; ////debug"
-		std::string getRelativeUri = request.getURI().substr(location.locationPath.length());
-		std::string relativeUri = normalizeSlash(getRelativeUri);
-		std::cout << "Relative path: " << relativeUri << "\n"; ////debug
-		if ((!location.index.empty()) && (relativeUri.empty() || relativeUri == "/"))
-		{
-			std::cout << "Alias path with index: " << getFullPath(location.alias + relativeUri + "/" + location.index) << "\n"; ////debug
-			return getFullPath(location.alias + relativeUri + "/" + location.index);
-		}
-		else
-		{
-			std::cout << "Alias path without index: " << getFullPath(location.alias + relativeUri) << "\n"; ////debug
-			return getFullPath(location.alias + relativeUri);
-		}
+        std::string getRelativeUri = request.getURI().substr(location.locationPath.length());
+        std::string relativeUri = normalizeSlash(getRelativeUri);
+        std::cout << "Relative path: " << relativeUri << "\n"; ////debug
+        if ((!location.index.empty()) && (relativeUri.empty() || relativeUri == "/"))
+        {
+            std::cout << "Alias path with index: " << getFullPath(location.alias + relativeUri + "/" + location.index) << "\n"; ////debug
+            return getFullPath(location.alias + relativeUri + "/" + location.index);
+        }
+        else
+        {
+            std::cout << "Alias path without index: " << getFullPath(location.alias + relativeUri) << "\n"; ////debug
+            return getFullPath(location.alias + relativeUri);
+        }
     }
     else if (!location.root.empty())
     {
         std::cout << "Root found\n"; ////debug
-		std::string getRelativeUri = request.getURI().substr(location.locationPath.length());
-		std::string relativeUri = normalizeSlash(getRelativeUri);
-		if ((!location.index.empty()) && (relativeUri.empty() || relativeUri == "/"))
-		{
-			std::cout << "Root path with index: " << getFullPath(location.root + request.getURI() + "/" + location.index) << "\n"; ////debug
-			return getFullPath(location.root + request.getURI() + "/" + location.index);
-		}
-		else
-		{
-			std::cout << "Root path without index: " << getFullPath(location.root + relativeUri) << "\n"; ////debug
-			return getFullPath(location.root + relativeUri);
-		}
+        std::string getRelativeUri = request.getURI().substr(location.locationPath.length());
+        std::string relativeUri = normalizeSlash(getRelativeUri);
+        if ((!location.index.empty()) && (relativeUri.empty() || relativeUri == "/"))
+        {
+            std::cout << "Root path with index: " << getFullPath(location.root + request.getURI() + "/" + location.index) << "\n"; ////debug
+            return getFullPath(location.root + request.getURI() + "/" + location.index);
+        }
+        else
+        {
+            std::cout << "Root path without index: " << getFullPath(location.root + relativeUri) << "\n"; ////debug
+            return getFullPath(location.root + relativeUri);
+        }
     }
     return "";
 }
@@ -173,12 +173,19 @@ std::string readDirectorytoString(const std::string &directoryPath, const HttpRe
 }
 
 /**
- * @brief Extracts the port number from a host string.
+ * @brief Get the port number of the socket
+ * @note 1. getSockName() retrieves the local address of the socket
+ * @note 2. ntohs() converts the port number from network byte order to host byte ( mean from big-endian to 16-bit number)
+ * @note 3. sockaddr is used to store the address of the socket
+ * @note 4. sockaddr_in is used to store the address of the socket in IPv4 format
 */
-std::string extractPortFromHost(const std::string &host)
+std::string getSocketPortNumber(int fd)
 {
-    size_t colon = host.find(':');
-    if (colon == std::string::npos)
-        return "";
-    return host.substr(colon + 1);
+    std::stringstream intToString;
+    struct sockaddr_storage remoteAddr;
+    socklen_t addrLen = sizeof(remoteAddr);
+    getsockname(fd, (struct sockaddr *)&remoteAddr, &addrLen);
+    int localPort = ntohs(((struct sockaddr_in*)&remoteAddr)->sin_port);
+    intToString << localPort;
+    return (intToString.str());
 }
