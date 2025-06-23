@@ -1,5 +1,27 @@
 #include "http-request.h"
 
+std::string toLower(const std::string& str)
+{
+    std::string result = str;
+    for (size_t i = 0; i < str.size(); ++i)
+        result[i] = std::tolower(static_cast<int>(result[i]));
+    return result;
+}
+
+bool isDigitsOnly(const std::string& str)
+{
+    for (size_t i = 0; i < str.size(); ++i) {
+        if (!std::isdigit(static_cast<int>(str[i])))
+            return false;
+    }
+    return true;
+}
+
+bool HttpRequest::hasHeader(const std::string& name) const
+{
+    return _headers.find(toLower(name)) != _headers.end();
+}
+
 const std::string& HttpRequest::getMethod() const
 {
     return _method;
@@ -23,7 +45,7 @@ const std::map<std::string, std::string>& HttpRequest::getHeaders() const
 const std::string& HttpRequest::getHeader(const std::string& name) const
 {
     static const std::string empty;
-    std::map<std::string, std::string>::const_iterator it = _headers.find(name);
+    std::map<std::string, std::string>::const_iterator it = _headers.find(toLower(name));
     if (it != _headers.end())
         return it->second;
     return empty;

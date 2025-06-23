@@ -41,7 +41,6 @@ int receiveClientRequest(Connection &connection, std::vector<Config>& configs)
     HttpRequest& request = connection.request;
     HttpResponse& response = connection.response;
 
-
     int ret = 0;
     if (request.getMethod().empty()) {
         ret = readRequestHeader(connection, headerStr);
@@ -50,21 +49,24 @@ int receiveClientRequest(Connection &connection, std::vector<Config>& configs)
             return ret;
 
         try {
-            request.parseRequestLine(headerStr, response);
-            request.parseHeaderLines(headerStr, response);
-
+            request.parseRequestLine(headerStr);
+            request.parseHeaderLines(headerStr);
         }
-        catch (std::exception &e) {
-            std::cerr << e.what() << "\n";
+        catch (const HttpException& e) {
+            std::cerr << "Error: " <<  e.what() << "\n";
+            response.setStatus(e.getStatusCode());
+
+            // Add a better exception handler here for the error codes
             connection.connType = CLOSE;
+            connection.isResponseReady = true;
+            return 1; // Find a better way to exit the function and send the response
         }
     }
 
     // Refactor later
+    response.setHeader("Connection", request.getHeader("Connection"));
     if (request.getHeader("Connection") == "close")
         connection.connType = CLOSE;
-
-    std::cout << "header size: " << headerStr.size() << "\n"; ////debug
 
     std::string choosePort = request.getHeader("Host").substr(request.getHeader("Host").rfind(':') + 1);
     Config serverConfig = getServerConfigByPort(configs, choosePort);
@@ -76,16 +78,11 @@ int receiveClientRequest(Connection &connection, std::vector<Config>& configs)
         response.setBody("404 Not Found: The requested resource could not be found.\n");
     }
 
-
-	// Initialise `readBodyMethod`
-	if (request.getHeaders().find("Content-Length") != request.getHeaders().end()) {
-		if (!request.getHeader("Content-Length").empty())
-			connection.readBodyMethod = CONTENT_LENGTH;
-	}
-	else if (request.getHeaders().find("Transfer-Encoding") != request.getHeaders().end()) {
-		if (!request.getHeader("Transfer-Encoding").empty())
-			connection.readBodyMethod = CHUNKED_ENCODING;
-	}
+	// Initialise `readBodyMethod
+	if (request.hasHeader("Content-Length"))
+		connection.readBodyMethod = CONTENT_LENGTH;
+	else if (request.hasHeader("Transfer-Encoding"))
+		connection.readBodyMethod = CHUNKED_ENCODING;
 	else
 		connection.readBodyMethod = NO_BODY;
 
