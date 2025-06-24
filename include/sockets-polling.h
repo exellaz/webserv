@@ -63,9 +63,9 @@ void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Connection>& con
 
 // Read Request Utils
 /*int readFromSocket(int fd, std::string& buffer, size_t bufferSize);*/
-int readRequestHeader(Connection &connection, std::string& headerStr);
+int readRequestHeader(Connection &conn, std::string& headerStr, int bufferSize);
 // void readRequestBody(int fd, std::string& bodyStr, std::string& buffer, enum reqBodyType type);
-int readRequestBody(Connection &conn, std::string& bodyStr);
+int readRequestBody(Connection &conn, std::string& bodyStr, int bufferSize);
 int receiveClientRequest(Connection &connection, std::vector<Server>& servers);
 
 // Timeout

@@ -49,7 +49,7 @@ int receiveClientRequest(Connection &connection, std::vector<Server>& servers)
 
     int ret = 0;
     if (request.getMethod().empty()) {
-        ret = readRequestHeader(connection, headerStr);
+        ret = readRequestHeader(connection, headerStr, server.getClientHeaderBufferSize());
 
         if (ret < 0)
             return ret;
@@ -82,7 +82,7 @@ int receiveClientRequest(Connection &connection, std::vector<Server>& servers)
 
     //check for body to handle
     if (request.getHeaders().find("Content-Length") != request.getHeaders().end()) {
-        int ret2 = readRequestBody(connection, bodyStr);
+        int ret2 = readRequestBody(connection, bodyStr, server.getClientBodyBufferSize());
         if (ret2 < 0)
             return ret2;
         std::cout << "Size of body: " << bodyStr.size() << "\n"; ////debug

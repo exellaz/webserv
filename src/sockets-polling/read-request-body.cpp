@@ -1,10 +1,10 @@
 #include "../../include/sockets-polling.h"
 
-static int readFromSocket(Connection &connection)
+static int readFromSocket(Connection &connection, int bufferSize)
 {
 	char buf[BODY_BUFFER_SIZE + 1];
 
-	ssize_t n = recv(connection.fd, buf, BODY_BUFFER_SIZE, 0);
+	ssize_t n = recv(connection.fd, buf, bufferSize, 0);
 	std::cout << "n: " << n << '\n';
 
     if (n == 0) {
@@ -24,14 +24,14 @@ static int readFromSocket(Connection &connection)
 }
 
 // if actual body size is larger than contentLength, remainder is stored in buffer
-int readByContentLength(Connection &conn, std::string& bodyStr)
+int readByContentLength(Connection &conn, std::string& bodyStr, int bufferSize)
 {
 	size_t bytesRead = conn.getBuffer().size();
 	int ret;
 
 	size_t contentLength = std::strtol(conn.request.getHeader("Content-Length").c_str(), NULL, 10); // HARDCODED
 	while (bytesRead < contentLength) {
-		ret = readFromSocket(conn);
+		ret = readFromSocket(conn, bufferSize);
 		if (ret <= 0)
 		return ret; // RECV_AGAIN or RECV_CLOSED or RECV_ERROR
 		conn.startTime = getNowInSeconds(); // reset timer
@@ -49,12 +49,13 @@ int readByContentLength(Connection &conn, std::string& bodyStr)
 	}
 	return ret;
 }
-int readRequestBody(Connection &conn, std::string& bodyStr)
+int readRequestBody(Connection &conn, std::string& bodyStr, int bufferSize)
 {
 	// std::cout << GREY << "===== readRequestBody =====" << RESET << '\n';
 	int ret;
+    std::cout << RED "body buffer size: " << bufferSize << '\n' << RESET; ////debug
 	// if (type == CONTENT_LENGTH)
-		ret = readByContentLength(conn, bodyStr);
+		ret = readByContentLength(conn, bodyStr, bufferSize);
 	// else if (type == TRANSFER_ENCODING) {
 	//
 	// }
