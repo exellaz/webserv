@@ -140,32 +140,6 @@ int receiveClientRequest(Connection &connection, std::vector<Config>& configs)
             return handleParsingError(e, response, connection);
         }
     }
-
-    // // get the cgi path
-    // if (!connection.location.cgi_path.empty())
-    // {
-    //     std::cout << GREEN "CGI found\n" RESET; ////debug
-    //     Cgi	cgi;
-    //     std::string cgiOutput = cgi.executeCgi(request, response); //? handle by response
-    //     std::cerr << "cgiOutput: " << cgiOutput << "\n";
-    //     if (cgiOutput.empty() || cgiOutput == "") {
-    //         response.setStatus(INTERNAL_ERROR);
-    //         response.setHeader("Content-Type", "text/plain");
-    //         response.setBody("500 Internal Server Error: CGI script execution failed.\n");
-    //     }
-    //     else {
-    //         handleCgiRequest(cgiOutput, response);
-    //         std::cout << "---------- CGI Output ----------\n" << BLUE << response.toString() << RESET << "\n";
-    //     }
-    // }
-    // else if (response.getStatus() == OK && request.getMethod() == "GET")
-    //     response.handleGetRequest(request, connection.config);
-
-    // std::cout << request;
-    // std::cout << "Is it parsed?: " << request.isHeaderParsed() << "\n";
-    // connection.isResponseReady = true;
-    // connection.clearBuffer();
-
     return 0;
 }
 

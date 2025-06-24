@@ -109,27 +109,6 @@ void HttpRequest::parseHeaderLines(const std::string& str)
     _headerParsed = true;
 }
 
-bool HttpRequest::parseRequestBody(const std::string& str)
-{
-    size_t headerEnd = str.find("\r\n\r\n");
-    if (headerEnd == std::string::npos)
-        return false;
-
-    // Compute where the body starts
-    size_t bodyStart = headerEnd + 4;  // skip “\r\n\r\n”
-    // See if there’s a Content-Length header
-    std::string clStr = _headers["Content-Length"];
-    if (!clStr.empty()) {
-        int content_length = std::atoi(clStr.c_str());
-        // Don’t read past the end of str
-        size_t maxAvailable = str.size() - bodyStart;
-        size_t toCopy = std::min<size_t>(content_length, maxAvailable);
-
-        _body = str.substr(bodyStart, toCopy);
-    }
-    return true;
-}
-
 void HttpRequest::clearRequest()
 {
     _headerParsed = false;

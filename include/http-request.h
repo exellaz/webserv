@@ -26,7 +26,6 @@ class HttpRequest
 
         void parseRequestLine(const std::string& headerStr);
         void parseHeaderLines(const std::string& line);
-        bool parseRequestBody(const std::string& str);
         void clearRequest();
 
         bool hasHeader(const std::string& name) const;
