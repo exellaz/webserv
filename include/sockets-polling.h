@@ -24,6 +24,8 @@
 #include "./Buffer.h"
 #include "Connection.h"
 #include "http-response.h"
+#include <algorithm>
+#include <cctype>
 #include "Cgi.hpp"
 
 
@@ -48,6 +50,8 @@
 #define CLIENT_TIMEOUT 60 // in seconds
 #define MAX_BODY_SIZE 1048576
 #define HEADER_END "\r\n\r\n"
+#define CRLF "\r\n"
+#define CRLF_LENGTH 2
 
 enum recvResult {
     RECV_OK = 0,
@@ -69,7 +73,8 @@ int readRequestBody(Connection &conn, std::string& bodyStr, int bufferSize);
 int receiveClientRequest(Connection &connection, std::vector<Server>& servers);
 
 // Timeout
-void disconnectTimedOutClients(std::vector<Connection>& connections, std::vector<struct pollfd>& pfds);
+int getNearestUpcomingTimeout(std::vector<Connection>& connections, size_t listenerCount);
+void disconnectTimedOutClients(std::vector<Connection>& connections, std::vector<struct pollfd>& pfds, size_t listenerCount);
 
 // Utils
 void *getInAddr(struct sockaddr *sa);
@@ -78,7 +83,6 @@ void addToPfds(std::vector<struct pollfd>& pfds, int newFd);
 //void delFromPfds(std::vector<struct pollfd>& pfds, int i);
 void disconnectClient(std::vector<Connection>& connections, std::vector<struct pollfd>& pfds, int index);
 time_t getNowInSeconds();
-int getNearestUpcomingTimeout(std::vector<Connection>& connections);
 
 // utils2
 //std::string resolveAliasPath(const std::string &url, const Location &location);

@@ -15,10 +15,9 @@ static int readFromSocket(Connection &connection, int bufferSize)
 		std::cout << "RECV_AGAIN: No data available yet, will try again next iteration.\n";
 		return RECV_AGAIN;
     }
-
 	buf[n] = '\0';
 	connection.appendToBuffer(buf, n);
-	std::cout << "curBuffer: " << connection.getBuffer() << '\n'; ////debug
+	std::cout << "curBuffer: " << connection.getBuffer() << '\n';
 
 	return n;
 }
@@ -51,24 +50,20 @@ int readByContentLength(Connection &conn, std::string& bodyStr, int bufferSize)
 }
 int readRequestBody(Connection &conn, std::string& bodyStr, int bufferSize)
 {
-	// std::cout << GREY << "===== readRequestBody =====" << RESET << '\n';
+	std::cout << GREY << "===== readRequestBody =====" << RESET << '\n';
 	int ret;
-    std::cout << RED "body buffer size: " << bufferSize << '\n' << RESET; ////debug
-	// if (type == CONTENT_LENGTH)
+	if (conn.readBodyMethod == CONTENT_LENGTH) {
+		std::cout << "CONTENT_LENGTH\n";
 		ret = readByContentLength(conn, bodyStr, bufferSize);
-	// else if (type == TRANSFER_ENCODING) {
-	//
-	// }
-	// else // NO_BODY
-	// 	return;
-	//
-	// std::cout << "bodyStr size: " << bodyStr.size() << '\n';
-	// std::cout << "\n===== body String: =====\n";
-	// std::cout << bodyStr << '\n';
-	// std::cout << "==========================\n\n";
-	// std::cout << "----Leftover in Buffer: ----\n";
-	// std::cout << conn.getBuffer() << '\n';
-	// std::cout << "----------------------------\n";
+	}
+	else if (conn.readBodyMethod == CHUNKED_ENCODING) {
+		std::cout << "CHUNKED ENCODING\n";
+		ret = readByChunkedEncoding(conn, bodyStr, bufferSize);
+	}
+	else {// NO_BODY
+		std::cout << "NO BODY\n";
+		return RECV_OK;
+	}
 
 	return ret;
 }

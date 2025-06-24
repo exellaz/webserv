@@ -5,7 +5,6 @@
 # include <sstream>
 # include <map>
 # include <cstdlib>
-# include "http-response.h"
 
 namespace HttpConstants
 {
@@ -20,10 +19,16 @@ namespace HttpConstants
 class HttpRequest
 {
     public:
-        bool parseRequestLine(const std::string& headerStr, HttpResponse& response);
-        bool parseHeaderLines(const std::string& line, HttpResponse& response);
+        bool parseRequestLine(const std::string& headerStr);
+        bool parseHeaderLines(const std::string& line);
         bool parseRequestBody(const std::string& str);
         void clearRequest();
+
+        bool hasHeader(const std::string& name) const;
+        bool isValidToken(const std::string& token) const;
+        bool isTChar(char c) const;
+        bool isValidHeaderValue(const std::string& value) const;
+
 
         const std::string& getMethod() const;
         const std::string& getURI() const;
@@ -48,5 +53,7 @@ class HttpRequest
 };
 
 std::ostream& operator<<(std::ostream &stream, const HttpRequest& src);
+std::string toLower(const std::string& str);
+bool isDigitsOnly(const std::string& str);
 
 #endif

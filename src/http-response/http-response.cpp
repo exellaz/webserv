@@ -15,12 +15,14 @@ HttpResponse::HttpResponse(StatusCode code)
     : _status(code)
 {
     _headers["Server"] = "Webserv/1.0";
+    _headers["Connection"] = "keep-alive";
 }
 
 HttpResponse::HttpResponse()
     : _status(OK)
 {
     _headers["Server"] = "Webserv/1.0";
+    _headers["Connection"] = "keep-alive";
 }
 
 std::string HttpResponse::reasonPhrase(StatusCode code)

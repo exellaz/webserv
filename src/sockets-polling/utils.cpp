@@ -13,7 +13,7 @@ void *getInAddr(struct sockaddr *sa)
 // Helper: set a file descriptor to non-blocking mode
 int set_nonblocking(int fd) {
     int flags = fcntl(fd, F_GETFL, 0);
-    if (flags == -1) 
+    if (flags == -1)
 		return -1;
 	// set file status with existing flags + Non-blocking flag
     return fcntl(fd, F_SETFL, flags | O_NONBLOCK);
@@ -35,7 +35,7 @@ void disconnectClient(std::vector<Connection>& connections, std::vector<struct p
 {
 	std::cout << RED << "server: disconnected client socket " << connections[index].fd << "\n" << RESET << '\n';
 	close(connections[index].fd);
-
+	
 	connections.erase(connections.begin() + index);
 	pfds.erase(pfds.begin() + index);
 }
