@@ -132,6 +132,8 @@ bool HttpRequest::parseRequestBody(const std::string& str)
 
 void HttpRequest::clearRequest()
 {
+    _headerParsed = false;
+    _bodyParsed = false;
     _method.clear();
     _uri.clear();
     _version.clear();

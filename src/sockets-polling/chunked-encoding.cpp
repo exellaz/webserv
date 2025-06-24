@@ -113,9 +113,7 @@ int readByChunkedEncoding(Connection &conn, std::string& bodyStr)
 
 				if (conn.getBuffer()[conn.chunkSize] != '\r' || conn.getBuffer()[conn.chunkSize + 1] != '\n') {
 					std::cout << "Chunked Body Format Error: characters after chunkData is not CRLF\n";
-					// 400 Bad Request
-					conn.response.setStatus(BAD_REQUEST);
-					throw std::logic_error("Bad request line format");
+					throw HttpException(BAD_REQUEST, "Bad body format");
 				}
 
 				conn.eraseBufferFromStart(conn.chunkSize + CRLF_LENGTH);
@@ -126,16 +124,14 @@ int readByChunkedEncoding(Connection &conn, std::string& bodyStr)
 
 				if (!conn.compareBuffer(CRLF)) { // line after chunkSize 0 is not CRLF only
 					std::cout << "Chunked Body Format Error: line after chunkSize 0 is not CRLF only\n";
-					// 400 Bad Request
-					conn.response.setStatus(BAD_REQUEST);
-					throw std::logic_error("Bad request line format");
+					throw HttpException(BAD_REQUEST, "Bad body format");
 				}
 				status = DONE;
 				conn.eraseBufferFromStart(CRLF_LENGTH);
 			}
 		}
 	}
-	
+
 	bodyStr.append(conn.chunkReqBuf.c_str(), conn.chunkReqBuf.length());
 	resetChunkEnodingVariables(conn);
 

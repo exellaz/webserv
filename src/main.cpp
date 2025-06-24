@@ -90,8 +90,18 @@ int main(int argc, char **argv)
                             i--;
                             continue;
                         }
-                        if (connections[i].isResponseReady)
-                            pfds[i].events |= POLLOUT;
+                        else if (res == RECV_AGAIN)
+                            continue;
+
+                        try {
+                            dispatchRequest(connections[i]);
+                        }
+                        catch (const HttpException& e) {
+                            handleParsingError(e, connections[i].response, connections[i]);
+                        }
+                        connections[i].isResponseReady = true;
+                        connections[i].clearBuffer();
+                        pfds[i].events |= POLLOUT;
                     }
                 }
                 else if (pfds[i].revents & POLLOUT) {
