@@ -41,13 +41,10 @@ int receiveClientRequest(Connection &connection, std::vector<Config>& configs)
     HttpRequest& request = connection.request;
     HttpResponse& response = connection.response;
 
-    int ret = 0;
     if (request.getMethod().empty()) {
-        ret = readRequestHeader(connection, headerStr);
-
+        int ret = readRequestHeader(connection, headerStr);
         if (ret < 0)
             return ret;
-
         try {
             request.parseRequestLine(headerStr);
             request.parseHeaderLines(headerStr);

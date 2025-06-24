@@ -140,6 +140,45 @@ void HttpRequest::clearRequest()
     _body.clear();
 }
 
+HttpRequest::HttpRequest()
+    : _headerParsed(false),
+    _bodyParsed(false),
+    _method(),
+    _uri(),
+    _version(),
+    _headers(),
+    _body()
+{}
+
+HttpRequest::HttpRequest(const HttpRequest& other)
+    : _headerParsed(other._headerParsed),
+    _bodyParsed(other._bodyParsed),
+    _method(other._method),
+    _uri(other._uri),
+    _version(other._version),
+    _headers(other._headers),
+    _body(other._body)
+{}
+
+// Copy assignment operator
+HttpRequest& HttpRequest::operator=(const HttpRequest& other)
+{
+    if (this != &other) {
+        _headerParsed = other._headerParsed;
+        _bodyParsed = other._bodyParsed;
+        _method = other._method;
+        _uri = other._uri;
+        _version = other._version;
+        _headers = other._headers;
+        _body = other._body;
+    }
+    return *this;
+}
+
+// Destructor
+HttpRequest::~HttpRequest()
+{}
+
 std::ostream& operator<<(std::ostream &stream, const HttpRequest& src)
 {
     stream << "Method: " << src.getMethod() << "\n";

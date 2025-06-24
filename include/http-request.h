@@ -19,6 +19,11 @@ namespace HttpConstants
 class HttpRequest
 {
     public:
+        HttpRequest();
+        HttpRequest(const HttpRequest& other);
+        HttpRequest& operator=(const HttpRequest& other);
+        ~HttpRequest();
+
         bool parseRequestLine(const std::string& headerStr);
         bool parseHeaderLines(const std::string& line);
         bool parseRequestBody(const std::string& str);
@@ -44,6 +49,8 @@ class HttpRequest
         void setBody(const std::string& body);
 
     private:
+        bool _headerParsed;
+        bool _bodyParsed;
         std::string _method;
         std::string _uri;
         std::string _version;
