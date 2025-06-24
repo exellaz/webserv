@@ -24,8 +24,8 @@ class HttpRequest
         HttpRequest& operator=(const HttpRequest& other);
         ~HttpRequest();
 
-        bool parseRequestLine(const std::string& headerStr);
-        bool parseHeaderLines(const std::string& line);
+        void parseRequestLine(const std::string& headerStr);
+        void parseHeaderLines(const std::string& line);
         bool parseRequestBody(const std::string& str);
         void clearRequest();
 
@@ -34,7 +34,8 @@ class HttpRequest
         bool isTChar(char c) const;
         bool isValidHeaderValue(const std::string& value) const;
 
-
+        bool isHeaderParsed() const;
+        bool isBodyParsed() const;
         const std::string& getMethod() const;
         const std::string& getURI() const;
         const std::string& getVersion() const;

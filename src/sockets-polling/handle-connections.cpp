@@ -36,12 +36,11 @@ NOTE:
 */
 int receiveClientRequest(Connection &connection, std::vector<Config>& configs)
 {
-    std::string headerStr;
-    std::string bodyStr;
     HttpRequest& request = connection.request;
     HttpResponse& response = connection.response;
 
-    if (request.getMethod().empty()) {
+    if (!request.isHeaderParsed()) {
+        std::string headerStr;
         int ret = readRequestHeader(connection, headerStr);
         if (ret < 0)
             return ret;
@@ -85,6 +84,7 @@ int receiveClientRequest(Connection &connection, std::vector<Config>& configs)
 
 	if (connection.readBodyMethod != NO_BODY) {
 		try {
+            std::string bodyStr;
 			int ret2 = readRequestBody(connection, bodyStr);
 			if (ret2 < 0)
 				return ret2;

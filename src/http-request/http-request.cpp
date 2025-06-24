@@ -28,11 +28,12 @@ bool HttpRequest::isValidHeaderValue(const std::string& value) const
     return true;
 }
 
-bool HttpRequest::parseRequestLine(const std::string& headerStr)
+void HttpRequest::parseRequestLine(const std::string& headerStr)
 {
     std::istringstream stream(headerStr);
     std::string line;
 
+    _headerParsed = true;
     while (std::getline(stream, line)) {
         if (!line.empty() && line[line.size() - 1] == '\r')
             line.erase(line.size() - 1);
@@ -58,15 +59,14 @@ bool HttpRequest::parseRequestLine(const std::string& headerStr)
         if (_version != "HTTP/1.1")
             throw HttpException(VERSION_NOT_SUPPORTED, "Only HTTP/1.1 supported");
 
-        return true;
+        return ;
     }
 
     // If we never found a non-empty line
     throw HttpException(BAD_REQUEST, "Missing request line");
-    return true;
 }
 
-bool HttpRequest::parseHeaderLines(const std::string& str)
+void HttpRequest::parseHeaderLines(const std::string& str)
 {
     std::istringstream stream(str);
     std::string line;
@@ -98,16 +98,15 @@ bool HttpRequest::parseHeaderLines(const std::string& str)
     if ((_method == "GET" || _method == "DELETE") && (hasHeader("Content-Length") || hasHeader("Transfer-Encoding")))
         throw HttpException(BAD_REQUEST, "No body expected for this method");
 
-    for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); ++it) {
+    for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); ++it)
         std::cout << "Header: [" << it->first << "] = [" << it->second << "]\n";
-    }
 
     if (!hasHeader("Host"))
         throw HttpException(BAD_REQUEST, "Missing Host header");
 
     if (hasHeader("Content-Length") && !isDigitsOnly(getHeader("Content-Length")))
         throw HttpException(BAD_REQUEST, "Invalid content length");
-    return true;
+    _headerParsed = true;
 }
 
 bool HttpRequest::parseRequestBody(const std::string& str)
