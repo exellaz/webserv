@@ -1,11 +1,11 @@
 #include "../../include/sockets-polling.h"
 
 // Return a listening socket
-int getListenerSocket(Config& config)
+int getListenerSocket(Server& server)
 {
     int listener;     // Listening socket descriptor
     int rv;
-	struct addrinfo hints; 
+	struct addrinfo hints;
 	struct addrinfo *res;
 	struct addrinfo *p;
 
@@ -16,17 +16,17 @@ int getListenerSocket(Config& config)
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE;
 
-    if ((rv = getaddrinfo(config.getHost().c_str(), config.getPort().c_str(), &hints, &res)) != 0) {
+    if ((rv = getaddrinfo(server.getHost().c_str(), server.getPort().c_str(), &hints, &res)) != 0) {
         fprintf(stderr, "pollserver: %s\n", gai_strerror(rv));
         exit(1);
     }
-    
+
     for(p = res; p != NULL; p = p->ai_next) {
         listener = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
         if (listener < 0)
             continue;
-        
-		int yes = 1;      
+
+		int yes = 1;
         // Lose the pesky "address already in use" error message
         setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
 
@@ -39,11 +39,11 @@ int getListenerSocket(Config& config)
 
     // If we got here, it means we didn't get bound
     if (p == NULL) {
-	    freeaddrinfo(res); 
+	    freeaddrinfo(res);
 		return -1;
 	}
 
-    freeaddrinfo(res); 
+    freeaddrinfo(res);
 
     // Listen
     if (listen(listener, 10) == -1)
@@ -53,9 +53,9 @@ int getListenerSocket(Config& config)
 }
 
 // returns listening socket fd
-int setupListeningSocket(std::vector<struct pollfd>& pfds, std::vector<Connection>& connections, Config& config) {
+int setupListeningSocket(std::vector<struct pollfd>& pfds, std::vector<Connection>& connections, Server& server) {
 
-    int listener = getListenerSocket(config);
+    int listener = getListenerSocket(server);
     if (listener == -1) {
 		std::cerr << "Error: error getting listening socket\n";
         exit(1);
@@ -71,7 +71,7 @@ int setupListeningSocket(std::vector<struct pollfd>& pfds, std::vector<Connectio
 	struct pollfd pfd;
     pfd.fd = listener;
     pfd.events = POLLIN; // Report ready to read on incoming connection
-	pfds.push_back(pfd); 
+	pfds.push_back(pfd);
 
 	connections.push_back(Connection(listener, getNowInSeconds()));
 

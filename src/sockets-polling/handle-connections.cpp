@@ -34,16 +34,19 @@ NOTE:
 - if recv(HEADER_BUFFER_SIZE) reads till the 'body' section, that section of 'body' will remain in buffers after `readHeader()` is called
 
 */
-int receiveClientRequest(Connection &connection, std::vector<Config>& configs)
+int receiveClientRequest(Connection &connection, std::vector<Server>& servers)
 {
     std::string headerStr;
     std::string bodyStr;
     HttpRequest& request = connection.request;
     HttpResponse& response = connection.response;
 
+    std::string choosePort = getSocketPortNumber(connection.fd);
+    Server server = getServerByPort(servers, choosePort);
+
     int ret = 0;
     if (request.getMethod().empty()) {
-        ret = readRequestHeader(connection, headerStr);
+        ret = readRequestHeader(connection, headerStr, server.getClientHeaderBufferSize());
 
         if (ret < 0)
             return ret;
@@ -68,9 +71,9 @@ int receiveClientRequest(Connection &connection, std::vector<Config>& configs)
     if (request.getHeader("Connection") == "close")
         connection.connType = CLOSE;
 
-    std::string choosePort = request.getHeader("Host").substr(request.getHeader("Host").rfind(':') + 1);
-    Config serverConfig = getServerConfigByPort(configs, choosePort);
-    Location location = serverConfig.getLocationPath(request.getURI());
+    std::cout << "header size: " << headerStr.size() << "\n"; ////debug
+
+    Location location = server.getLocationPath(request.getURI());
     if (location.alias.empty() && location.root.empty())
     {
         response.setStatus(NOT_FOUND);
@@ -88,7 +91,7 @@ int receiveClientRequest(Connection &connection, std::vector<Config>& configs)
 
 	if (connection.readBodyMethod != NO_BODY) {
 		try {
-			int ret2 = readRequestBody(connection, bodyStr);
+			int ret2 = readRequestBody(connection, bodyStr, server.getClientBodyBufferSize());
 			if (ret2 < 0)
 				return ret2;
 
@@ -124,7 +127,7 @@ int receiveClientRequest(Connection &connection, std::vector<Config>& configs)
         }
     }
     else if (response.getStatus() == OK && request.getMethod() == "GET")
-        response.handleGetRequest(request, serverConfig);
+        response.handleGetRequest(request, server);
 
     std::cout << request;
     connection.isResponseReady = true;

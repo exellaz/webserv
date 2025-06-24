@@ -130,9 +130,9 @@ static char **setEnvStrToEnvp(std::map<std::string, std::string> &env_vars, std:
 }
 
 /**
- * @brief get full path of the CGI script
- * @param file name of the CGI script
- * @return full path of the CGI script
+ * @brief get full path of the file
+ * @param file name of the file
+ * @return full path of the file
 */
 std::string getFullPath(const std::string &file)
 {
@@ -143,10 +143,7 @@ std::string getFullPath(const std::string &file)
 		perror("getcwd");
 		return "";
 	}
-	//if (std::string(cwd).find("/src/cgi-handling") != std::string::npos) //test purpose
-	//	full_path = std::string(cwd).substr(0, std::string(cwd).find("/src/cgi-handling")) + file;
-	//else
-		full_path = std::string(cwd) + file;
+	full_path = std::string(cwd) + file;
 	free(cwd);
 	return full_path;
 }
