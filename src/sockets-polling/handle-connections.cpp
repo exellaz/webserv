@@ -88,10 +88,13 @@ NOTE:
 - if recv(HEADER_BUFFER_SIZE) reads till the 'body' section, that section of 'body' will remain in buffers after `readHeader()` is called
 
 */
-int receiveClientRequest(Connection &connection, std::vector<Config>& configs)
+int receiveClientRequest(Connection &connection, std::vector<Server>& servers)
 {
     HttpRequest& request = connection.request;
     HttpResponse& response = connection.response;
+
+    std::string choosePort = getSocketPortNumber(connection.fd);
+    Server server = getServerByPort(servers, choosePort);
 
     if (!request.isHeaderParsed()) {
         std::string headerStr;
@@ -131,7 +134,7 @@ int receiveClientRequest(Connection &connection, std::vector<Config>& configs)
     if (connection.readBodyMethod != NO_BODY) {
         try {
             std::string bodyStr;
-            int ret2 = readRequestBody(connection, bodyStr);
+            int ret2 = readRequestBody(connection, bodyStr, server.getClientBodyBufferSize());
             if (ret2 < 0)
                 return ret2;
             request.setBody(bodyStr);

@@ -6,7 +6,7 @@
 /*   By: welow <welow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/29 15:31:13 by welow             #+#    #+#             */
-/*   Updated: 2025/06/17 16:51:35 by welow            ###   ########.fr       */
+/*   Updated: 2025/06/20 20:24:40 by welow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ static std::string	extractLine(const std::string &line);
 /**
  * @brief Config constructor
 */
-Config::Config(std::istream &conf)
+Server::Server(std::istream &conf)
 	: _port(""),
 	  _host(""),
 	  _serverName(""),
@@ -31,7 +31,7 @@ Config::Config(std::istream &conf)
 	  _errorPage()
 {
 	if (conf.peek() == std::ifstream::traits_type::eof())
-		throw std::runtime_error("config file is empty");
+		throw std::runtime_error("server file is empty");
 	for (std::string line; std::getline(conf,line);)
 	{
 		line = checkComment(line);
@@ -185,7 +185,7 @@ Location::Location(std::istream &conf, const std::string &locName)
 /**
  * @brief get port number
 */
-const std::string	&Config::getPort() const
+const std::string	&Server::getPort() const
 {
 	return (this->_port);
 }
@@ -193,7 +193,7 @@ const std::string	&Config::getPort() const
 /**
  * @brief get ip address or DNS name
 */
-const std::string	&Config::getHost() const
+const std::string	&Server::getHost() const
 {
 	return (this->_host);
 }
@@ -201,7 +201,7 @@ const std::string	&Config::getHost() const
 /**
  * @brief get server name
 */
-const std::string	&Config::getServerName() const
+const std::string	&Server::getServerName() const
 {
 	return (this->_serverName);
 }
@@ -209,7 +209,7 @@ const std::string	&Config::getServerName() const
 /**
  * @brief get root directory
 */
-const std::string	&Config::getRoot() const
+const std::string	&Server::getRoot() const
 {
 	return (this->_root);
 }
@@ -217,7 +217,7 @@ const std::string	&Config::getRoot() const
 /**
  * @brief get allowed methods
 */
-const std::vector<std::string>	&Config::getAllowMethods() const
+const std::vector<std::string>	&Server::getAllowMethods() const
 {
 	return (this->_allowMethods);
 }
@@ -225,7 +225,7 @@ const std::vector<std::string>	&Config::getAllowMethods() const
 /**
  * @brief get client max size
 */
-int Config::getClientMaxSize() const
+int Server::getClientMaxSize() const
 {
 	return (this->_clientMaxSize);
 }
@@ -233,7 +233,7 @@ int Config::getClientMaxSize() const
 /**
  * @brief get client body buffer size
 */
-int	Config::getClientBodyBufferSize() const
+int	Server::getClientBodyBufferSize() const
 {
 	return (this->_clientBodyBufferSize);
 }
@@ -241,7 +241,7 @@ int	Config::getClientBodyBufferSize() const
 /**
  * @brief get client header buffer size
 */
-int	Config::getClientHeaderBufferSize() const
+int	Server::getClientHeaderBufferSize() const
 {
 	return (this->_clientHeaderBufferSize);
 }
@@ -249,7 +249,7 @@ int	Config::getClientHeaderBufferSize() const
 /**
  * @brief get large client header buffer number
 */
-int	Config::getClientTimeout() const
+int	Server::getClientTimeout() const
 {
 	return (this->_clientTimeout);
 }
@@ -257,7 +257,7 @@ int	Config::getClientTimeout() const
 /**
  * @brief get error log
 */
-const std::map<int, std::string>	&Config::getErrorPage() const
+const std::map<int, std::string>	&Server::getErrorPage() const
 {
 	return (this->_errorPage);
 }
@@ -266,7 +266,7 @@ const std::map<int, std::string>	&Config::getErrorPage() const
  * @brief get error log by code
  * @param errorCode error code
 */
-const std::string &Config::getErrorPageByCode(int errorCode) const
+const std::string &Server::getErrorPageByCode(int errorCode) const
 {
 	std::map<int, std::string>::const_iterator it = this->_errorPage.find(errorCode);
 	if (it != this->_errorPage.end())
@@ -277,7 +277,7 @@ const std::string &Config::getErrorPageByCode(int errorCode) const
 /**
  * @brief get location
 */
-const std::map<std::string, Location>	&Config::getLocations() const
+const std::map<std::string, Location>	&Server::getLocations() const
 {
 	return (this->_location);
 }
@@ -288,7 +288,7 @@ const std::map<std::string, Location>	&Config::getLocations() const
  * @note 1. if the location is "/", return the location if it matches the path
  * @note 2. if prefix match and (length is equal or next char is '/'), return the location
 */
-Location Config::getLocationPath(const std::string &path)
+Location Server::getLocationPath(const std::string &path)
 {
 	std::string match;
 	for (std::map<std::string, Location>::iterator it = this->_location.begin(); it != this->_location.end(); ++it)
@@ -302,9 +302,9 @@ Location Config::getLocationPath(const std::string &path)
 		}
 
 		bool prefixMatch = path.compare(0, loc.length(), loc) == 0;
-		bool exactMatch = path.length() == loc.length();
-		bool nextCharSlash = path.length() > loc.length() && path[loc.length()] == '/';
-		if (prefixMatch && (exactMatch || nextCharSlash))
+		//bool exactMatch = path.length() == loc.length();
+		//bool nextCharSlash = path.length() > loc.length() && path[loc.length()] == '/';
+		if (prefixMatch)
 				match = loc;
 	}
 	if (!match.empty())
@@ -315,48 +315,48 @@ Location Config::getLocationPath(const std::string &path)
 ////////////////////////////////////////////// OUTPUT OPERATOR //////////////////////////////////////////////////////////////
 
 /**
- * @brief print configuration information
+ * @brief print server information
 */
-std::ostream &operator<<(std::ostream &cout, const Config &config)
+std::ostream &operator<<(std::ostream &cout, const Server &server)
 {
-	if (!config.getPort().empty())
-		cout << "port           : [" << config.getPort() << "]\n";
-	if (!config.getHost().empty())
-		cout << "host           : [" << config.getHost() << "]\n";
-	if (!config.getServerName().empty())
-		cout << "server_name    : [" << config.getServerName() << "]\n\n";
+	if (!server.getPort().empty())
+		cout << "port           : [" << server.getPort() << "]\n";
+	if (!server.getHost().empty())
+		cout << "host           : [" << server.getHost() << "]\n";
+	if (!server.getServerName().empty())
+		cout << "server_name    : [" << server.getServerName() << "]\n\n";
 
-	if (!config.getRoot().empty())
-		cout << "root_directory : [" << config.getRoot() << "]\n\n";
+	if (!server.getRoot().empty())
+		cout << "root_directory : [" << server.getRoot() << "]\n\n";
 
-	if (!config.getAllowMethods().empty())
+	if (!server.getAllowMethods().empty())
 	{
 		cout << "allow_methods  : ";
-		for (std::vector<std::string>::const_iterator methodIt = config.getAllowMethods().begin();
-				methodIt != config.getAllowMethods().end(); ++methodIt)
+		for (std::vector<std::string>::const_iterator methodIt = server.getAllowMethods().begin();
+				methodIt != server.getAllowMethods().end(); ++methodIt)
 		{
 			cout << "[" << *methodIt << "]";
 		}
 		cout << "\n\n";
 	}
 
-	if (config.getClientMaxSize() != 0)
-		cout << "client_max_size          : [" << config.getClientMaxSize() << "]\n";
-	if (config.getClientBodyBufferSize() != 0)
-		cout << "client_body_buffer_size  : [" << config.getClientBodyBufferSize() << "]\n";
-	if (config.getClientHeaderBufferSize() != 0)
-		cout << "client_header_buffer_size: [" << config.getClientHeaderBufferSize() << "]\n";
-	if (config.getClientTimeout() != 0)
-		cout << "client_timeout: [" << config.getClientTimeout() << "]\n\n";
+	if (server.getClientMaxSize() != 0)
+		cout << "client_max_size          : [" << server.getClientMaxSize() << "]\n";
+	if (server.getClientBodyBufferSize() != 0)
+		cout << "client_body_buffer_size  : [" << server.getClientBodyBufferSize() << "]\n";
+	if (server.getClientHeaderBufferSize() != 0)
+		cout << "client_header_buffer_size: [" << server.getClientHeaderBufferSize() << "]\n";
+	if (server.getClientTimeout() != 0)
+		cout << "client_timeout: [" << server.getClientTimeout() << "]\n\n";
 
-	for (std::map<int, std::string>::const_iterator it = config.getErrorPage().begin(); it != config.getErrorPage().end(); ++it)
+	for (std::map<int, std::string>::const_iterator it = server.getErrorPage().begin(); it != server.getErrorPage().end(); ++it)
 	{
 		cout << "error_log      : [" << it->first << "] [" << it->second << "]\n";
 	}
 	std::cout << "\n";
 
-	for (std::map<std::string, Location>::const_iterator it = config.getLocations().begin();
-			it != config.getLocations().end(); ++it)
+	for (std::map<std::string, Location>::const_iterator it = server.getLocations().begin();
+			it != server.getLocations().end(); ++it)
 	{
 		const Location &loc = it->second;
 
@@ -401,10 +401,10 @@ std::ostream &operator<<(std::ostream &cout, const Config &config)
 
 ///////////////////////////////////////////// HELPER FUNCTION ///////////////////////////////////////////////////////////////
 
-std::vector<Config> parseAllServers(const std::string &filename)
+std::vector<Server> parseAllServers(const std::string &filename)
 {
 	std::ifstream conf(filename.c_str());
-	std::vector<Config> servers;
+	std::vector<Server> servers;
 	std::stringstream block;
 
 	if (!conf.is_open())
@@ -421,8 +421,8 @@ std::vector<Config> parseAllServers(const std::string &filename)
 				if (line.find('}') != std::string::npos) braceCount--;
 				block << line << "\n"; // if not keep parse the line
 			}
-			Config serverConfig(block);
-			servers.push_back(serverConfig);
+			Server serverBlock(block);
+			servers.push_back(serverBlock);
 		}
 	}
 	return servers;
