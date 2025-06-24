@@ -113,6 +113,8 @@ int readByChunkedEncoding(Connection &conn, std::string& bodyStr, int bufferSize
                     throw std::logic_error("Bad request line format");
                 }
 
+				if (conn.chunkReqBuf.size() > CLIENT_MAX_BODY_SIZE)
+				    throw HttpException(PAYLOAD_TOO_LARGE, "Request Body Too Large");
                 conn.eraseBufferFromStart(conn.chunkSize + CRLF_LENGTH);
                 status = READ_CHUNK_SIZE;
             }

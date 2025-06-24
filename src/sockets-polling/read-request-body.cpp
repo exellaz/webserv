@@ -3,6 +3,11 @@
 // if actual body size is larger than contentLength, remainder is stored in buffer
 int readByContentLength(Connection &conn, std::string& bodyStr, int bufferSize)
 {
+	if (conn.contentLength > CLIENT_MAX_BODY_SIZE) {
+		std::cout << RED << "contentLength > CLIENT_MAX_BODY_SIZE" << RESET;
+		throw HttpException(PAYLOAD_TOO_LARGE, "Request Body Too Large");
+	}
+
     size_t bytesRead = conn.getBuffer().size();
     int ret;
 

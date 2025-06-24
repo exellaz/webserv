@@ -48,7 +48,8 @@
 #define MAX_LARGE_BUFFERS 4
 #define BODY_BUFFER_SIZE 8192
 #define CLIENT_TIMEOUT 60 // in seconds
-#define MAX_BODY_SIZE 1048576
+#define CLIENT_MAX_BODY_SIZE 1048576
+
 #define HEADER_END "\r\n\r\n"
 #define CRLF "\r\n"
 #define CRLF_LENGTH 2
