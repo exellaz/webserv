@@ -72,7 +72,8 @@ int readRequestBody(Connection &conn, std::string& bodyStr);
 int receiveClientRequest(Connection &connection, std::vector<Config>& configs);
 
 // Timeout
-void disconnectTimedOutClients(std::vector<Connection>& connections, std::vector<struct pollfd>& pfds);
+int getNearestUpcomingTimeout(std::vector<Connection>& connections, size_t listenerCount);
+void disconnectTimedOutClients(std::vector<Connection>& connections, std::vector<struct pollfd>& pfds, size_t listenerCount);
 
 // Utils
 void *getInAddr(struct sockaddr *sa);
@@ -81,7 +82,6 @@ void addToPfds(std::vector<struct pollfd>& pfds, int newFd);
 //void delFromPfds(std::vector<struct pollfd>& pfds, int i);
 void disconnectClient(std::vector<Connection>& connections, std::vector<struct pollfd>& pfds, int index);
 time_t getNowInSeconds();
-int getNearestUpcomingTimeout(std::vector<Connection>& connections);
 
 // utils2
 std::string resolveAliasPath(const std::string &url, const Location &location);
