@@ -71,6 +71,7 @@ int readRequestHeader(Connection &conn, std::string& headerStr, int bufferSize);
 // void readRequestBody(int fd, std::string& bodyStr, std::string& buffer, enum reqBodyType type);
 int readRequestBody(Connection &conn, std::string& bodyStr, int bufferSize);
 int receiveClientRequest(Connection &connection, std::vector<Server>& servers);
+int readByChunkedEncoding(Connection &conn, std::string& bodyStr, int bufferSize);
 
 // Timeout
 int getNearestUpcomingTimeout(std::vector<Connection>& connections, size_t listenerCount);
@@ -83,6 +84,7 @@ void addToPfds(std::vector<struct pollfd>& pfds, int newFd);
 //void delFromPfds(std::vector<struct pollfd>& pfds, int i);
 void disconnectClient(std::vector<Connection>& connections, std::vector<struct pollfd>& pfds, int index);
 time_t getNowInSeconds();
+int readFromSocket(Connection &connection, int bufferSize);
 
 // utils2
 //std::string resolveAliasPath(const std::string &url, const Location &location);
@@ -96,19 +98,19 @@ std::string getSocketPortNumber(int fd);
 
 class BadRequestException : public std::exception {
 public:
-	// 'throw()' specifies that func won't throw any exceptions
-	const char* what() const throw() {
-		return "400: Bad Request";
-	}
+    // 'throw()' specifies that func won't throw any exceptions
+    const char* what() const throw() {
+        return "400: Bad Request";
+    }
 
 };
 
 class PollErrorException : public std::exception {
 public:
-	// 'throw()' specifies that func won't throw any exceptions
-	const char* what() const throw() {
-		return "Poll error";
-	}
+    // 'throw()' specifies that func won't throw any exceptions
+    const char* what() const throw() {
+        return "Poll error";
+    }
 
 };
 
