@@ -37,7 +37,7 @@ void dispatchRequest(Connection& connection)
     }
     else {
         if (request.getMethod() == "GET")
-            response.handleGetRequest(request, connection.config);
+            response.handleGetRequest(request, connection.server);
         // else if (req.getMethod() == "POST")
         //     res.handlePostRequest(req, connection.config);
         // else if (req.getMethod() == "DELETE")
@@ -46,14 +46,14 @@ void dispatchRequest(Connection& connection)
 }
 
 
-void Connection::resolveServerConfig(std::vector<Config>& configs, HttpRequest& request)
-{
-    std::string choosePort = request.getHeader("Host").substr(request.getHeader("Host").rfind(':') + 1);
-    config = getServerConfigByPort(configs, choosePort);
-    location = config.getLocationPath(request.getURI());
-    if (location.alias.empty() && location.root.empty())
-        throw HttpException(NOT_FOUND, "Requested resource not found");
-}
+// void Connection::resolveServerConfig(std::vector<Server>& servers, HttpRequest& request)
+// {
+//     std::string choosePort = request.getHeader("Host").substr(request.getHeader("Host").rfind(':') + 1);
+//     config = getServerConfigByPort(, choosePort);
+//     location = config.getLocationPath(request.getURI());
+//     if (location.alias.empty() && location.root.empty())
+//         throw HttpException(NOT_FOUND, "Requested resource not found");
+// }
 
 void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Connection>& connections, int listener)
 {
@@ -94,11 +94,11 @@ int receiveClientRequest(Connection &connection, std::vector<Server>& servers)
     HttpResponse& response = connection.response;
 
     std::string choosePort = getSocketPortNumber(connection.fd);
-    Server server = getServerByPort(servers, choosePort);
+    connection.server = getServerByPort(servers, choosePort);
 
     if (!request.isHeaderParsed()) {
         std::string headerStr;
-        int ret = readRequestHeader(connection, headerStr);
+        int ret = readRequestHeader(connection, headerStr, connection.server.getClientHeaderBufferSize());
         if (ret < 0)
             return ret;
 
@@ -116,12 +116,20 @@ int receiveClientRequest(Connection &connection, std::vector<Server>& servers)
     if (request.getHeader("Connection") == "close")
         connection.connType = CLOSE;
 
-    try {
-        connection.resolveServerConfig(configs, request);
+    connection.location = connection.server.getLocationPath(request.getURI());
+    if (connection.location.alias.empty() && connection.location.root.empty())
+    {
+        response.setStatus(NOT_FOUND);
+        response.setHeader("Content-Type", "text/plain");
+        response.setBody("404 Not Found: The requested resource could not be found.\n");
+        return 1;
     }
-    catch (const HttpException& e) {
-        return handleParsingError(e, response, connection);
-    }
+    // try {
+    //     connection.resolveServerConfig(configs, request);
+    // }
+    // catch (const HttpException& e) {
+    //     return handleParsingError(e, response, connection);
+    // }
 
     // Initialise `readBodyMethod`
     if (request.hasHeader("Content-Length"))
@@ -134,7 +142,7 @@ int receiveClientRequest(Connection &connection, std::vector<Server>& servers)
     if (connection.readBodyMethod != NO_BODY) {
         try {
             std::string bodyStr;
-            int ret2 = readRequestBody(connection, bodyStr, server.getClientBodyBufferSize());
+            int ret2 = readRequestBody(connection, bodyStr, connection.server.getClientBodyBufferSize());
             if (ret2 < 0)
                 return ret2;
             request.setBody(bodyStr);

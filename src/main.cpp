@@ -108,6 +108,7 @@ int main(int argc, char **argv)
                     std::cout << "POLLOUT\n";
 
                     sendResponseToClient(connections[i].fd, connections[i].response);
+                    // connections[i].location;
                     connections[i].isResponseReady = false;
                     connections[i].request.clearRequest();
                     connections[i].response.clearResponse();

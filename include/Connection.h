@@ -63,12 +63,12 @@ public:
 	size_t bufferSize() const;
 	bool compareBuffer(const std::string str);
 	size_t findInBuffer(const std::string str, size_t pos);
-	void resolveServerConfig(std::vector<Config>& configs, HttpRequest& request);
+	// void resolveServerConfig(std::vector<Config>& configs, HttpRequest& request);
 
 
 	HttpRequest request;
 	HttpResponse response;
-	Config config;
+	Server server;
 	Location location;
 
 private:
