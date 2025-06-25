@@ -3,31 +3,35 @@
 // if actual body size is larger than contentLength, remainder is stored in buffer
 int readByContentLength(Connection &conn, std::string& bodyStr, int bufferSize)
 {
+
+    size_t bytesRead = conn.getBuffer().size();
+    int ret = RECV_OK;
+
+    conn.contentLength = std::strtol(conn.request.getHeader("Content-Length").c_str(), NULL, 10);
+
+	std::cout << "contentLength: " << conn.contentLength << '\n';
 	if (conn.contentLength > CLIENT_MAX_BODY_SIZE) {
-		std::cout << RED << "contentLength > CLIENT_MAX_BODY_SIZE" << RESET;
+		std::cout << RED << "contentLength > CLIENT_MAX_BODY_SIZE\n" << RESET;
 		throw HttpException(PAYLOAD_TOO_LARGE, "Request Body Too Large");
 	}
 
-    size_t bytesRead = conn.getBuffer().size();
-    int ret;
-
-    size_t contentLength = std::strtol(conn.request.getHeader("Content-Length").c_str(), NULL, 10); // HARDCODED
-    while (bytesRead < contentLength) {
+    while (bytesRead < conn.contentLength) {
         ret = readFromSocket(conn, bufferSize);
         if (ret <= 0)
-        return ret; // RECV_AGAIN or RECV_CLOSED or RECV_ERROR
-        conn.startTime = getNowInSeconds(); // reset timer
-        bytesRead += ret;
-        std::cout << "bytesRead: " << bytesRead << '\n'; ////debug
-    }
+			return ret; // RECV_AGAIN or RECV_CLOSED or RECV_ERROR
+		
+		conn.startTime = getNowInSeconds(); // reset timer
+		bytesRead += ret;
+		std::cout << "bytesRead: " << bytesRead << '\n'; ////debug
+	}
 
-    if (bytesRead == contentLength) {
-        bodyStr = conn.getBuffer();
-        conn.clearBuffer();
-    }
-    else { // bytesRead > contentLength
-        bodyStr = conn.getBuffer().substr(0, contentLength);
-        conn.setBuffer(conn.getBuffer().substr(contentLength));
+	if (bytesRead == conn.contentLength) {
+		bodyStr = conn.getBuffer();
+		conn.clearBuffer();
+	}
+	else { // bytesRead > conn.contentLength
+        bodyStr = conn.getBuffer().substr(0, conn.contentLength);
+        conn.setBuffer(conn.getBuffer().substr(conn.contentLength));
     }
     return ret;
 }

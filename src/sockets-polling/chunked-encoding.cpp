@@ -70,6 +70,7 @@ static void resetChunkEnodingVariables(Connection &conn)
     conn.readChunkedRequestStatus = READ_CHUNK_SIZE;
     conn.chunkReqBuf.clear();
     conn.chunkSize = 0;
+	conn.isFirstTimeReadingBody = true;
 }
 
 int readByChunkedEncoding(Connection &conn, std::string& bodyStr, int bufferSize)
@@ -79,12 +80,14 @@ int readByChunkedEncoding(Connection &conn, std::string& bodyStr, int bufferSize
 
     while (status != DONE) {
 
-        if (conn.bufferSize() == 0) {
-            ret = readFromSocket(conn, bufferSize);
-            if (ret <= 0)
-                return ret; // RECV_AGAIN or RECV_CLOSED or RECV_ERROR
-            conn.startTime = getNowInSeconds(); // reset timer
-        }
+        if (!(conn.isFirstTimeReadingBody && conn.bufferSize() > 0)) {
+			conn.isFirstTimeReadingBody = false;
+
+			ret = readFromSocket(conn, bufferSize);
+			if (ret <= 0)
+				return ret; // RECV_AGAIN or RECV_CLOSED or RECV_ERROR
+			conn.startTime = getNowInSeconds(); // reset timer
+		}
 
         while (conn.bufferSize() > 0) {
 
@@ -102,7 +105,7 @@ int readByChunkedEncoding(Connection &conn, std::string& bodyStr, int bufferSize
                 std::cout << "READ_CHUNK_DATA\n";
 
                 if (conn.bufferSize() < conn.chunkSize + CRLF_LENGTH) // must have CRLF for a complete line
-                    break;
+					break;
                 std::string chunkData = extractChunkData(conn.getBuffer(), conn.chunkSize);
                 conn.chunkReqBuf.append(chunkData.c_str(), chunkData.length());
 

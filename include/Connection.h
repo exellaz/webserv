@@ -50,7 +50,7 @@ public:
 	enum readChunkedRequestStatus readChunkedRequestStatus;
 	size_t chunkSize;
 	std::string chunkReqBuf;
-
+	bool isFirstTimeReadingBody;
 	bool isResponseReady;
 	
 	// Buffer methods
