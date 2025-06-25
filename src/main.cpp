@@ -100,6 +100,7 @@ int main(int argc, char **argv)
                                 handleParsingError(e, connections[i].response, connections[i]);
                             }
                         }
+                        std::cout << "Res: " << res << "\n";
                         std::cout << "Response ready\n";
                         connections[i].isResponseReady = true;
                         connections[i].clearBuffer();

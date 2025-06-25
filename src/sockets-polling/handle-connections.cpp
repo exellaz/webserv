@@ -115,13 +115,14 @@ int receiveClientRequest(Connection &connection, std::vector<Server>& servers)
     if (request.getHeader("Connection") == "close")
         connection.connType = CLOSE;
 
+    // BUG HERE CRITICAL
     connection.location = connection.server.getLocationPath(request.getURI());
     if (connection.location.alias.empty() && connection.location.root.empty())
     {
         response.setStatus(NOT_FOUND);
         response.setHeader("Content-Type", "text/plain");
         response.setBody("404 Not Found: The requested resource could not be found.\n");
-        return 1;
+        return -4;
     }
     // try {
     //     connection.resolveServerConfig(configs, request);
