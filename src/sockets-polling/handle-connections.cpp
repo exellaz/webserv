@@ -9,7 +9,7 @@ int handleParsingError(const HttpException& e, HttpResponse& response, Connectio
     response.setHeader("Connection", "close");
     connection.connType = CLOSE;
     connection.isResponseReady = true;
-    return 1;
+    return -3;
 }
 
 void dispatchRequest(Connection& connection)
@@ -97,12 +97,11 @@ int receiveClientRequest(Connection &connection, std::vector<Server>& servers)
     connection.server = getServerByPort(servers, choosePort);
 
     if (!request.isHeaderParsed()) {
-        std::string headerStr;
-        int ret = readRequestHeader(connection, headerStr, connection.server.getClientHeaderBufferSize());
-        if (ret < 0)
-            return ret;
-
         try {
+            std::string headerStr;
+            int ret = readRequestHeader(connection, headerStr, connection.server.getClientHeaderBufferSize());
+            if (ret < 0)
+                return ret;
             request.parseRequestLine(headerStr);
             request.parseHeaderLines(headerStr);
         }
@@ -151,6 +150,8 @@ int receiveClientRequest(Connection &connection, std::vector<Server>& servers)
             return handleParsingError(e, response, connection);
         }
     }
+
+    std::cout << request;
     return 0;
 }
 

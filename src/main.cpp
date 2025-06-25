@@ -92,13 +92,15 @@ int main(int argc, char **argv)
                         }
                         else if (res == RECV_AGAIN)
                             continue;
-
-                        try {
-                            dispatchRequest(connections[i]);
+                        else if (res != -3) {
+                            try {
+                                dispatchRequest(connections[i]);
+                            }
+                            catch (const HttpException& e) {
+                                handleParsingError(e, connections[i].response, connections[i]);
+                            }
                         }
-                        catch (const HttpException& e) {
-                            handleParsingError(e, connections[i].response, connections[i]);
-                        }
+                        std::cout << "Response ready\n";
                         connections[i].isResponseReady = true;
                         connections[i].clearBuffer();
                         pfds[i].events |= POLLOUT;

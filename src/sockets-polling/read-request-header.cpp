@@ -28,7 +28,7 @@ int readRequestHeader(Connection &conn, std::string& headerStr, int bufferSize)
     // TODO: if CRLF not found -> throw exception?
     if (found == std::string::npos) {
         std::cout << "getHeaderStr: Error: End of Header not found\n";
-
+        throw HttpException(BAD_REQUEST, "No header found");
     }
     // if no body
     if (buffer.begin() + found == buffer.end() - 4) {
