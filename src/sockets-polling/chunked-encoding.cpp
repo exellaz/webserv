@@ -106,12 +106,10 @@ int readByChunkedEncoding(Connection &conn, std::string& bodyStr, int bufferSize
                 std::string chunkData = extractChunkData(conn.getBuffer(), conn.chunkSize);
                 conn.chunkReqBuf.append(chunkData.c_str(), chunkData.length());
 
-                if (conn.getBuffer()[conn.chunkSize] != '\r' || conn.getBuffer()[conn.chunkSize + 1] != '\n') {
-                    std::cout << "Chunked Body Format Error: characters after chunkData is not CRLF\n";
-                    // 400 Bad Request
-                    conn.response.setStatus(BAD_REQUEST);
-                    throw std::logic_error("Bad request line format");
-                }
+				if (conn.getBuffer()[conn.chunkSize] != '\r' || conn.getBuffer()[conn.chunkSize + 1] != '\n') {
+					std::cout << "Chunked Body Format Error: characters after chunkData is not CRLF\n";
+					throw HttpException(BAD_REQUEST, "Bad body format");
+				}
 
                 conn.eraseBufferFromStart(conn.chunkSize + CRLF_LENGTH);
                 status = READ_CHUNK_SIZE;
@@ -119,20 +117,20 @@ int readByChunkedEncoding(Connection &conn, std::string& bodyStr, int bufferSize
             else if (status == EXPECT_CRLF_AFTER_ZERO_CHUNK_SIZE) {
                 std::cout << "EXPECT_CRLF_AFTER_ZERO_CHUNK_SIE\n";
 
-                if (!conn.compareBuffer(CRLF)) { // line after chunkSize 0 is not CRLF only
-                    std::cout << "Chunked Body Format Error: line after chunkSize 0 is not CRLF only\n";
-                    // 400 Bad Request
-                    conn.response.setStatus(BAD_REQUEST);
-                    throw std::logic_error("Bad request line format");
-                }
-                status = DONE;
-                conn.eraseBufferFromStart(CRLF_LENGTH);
-            }
-        }
-    }
+				if (!conn.compareBuffer(CRLF)) { // line after chunkSize 0 is not CRLF only
+					std::cout << "Chunked Body Format Error: line after chunkSize 0 is not CRLF only\n";
+					// 400 Bad Request
+					conn.response.setStatus(BAD_REQUEST);
+					throw std::logic_error("Bad request line format");
+				}
+				status = DONE;
+				conn.eraseBufferFromStart(CRLF_LENGTH);
+			}
+		}
+	}
 
-    bodyStr.append(conn.chunkReqBuf.c_str(), conn.chunkReqBuf.length());
-    resetChunkEnodingVariables(conn);
+	bodyStr.append(conn.chunkReqBuf.c_str(), conn.chunkReqBuf.length());
+	resetChunkEnodingVariables(conn);
 
     return ret;
 }

@@ -17,6 +17,16 @@ bool isDigitsOnly(const std::string& str)
     return true;
 }
 
+bool HttpRequest::isHeaderParsed() const
+{
+    return _headerParsed;
+}
+
+bool HttpRequest::isBodyParsed() const
+{
+    return _bodyParsed;
+}
+
 bool HttpRequest::hasHeader(const std::string& name) const
 {
     return _headers.find(toLower(name)) != _headers.end();

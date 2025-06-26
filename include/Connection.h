@@ -6,6 +6,7 @@
 #include "http-request.h"
 #include "http-response.h"
 #include "http-exception.h"
+#include "Configuration.hpp"
 #include <iostream>
 #include <sys/time.h>
 
@@ -40,10 +41,10 @@ public:
 
 	int fd;
 	time_t startTime; // Timeout
-	
+
 	enum connectionType connType;
 	enum readBodyMethod readBodyMethod;
-	
+
 	size_t contentLength;
 
 	// Chunked Encoding
@@ -52,7 +53,7 @@ public:
 	std::string chunkReqBuf;
 
 	bool isResponseReady;
-	
+
 	// Buffer methods
 	void appendToBuffer(const char *str, size_t n);
 	const std::string& getBuffer() const;
@@ -62,14 +63,21 @@ public:
 	size_t bufferSize() const;
 	bool compareBuffer(const std::string str);
 	size_t findInBuffer(const std::string str, size_t pos);
+	// void resolveServerConfig(std::vector<Config>& configs, HttpRequest& request);
+
 
 	HttpRequest request;
 	HttpResponse response;
+	Server server;
+	Location location;
 
 private:
 	std::string _buffer;
 };
 
 std::ostream & operator<<( std::ostream & o, Connection const & connection );
+void dispatchRequest(Connection& connection);
+int handleParsingError(const HttpException& e, HttpResponse& response, Connection& connection);
+
 
 #endif
