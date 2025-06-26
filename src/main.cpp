@@ -104,14 +104,15 @@ int main(int argc, char **argv)
                         std::cout << "Response ready\n";
                         connections[i].isResponseReady = true;
                         connections[i].clearBuffer();
+                        pfds[i].events &= ~POLLIN;
                         pfds[i].events |= POLLOUT;
+
                     }
                 }
                 else if (pfds[i].revents & POLLOUT) {
                     std::cout << "POLLOUT\n";
 
                     sendResponseToClient(connections[i].fd, connections[i].response);
-                    // connections[i].location;
                     connections[i].isResponseReady = false;
                     connections[i].request.clearRequest();
                     connections[i].response.clearResponse();
@@ -122,6 +123,8 @@ int main(int argc, char **argv)
                        continue;
                     }
                     pfds[i].events &= ~POLLOUT;
+                    pfds[i].events |= POLLIN;
+
                 }
                 else if (pfds[i].revents & POLLHUP) {
                     std::cout << "POLLHUP\n";

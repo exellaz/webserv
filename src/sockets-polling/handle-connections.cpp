@@ -25,6 +25,8 @@ void dispatchRequest(Connection& connection)
     if (!location.cgi_path.empty()) {
         std::cout << GREEN "CGI found\n" RESET;
         Cgi cgi;
+        
+        std::cout << "response body: \n" << response.getBody() << '\n';
         std::string cgiOutput = cgi.executeCgi(request, response);
         std::cerr << "cgiOutput: " << cgiOutput << "\n";
 
@@ -115,15 +117,6 @@ int receiveClientRequest(Connection &connection, std::vector<Server>& servers)
     if (request.getHeader("Connection") == "close")
         connection.connType = CLOSE;
 
-    // BUG HERE CRITICAL
-    connection.location = connection.server.getLocationPath(request.getURI());
-    if (connection.location.alias.empty() && connection.location.root.empty())
-    {
-        response.setStatus(NOT_FOUND);
-        response.setHeader("Content-Type", "text/plain");
-        response.setBody("404 Not Found: The requested resource could not be found.\n");
-        return -4;
-    }
     // try {
     //     connection.resolveServerConfig(configs, request);
     // }
