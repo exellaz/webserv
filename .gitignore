@@ -35,3 +35,10 @@ webserv
 .vscode/
 /src/http-request/http-request
 /src/http-response/http-response
+/cgi-bin/storage
+/cgi-bin/data.json
+
+# ignore my python version
+cgi-bin/hello.cgi
+cgi-bin/post_file.cgi
+cgi-bin/delete_file.cgi
