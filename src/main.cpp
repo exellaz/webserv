@@ -90,14 +90,23 @@ int main(int argc, char **argv)
                             i--;
                             continue;
                         }
-						else if (res == REQUEST_ERR) {
-                            std::cout << "REQUEST_ERR\n";
-                            disconnectClient(connections, pfds, i);
-                            i--;
+                        else if (res == RECV_AGAIN)
                             continue;
-						}
-                        if (connections[i].isResponseReady)
-                            pfds[i].events |= POLLOUT;
+                        else if (res != -3) {
+                            try {
+                                dispatchRequest(connections[i]);
+                            }
+                            catch (const HttpException& e) {
+                                handleParsingError(e, connections[i].response, connections[i]);
+                            }
+                        }
+                        std::cout << "Res: " << res << "\n";
+                        std::cout << "Response ready\n";
+                        connections[i].isResponseReady = true;
+                        connections[i].clearBuffer();
+                        pfds[i].events &= ~POLLIN;
+                        pfds[i].events |= POLLOUT;
+
                     }
                 }
                 else if (pfds[i].revents & POLLOUT) {
@@ -114,6 +123,8 @@ int main(int argc, char **argv)
                        continue;
                     }
                     pfds[i].events &= ~POLLOUT;
+                    pfds[i].events |= POLLIN;
+
                 }
                 else if (pfds[i].revents & POLLHUP) {
                     std::cout << "POLLHUP\n";

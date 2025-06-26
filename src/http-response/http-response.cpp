@@ -175,6 +175,7 @@ void HttpResponse::handleGetRequest(const HttpRequest& request, Server &serverCo
     Location location = serverConfig.getLocationPath(request.getURI());
 
     struct stat info;
+    std::cout << fullPath << "\n";
     if (stat(fullPath.c_str(), &info) < 0)
     {
 		std::cout << "not file or folder\n";
