@@ -16,7 +16,7 @@ void dispatchRequest(Connection& connection)
 {
     HttpRequest& request = connection.request;
     HttpResponse& response = connection.response;
-    const Location& location = connection.location;
+    const Location& location = connection.server.getLocationPath(request.getURI());
 
     response.setHeader("Connection", request.getHeader("Connection"));
     if (request.getHeader("Connection") == "close")
@@ -25,7 +25,7 @@ void dispatchRequest(Connection& connection)
     if (!location.cgi_path.empty()) {
         std::cout << GREEN "CGI found\n" RESET;
         Cgi cgi;
-        
+
         std::cout << "response body: \n" << response.getBody() << '\n';
         std::string cgiOutput = cgi.executeCgi(request, response);
         std::cerr << "cgiOutput: " << cgiOutput << "\n";
@@ -46,7 +46,6 @@ void dispatchRequest(Connection& connection)
         //     res.handleDeleteRequest(req, connection.config);
     }
 }
-
 
 // void Connection::resolveServerConfig(std::vector<Server>& servers, HttpRequest& request)
 // {
@@ -116,7 +115,6 @@ int receiveClientRequest(Connection &connection, std::vector<Server>& servers)
     response.setHeader("Connection", request.getHeader("Connection"));
     if (request.getHeader("Connection") == "close")
         connection.connType = CLOSE;
-
     // try {
     //     connection.resolveServerConfig(configs, request);
     // }
