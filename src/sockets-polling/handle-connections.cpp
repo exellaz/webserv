@@ -9,7 +9,7 @@ int handleParsingError(const HttpException& e, HttpResponse& response, Connectio
     response.setHeader("Connection", "close");
     connection.connType = CLOSE;
     connection.isResponseReady = true;
-    return -3;
+    return REQUEST_ERR;
 }
 
 void dispatchRequest(Connection& connection)

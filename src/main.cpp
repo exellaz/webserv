@@ -92,7 +92,7 @@ int main(int argc, char **argv)
                         }
                         else if (res == RECV_AGAIN)
                             continue;
-                        else if (res != -3) {
+                        else if (res != REQUEST_ERR) {
                             try {
                                 dispatchRequest(connections[i]);
                             }
