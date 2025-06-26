@@ -73,7 +73,7 @@
     const msg = document.getElementById('msg').value;
     // Send as JSON (or you can use FormData if your CGI expects it)
     const response = await fetch('/cgi-bin/delete_database.py', {
-      method: 'DELETE',
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
