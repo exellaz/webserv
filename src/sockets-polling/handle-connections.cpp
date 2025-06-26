@@ -104,6 +104,7 @@ int receiveClientRequest(Connection &connection, std::vector<Server>& servers)
 		catch (std::exception& e) {
 			std::cerr << e.what() << "\n";
 			connection.connType = CLOSE;
+			return REQUEST_ERR;
 		}
 	}
 

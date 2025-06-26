@@ -90,6 +90,12 @@ int main(int argc, char **argv)
                             i--;
                             continue;
                         }
+						else if (res == REQUEST_ERR) {
+                            std::cout << "REQUEST_ERR\n";
+                            disconnectClient(connections, pfds, i);
+                            i--;
+                            continue;
+						}
                         if (connections[i].isResponseReady)
                             pfds[i].events |= POLLOUT;
                     }
