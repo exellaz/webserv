@@ -70,7 +70,6 @@ void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Connection>& con
 int readRequestHeader(Connection &conn, std::string& headerStr, int bufferSize);
 // void readRequestBody(int fd, std::string& bodyStr, std::string& buffer, enum reqBodyType type);
 int readRequestBody(Connection &conn, std::string& bodyStr, int bufferSize);
-//int receiveClientRequest(Connection &connection, std::map<int, std::vector<Server> >& servers, Server& defaultServer); //TODO
 int receiveClientRequest(Connection &connection, std::map<int, std::vector<Server> >& servers);
 int readByChunkedEncoding(Connection &conn, std::string& bodyStr, int bufferSize);
 

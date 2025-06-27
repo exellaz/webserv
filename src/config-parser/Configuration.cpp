@@ -6,7 +6,7 @@
 /*   By: welow <welow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/29 15:31:13 by welow             #+#    #+#             */
-/*   Updated: 2025/06/27 09:42:50 by welow            ###   ########.fr       */
+/*   Updated: 2025/06/27 10:10:25 by welow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -431,35 +431,6 @@ std::map<int, std::vector<Server> > parseAllServers(const std::string &filename)
     }
     conf.close();
     return listServers;
-}
-
-std::map<int, Server> parseDefaultServer(const std::string &filename)
-{
-    std::map<int, Server> defaultServer;
-    std::ifstream conf(filename.c_str());
-    std::stringstream serverBlock;
-
-    if (!conf.is_open())
-        throw std::runtime_error("default server: Failed to open configuration file");
-
-    for (std::string line; std::getline(conf, line);)
-    {
-        if (line.find("server") != std::string::npos && line.find("{") != std::string::npos)
-        {
-            serverBlock << line << "\n";
-            int braceCount = 1; //look for the next "}"
-            while (braceCount != 0 && std::getline(conf, line)) {
-                if (line.find('{') != std::string::npos) braceCount++;
-                if (line.find('}') != std::string::npos) braceCount--;
-                serverBlock << line << "\n"; // if not keep parse the line
-            }
-            Server servers(serverBlock);
-            int port = std::strtol(servers.getPort().c_str(), NULL, 10);
-            defaultServer[port] = servers;
-        }
-    }
-    conf.close();
-    return defaultServer;
 }
 
 /**

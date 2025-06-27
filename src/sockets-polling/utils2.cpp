@@ -30,20 +30,6 @@
 //}
 
 /**
- * @brief get the server by port
-*/
-Server getServerByPort(std::map<int, std::vector<Server> > &servers, std::string &port)
-{
-    for (std::map<int, std::vector<Server> >::iterator it = servers.begin(); it != servers.end(); ++it)
-    {
-        for (std::vector<Server>::iterator serverIt = it->second.begin(); serverIt != it->second.end(); ++serverIt)
-            if (serverIt->getPort() == port)
-                return *serverIt;
-    }
-    return Server();
-}
-
-/**
  * @brief normalize the multiple "/" in the relative uri to one "/"
 */
 std::string normalizeSlash(const std::string &relativeUri)

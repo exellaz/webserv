@@ -41,7 +41,6 @@ int main(int argc, char **argv)
 
     try {
         std::map<int, std::vector<Server> > servers = parseAllServers(configFile);
-        std::map<int, Server> defaultServer = parseDefaultServer(configFile);
 
         std::vector<struct pollfd> pfds;
         std::vector<Connection> connections;
@@ -85,7 +84,6 @@ int main(int argc, char **argv)
                     if (find(listeners.begin(), listeners.end(), pfds[i].fd) != listeners.end())
                         acceptClient(pfds, connections, pfds[i].fd);
                     else {
-                        //int res = receiveClientRequest(connections[i], servers, defaultServer[4242]); //pass multiple servers //TODO
                         int res = receiveClientRequest(connections[i], servers);
                         if (res == RECV_CLOSED) {
                             std::cout << "server: socket " << pfds[i].fd << " hung up\n";
