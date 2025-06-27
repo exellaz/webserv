@@ -38,7 +38,7 @@ int main()
     request.setMethod("POST");
 
     if (request.getMethod() == "POST")
-        response.handlePostRequest(request);
+        response.handlePostRequest(request, "./objs/");
 
     std::cout << response.toString();
     return 0;
