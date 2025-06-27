@@ -102,12 +102,12 @@ Server::Server(std::istream &conf)
 /**
  * @brief Location constructor
 */
-Location::Location(std::istream &conf, const std::string &locName, const std::vector<std::string> & allowMethods)
+Location::Location(std::istream &conf, const std::string &locName, const std::vector<std::string> & defaultMethods)
     : locationPath(""),
       index(""),
       root(""),
       alias(""),
-      allowMethods(allowMethods),
+      allowMethods(defaultMethods),
       returnPath(),
       clientMaxSize(0),
       autoIndex(false),
@@ -133,8 +133,8 @@ Location::Location(std::istream &conf, const std::string &locName, const std::ve
         {
             this->allowMethods.clear();
             std::istringstream iss(line);
-            std::string keyword, method;
-            iss >> keyword;
+            std::string method;
+            iss >> method;
             while (iss >> method)
             {
                 if (isupper(method[0]) == false)
@@ -364,6 +364,7 @@ std::ostream &operator<<(std::ostream &cout, const Server &server)
             cout << "alias_directory : [" << loc.alias << "]\n";
         if (!loc.allowMethods.empty())
         {
+            std::cout << "method size: " << loc.allowMethods.size();
             cout << "allow_methods   : ";
             for (std::vector<std::string>::const_iterator methodIt = loc.allowMethods.begin();
                     methodIt != loc.allowMethods.end(); ++methodIt)
@@ -397,9 +398,10 @@ std::ostream &operator<<(std::ostream &cout, const Server &server)
 
 ///////////////////////////////////////////// HELPER FUNCTION ///////////////////////////////////////////////////////////////
 
-std::map<int, std::vector<Server> > parseAllServers(const std::string &filename)
+std::map< std::pair<std::string, std::string> , std::vector<Server> > parseAllServers(const std::string &filename)
 {
-    std::map<int, std::vector<Server> > listServers;
+    // std::map<int, std::vector<Server> > listServers;
+    std::map< std::pair<std::string, std::string> , std::vector<Server> > listServers;
     std::ifstream conf(filename.c_str());
     std::stringstream serverBlock;
 
@@ -417,9 +419,12 @@ std::map<int, std::vector<Server> > parseAllServers(const std::string &filename)
                 if (line.find('}') != std::string::npos) braceCount--;
                 serverBlock << line << "\n"; // if not keep parse the line
             }
-            Server servers(serverBlock);
-            int port = std::strtol(servers.getPort().c_str(), NULL, 10);
-            listServers[port].push_back(servers);
+            Server server(serverBlock);
+            std::string host = server.getHost();
+            std::string port = server.getPort();
+            
+            std::pair<std::string, std::string> key = std::make_pair(host, port);
+            listServers[key].push_back(server);
         }
     }
     conf.close();

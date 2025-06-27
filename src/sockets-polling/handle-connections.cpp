@@ -76,12 +76,15 @@ void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Connection>& con
 void validateMethod(const std::string& method, const std::vector<std::string>& allowedMethods)
 {
     for (std::vector<std::string>::const_iterator It = allowedMethods.begin(); It != allowedMethods.end(); ++It) {
-        std::cout << "Allowed method: " << *It << "\n";
+
         if (*It == method)
             return ;
     }
     throw HttpException(METHOD_NOT_ALLOWED, "Method not allowed");
 }
+
+
+
 
 /*
 NOTE:
@@ -89,23 +92,27 @@ NOTE:
 - if recv(HEADER_BUFFER_SIZE) reads till the 'body' section, that section of 'body' will remain in buffers after `readHeader()` is called
 
 */
-int receiveClientRequest(Connection &connection, std::map<int, std::vector<Server> >& servers)
+int receiveClientRequest(Connection &connection, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers)
 {
     HttpRequest& request = connection.request;
     HttpResponse& response = connection.response;
 
-    //TODO check host
-    // (void)servers;
-    connection.server = servers[4242][0];
+    // IP:PORT pair from fd
+    std::pair<std::string, std::string> ipPort = getIpAndPortFromSocketFd(connection.fd);
+
+    // get default block by IP:PORT pair
+    Server& defaultServer = getDefaultServerBlockByIpPort(ipPort, servers);
 
     if (!request.isHeaderParsed()) {
         try {
             std::string headerStr;
-            int ret = readRequestHeader(connection, headerStr, connection.server.getClientHeaderBufferSize());
+            int ret = readRequestHeader(connection, headerStr, defaultServer.getClientHeaderBufferSize());
             if (ret < 0)
                 return ret;
             request.parseRequestLine(headerStr);
             request.parseHeaderLines(headerStr);
+
+            connection.assignServerByServerName(servers, ipPort, defaultServer);
             connection.location = connection.server.getLocationPath(request.getURI());
             std::cout << connection.location.allowMethods.size() << "\n";
             validateMethod(request.getMethod(), connection.location.allowMethods);
@@ -119,12 +126,6 @@ int receiveClientRequest(Connection &connection, std::map<int, std::vector<Serve
     response.setHeader("Connection", request.getHeader("Connection"));
     if (request.getHeader("Connection") == "close")
         connection.connType = CLOSE;
-    // try {
-    //     connection.resolveServerConfig(configs, request);
-    // }
-    // catch (const HttpException& e) {
-    //     return handleParsingError(e, response, connection);
-    // }
 
     // Initialise `readBodyMethod`
     if (request.hasHeader("Content-Length"))
@@ -137,7 +138,7 @@ int receiveClientRequest(Connection &connection, std::map<int, std::vector<Serve
     if (connection.readBodyMethod != NO_BODY) {
         try {
             std::string bodyStr;
-            int ret2 = readRequestBody(connection, bodyStr, connection.server.getClientBodyBufferSize());
+            int ret2 = readRequestBody(connection, bodyStr, defaultServer.getClientBodyBufferSize());
             if (ret2 < 0)
                 return ret2;
             request.setBody(bodyStr);
