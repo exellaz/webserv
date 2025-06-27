@@ -11,7 +11,7 @@ Location::Location(std::istream &conf, const std::string &locName, const std::ve
       _autoIndex(false),
       _allowUpload(false)
 {
-    this->_locaPath = ft_trim(locName);
+    this->_locaPath = extractLine(locName);
     for(std::string line; std::getline(conf, line);)
     {
         line = checkComment(line);

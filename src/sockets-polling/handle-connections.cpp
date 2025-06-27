@@ -76,7 +76,6 @@ void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Connection>& con
 void validateMethod(const std::string& method, const std::vector<std::string>& allowedMethods)
 {
     for (std::vector<std::string>::const_iterator It = allowedMethods.begin(); It != allowedMethods.end(); ++It) {
-
         if (*It == method)
             return ;
     }
