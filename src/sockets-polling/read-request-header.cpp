@@ -1,6 +1,6 @@
 #include "../../include/sockets-polling.h"
 
-int readRequestHeader(Connection &conn, std::string& headerStr, int bufferSize)
+int readRequestHeader(Connection &conn, std::string& headerStr, const size_t bufferSize)
 {
     std::cout << GREY << "===== readRequestHeader =====" << RESET << '\n';
 

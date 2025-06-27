@@ -65,7 +65,7 @@ static void resetChunkEnodingVariables(Connection &conn)
 	conn.isFirstTimeReadingBody = true;
 }
 
-int readByChunkedEncoding(Connection &conn, std::string& bodyStr, int bufferSize)
+int readByChunkedEncoding(Connection &conn, std::string& bodyStr, const size_t bufferSize, const size_t maxSize)
 {
     int ret = RECV_OK;
     enum readChunkedRequestStatus& status = conn.readChunkedRequestStatus;
@@ -106,7 +106,7 @@ int readByChunkedEncoding(Connection &conn, std::string& bodyStr, int bufferSize
 					throw HttpException(BAD_REQUEST, "Bad body format");
 
                 std::cout << "chunkReqBuf size " << conn.chunkReqBuf.size() << '\n';
-				if (conn.chunkReqBuf.size() > CLIENT_MAX_BODY_SIZE)
+				if (conn.chunkReqBuf.size() > maxSize)
 				    throw HttpException(PAYLOAD_TOO_LARGE, "Request Body Too Large");
                 conn.eraseBufferFromStart(conn.chunkSize + CRLF_LENGTH);
                 status = READ_CHUNK_SIZE;

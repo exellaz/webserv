@@ -38,7 +38,6 @@
 #define BLUE "\033[0;34m"
 
 #define CLIENT_TIMEOUT 60 // in seconds
-#define CLIENT_MAX_BODY_SIZE 1048576
 
 #define HEADER_END "\r\n\r\n"
 #define CRLF "\r\n"
@@ -57,11 +56,11 @@ int setupListeningSocket(std::vector<struct pollfd>& pfds, std::vector<Connectio
 void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Connection>& connections, int listener);
 
 // Read Request Utils
-int readRequestHeader(Connection &conn, std::string& headerStr, int bufferSize);
-int readRequestBody(Connection &conn, std::string& bodyStr, int bufferSize);
+int readRequestHeader(Connection &conn, std::string& headerStr, const size_t bufferSize);
+int readRequestBody(Connection &conn, std::string& bodyStr, const size_t bufferSize, const size_t maxSize);
 // int receiveClientRequest(Connection &connection, std::map<int, std::vector<Server> >& servers);
 int receiveClientRequest(Connection &connection, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers);
-int readByChunkedEncoding(Connection &conn, std::string& bodyStr, int bufferSize);
+int readByChunkedEncoding(Connection &conn, std::string& bodyStr, const size_t bufferSize, const size_t maxSize);
 
 // Timeout
 int getNearestUpcomingTimeout(std::vector<Connection>& connections, size_t listenerCount);

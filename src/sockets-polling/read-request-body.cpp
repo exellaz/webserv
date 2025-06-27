@@ -1,7 +1,7 @@
 #include "../../include/sockets-polling.h"
 
 // if actual body size is larger than contentLength, remainder is stored in buffer
-int readByContentLength(Connection &conn, std::string& bodyStr, int bufferSize)
+int readByContentLength(Connection &conn, std::string& bodyStr, const size_t bufferSize, const size_t maxSize)
 {
 
     size_t bytesRead = conn.getBuffer().size();
@@ -9,11 +9,8 @@ int readByContentLength(Connection &conn, std::string& bodyStr, int bufferSize)
 
     conn.contentLength = std::strtol(conn.request.getHeader("Content-Length").c_str(), NULL, 10);
 
-	std::cout << "contentLength: " << conn.contentLength << '\n';
-	if (conn.contentLength > CLIENT_MAX_BODY_SIZE) {
-		std::cout << RED << "contentLength > CLIENT_MAX_BODY_SIZE\n" << RESET;
+	if (conn.contentLength > maxSize)
 		throw HttpException(PAYLOAD_TOO_LARGE, "Request Body Too Large");
-	}
 
     while (bytesRead < conn.contentLength) {
         ret = readFromSocket(conn, bufferSize);
@@ -35,17 +32,17 @@ int readByContentLength(Connection &conn, std::string& bodyStr, int bufferSize)
     }
     return ret;
 }
-int readRequestBody(Connection &conn, std::string& bodyStr, int bufferSize)
+int readRequestBody(Connection &conn, std::string& bodyStr, const size_t bufferSize, const size_t maxSize)
 {
     std::cout << GREY << "===== readRequestBody =====" << RESET << '\n';
     int ret;
     if (conn.readBodyMethod == CONTENT_LENGTH) {
         std::cout << "CONTENT_LENGTH\n";
-        ret = readByContentLength(conn, bodyStr, bufferSize);
+        ret = readByContentLength(conn, bodyStr, bufferSize, maxSize);
     }
     else if (conn.readBodyMethod == CHUNKED_ENCODING) {
         std::cout << "CHUNKED ENCODING\n";
-        ret = readByChunkedEncoding(conn, bodyStr, bufferSize);
+        ret = readByChunkedEncoding(conn, bodyStr, bufferSize, maxSize);
     }
     else {// NO_BODY
         std::cout << "NO BODY\n";
