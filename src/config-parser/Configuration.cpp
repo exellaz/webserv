@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Configuration.cpp                                  :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: kkhai-ki <kkhai-ki@student.42kl.edu.my>    +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/05/29 15:31:13 by welow             #+#    #+#             */
-/*   Updated: 2025/06/27 08:24:58 by kkhai-ki         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "../../include/Configuration.hpp"
 
 static std::string ft_trim(const std::string &str);
@@ -103,7 +91,7 @@ Server::Server(std::istream &conf)
         }
         else if (line.find("location") != std::string::npos)
         {
-            Location loc(conf, line);
+            Location loc(conf, line, getAllowMethods());
             this->_location[loc.locationPath] = loc;
         }
         else if (line.find("}") != std::string::npos)
@@ -114,12 +102,12 @@ Server::Server(std::istream &conf)
 /**
  * @brief Location constructor
 */
-Location::Location(std::istream &conf, const std::string &locName)
+Location::Location(std::istream &conf, const std::string &locName, const std::vector<std::string> & allowMethods)
     : locationPath(""),
       index(""),
       root(""),
       alias(""),
-      allowMethods(),
+      allowMethods(allowMethods),
       returnPath(),
       clientMaxSize(0),
       autoIndex(false)
@@ -146,11 +134,14 @@ Location::Location(std::istream &conf, const std::string &locName)
             this->alias = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
         else if (line.find("allowed_method") != std::string::npos)
         {
+            this->allowMethods.clear();
             std::istringstream iss(line);
             std::string keyword, method;
             iss >> keyword; // skip "allowed_method"
             while (iss >> method)
             {
+                if (isupper(method[0]) == false)
+                    throw std::runtime_error("allowed_method must be uppercase");
                 if (!method.empty() && method[method.size() - 1] == ';') // check if method ends with ';'
                     method.erase(method.size() - 1); //if not erase the last character
                 if (!method.empty()) // check if method is not empty
@@ -401,31 +392,33 @@ std::ostream &operator<<(std::ostream &cout, const Server &server)
 
 ///////////////////////////////////////////// HELPER FUNCTION ///////////////////////////////////////////////////////////////
 
-std::vector<Server> parseAllServers(const std::string &filename)
+std::map<int, std::vector<Server> > parseAllServers(const std::string &filename)
 {
+    std::map<int, std::vector<Server> > listServers;
     std::ifstream conf(filename.c_str());
-    std::vector<Server> servers;
-    std::stringstream block;
+    std::stringstream serverBlock;
 
     if (!conf.is_open())
-        throw std::runtime_error("File not found");
+        throw std::runtime_error("all server: failed to open configuration file");
 
     for (std::string line; std::getline(conf, line);)
     {
         if (line.find("server") != std::string::npos && line.find("{") != std::string::npos)
         {
-            block << line << "\n";
+            serverBlock << line << "\n";
             int braceCount = 1; //look for the next "}"
             while (braceCount != 0 && std::getline(conf, line)) {
                 if (line.find('{') != std::string::npos) braceCount++;
                 if (line.find('}') != std::string::npos) braceCount--;
-                block << line << "\n"; // if not keep parse the line
+                serverBlock << line << "\n"; // if not keep parse the line
             }
-            Server serverBlock(block);
-            servers.push_back(serverBlock);
+            Server servers(serverBlock);
+            int port = std::strtol(servers.getPort().c_str(), NULL, 10);
+            listServers[port].push_back(servers);
         }
     }
-    return servers;
+    conf.close();
+    return listServers;
 }
 
 /**
