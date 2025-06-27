@@ -10,6 +10,7 @@
 #include <vector>
 #include <map>
 #include "utils.h"
+#include <utility>
 
 class Location;
 
@@ -73,12 +74,14 @@ class Location
         const std::string           &getCgiPath() const;
         bool                        getAllowUpload() const;
 
-        Location(std::istream &conf, const std::string &locName, const std::vector<std::string> & allowMethods);
+        Location(std::istream &conf, const std::string &locName, const std::vector<std::string> & defaultMethods);
         Location() {};
         ~Location() {};
 };
 
-std::map<int, std::vector<Server> > parseAllServers(const std::string &filename);
+// std::map<int, std::vector<Server> > parseAllServers(const std::string &filename);
+std::map< std::pair<std::string, std::string> , std::vector<Server> > parseAllServers(const std::string &filename);
+
 std::ostream &operator<<(std::ostream &cout, const Server &server);
 std::string ft_trim(const std::string &str);
 std::string	checkComment(const std::string &line);

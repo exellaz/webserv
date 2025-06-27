@@ -40,25 +40,24 @@ int main(int argc, char **argv)
     }
 
     try {
-        std::map<int, std::vector<Server> > servers = parseAllServers(configFile);
+        // std::map<int, std::vector<Server> > servers = parseAllServers(configFile);
+        std::map< std::pair<std::string, std::string> , std::vector<Server> > servers = parseAllServers(configFile);
 
         std::vector<struct pollfd> pfds;
         std::vector<Connection> connections;
         std::vector<int> listeners;
 
-        for (std::map<int, std::vector<Server> >::iterator it = servers.begin(); it != servers.end(); ++it)
+        // TODO: open listenerSocket per IP:PORT pair
+        for (std::map<std::pair<std::string, std::string>, std::vector<Server> >::iterator it = servers.begin(); it != servers.end(); ++it)
         {
-            for (std::vector<Server>::iterator serverIt = it->second.begin(); serverIt != it->second.end(); ++serverIt)
-            {
-                if (serverIt->getPort().empty() || serverIt->getHost().empty())
-                    continue;
-                int listener = setupListeningSocket(pfds, connections, *serverIt); //? set map in this
-                listeners.push_back(listener);
-            }
+            Server &curServer = *(it->second.begin());
+            int listener = setupListeningSocket(pfds, connections, curServer); //? set map in this
+            listeners.push_back(listener);
         }
         for (std::vector<int>::iterator it = listeners.begin(); it != listeners.end(); ++it) ////debug
             std::cout << "Listener socket fd: " << *it << "\n";
 
+        
         while(1) {
 
             std::cout << CYAN << "\n+++++++ Waiting for POLL event ++++++++" << RESET << "\n\n";
@@ -139,11 +138,13 @@ int main(int argc, char **argv)
                 }
             }
         }
+        
     }
     catch (const std::exception &e)
     {
         std::cerr << RED << "Error: " << RESET << e.what() << "\n";
     }
+
 
     return 0;
 }

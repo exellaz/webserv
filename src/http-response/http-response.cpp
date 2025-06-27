@@ -216,12 +216,6 @@ void HttpResponse::handleGetRequest(const std::string& uri, Server &serverConfig
     }
 }
 
-
-// void HttpResponse::handlePostRequest(const HttpRequest& request)
-// {
-
-// }
-
 void HttpResponse::clearResponse()
 {
     _status = OK;
@@ -258,6 +252,15 @@ void HttpResponse::setBody(const std::string& bodyData)
     std::stringstream stream;
 
     _body = bodyData;
+    stream << _body.size();
+    setHeader("Content-Length", stream.str());
+}
+
+void HttpResponse::appendToBody(const std::string& bodyData)
+{
+    std::stringstream stream;
+
+    _body.append(bodyData);
     stream << _body.size();
     setHeader("Content-Length", stream.str());
 }
