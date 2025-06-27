@@ -40,23 +40,24 @@ int main(int argc, char **argv)
     }
 
     try {
-        std::vector<Server> servers = parseAllServers(configFile);
+        std::map<int, std::vector<Server> > servers = parseAllServers(configFile);
 
         std::vector<struct pollfd> pfds;
         std::vector<Connection> connections;
         std::vector<int> listeners;
-        std::map<int, std::string> listenerToConfig;
 
-        for (size_t i = 0; i < servers.size(); ++i)
+        for (std::map<int, std::vector<Server> >::iterator it = servers.begin(); it != servers.end(); ++it)
         {
-            if (servers[i].getPort().empty() || servers[i].getHost().empty())
-                continue;
-            int listener = setupListeningSocket(pfds, connections, servers[i]);
-            listeners.push_back(listener);
+            for (std::vector<Server>::iterator serverIt = it->second.begin(); serverIt != it->second.end(); ++serverIt)
+            {
+                if (serverIt->getPort().empty() || serverIt->getHost().empty())
+                    continue;
+                int listener = setupListeningSocket(pfds, connections, *serverIt); //? set map in this
+                listeners.push_back(listener);
+            }
         }
-        for (std::vector<int>::iterator it = listeners.begin(); it != listeners.end(); ++it) { ////debug
+        for (std::vector<int>::iterator it = listeners.begin(); it != listeners.end(); ++it) ////debug
             std::cout << "Listener socket fd: " << *it << "\n";
-        }
 
         while(1) {
 
@@ -83,7 +84,7 @@ int main(int argc, char **argv)
                     if (find(listeners.begin(), listeners.end(), pfds[i].fd) != listeners.end())
                         acceptClient(pfds, connections, pfds[i].fd);
                     else {
-                        int res = receiveClientRequest(connections[i], servers); //pass multiple servers
+                        int res = receiveClientRequest(connections[i], servers);
                         if (res == RECV_CLOSED) {
                             std::cout << "server: socket " << pfds[i].fd << " hung up\n";
                             disconnectClient(connections, pfds, i);
