@@ -46,6 +46,7 @@ class HttpResponse
 
         std::string getHttpDate();
         std::string toString();
+        void appendToBody(const std::string& bodyData);
 
         void setStatus(StatusCode code);
         void setHeader(const std::string& name, const std::string& value);
@@ -59,6 +60,6 @@ class HttpResponse
         StatusCode _status;
         std::map<std::string, std::string> _headers;
         std::string _body;
-    };
+};
 
 #endif

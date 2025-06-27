@@ -104,6 +104,7 @@ int receiveClientRequest(Connection &connection, std::map<int, std::vector<Serve
     HttpResponse& response = connection.response;
 
     //TODO check host
+    (void)servers;
 
     if (!request.isHeaderParsed()) {
         try {
