@@ -3,97 +3,6 @@
 /**
  * @brief Config constructor
 */
-//Server::Server(std::istream &conf)
-//    : _port(""),
-//      _host(""),
-//      _serverName(""),
-//      _root(""),
-//      _clientMaxSize(0),
-//      _clientBodyBufferSize(0),
-//      _clientHeaderBufferSize(0),
-//      _clientTimeout(0),
-//      _errorPage()
-//{
-//    if (conf.peek() == std::ifstream::traits_type::eof())
-//        throw std::runtime_error("server file is empty");
-//    for (std::string line; std::getline(conf,line);)
-//    {
-//        line = checkComment(line);
-//        if (line.find("listen") != std::string::npos)
-//        {
-//            std::string listen = line.substr(line.find(' ') + 1,line.find(';') - line.find(' ') - 1);
-//            size_t colon = listen.find(':');
-//            if (colon != std::string::npos)
-//            {
-//                this->_host = listen.substr(0, colon);
-//                this->_port = listen.substr(colon + 1);
-//            }
-//            else
-//                this->_port = listen.substr(colon + 1);
-//        }
-//        else if (line.find("server_name") != std::string::npos)
-//        {
-//            std::string serverName = line.substr(line.find(' ') + 1,line.find(';') - line.find(' ') - 1);
-//            this->_serverName = serverName;
-//        }
-//        else if (line.find("root") != std::string::npos)
-//        {
-//            std::string rootPath = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
-//            this->_root = rootPath;
-//        }
-//        else if (line.find("allowed_method") != std::string::npos)
-//        {
-//            std::istringstream iss(line);
-//            std::string keyword, method;
-//            iss >> keyword; // skip "allowed_method"
-//            while (iss >> method)
-//            {
-//                if (!method.empty() && method[method.size() - 1] == ';') // check if method ends with ';'
-//                    method.erase(method.size() - 1); //if not erase the last character
-//                if (!method.empty()) // check if method is not empty
-//                    this->_allowMethods.push_back(method); //get the current method to the vector
-//            }
-//        }
-//        else if (line.find("client_max_body_size") != std::string::npos)
-//        {
-//            std::string clientMaxSize = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
-//            this->_clientMaxSize = std::strtol(clientMaxSize.c_str(), NULL, 10);
-//        }
-//        else if (line.find("client_body_buffer_size") != std::string::npos)
-//        {
-//            std::string clientBodyBufferSize = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
-//            this->_clientBodyBufferSize = std::strtol(clientBodyBufferSize.c_str(), NULL, 10);
-//        }
-//        else if (line.find("client_header_buffer_size") != std::string::npos)
-//        {
-//            std::string clientHeaderBufferSize = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
-//            this->_clientHeaderBufferSize = std::strtol(clientHeaderBufferSize.c_str(), NULL, 10);
-//        }
-//        else if (line.find("client_timeout") != std::string::npos)
-//        {
-//            std::string clientTimeout = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
-//            this->_clientTimeout = std::strtol(clientTimeout.c_str(), NULL, 10);
-//        }
-//        else if (line.find("error_page") != std::string::npos)
-//        {
-//            std::string errorPage = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
-//            size_t errorCodePos = errorPage.find(' ');
-//            if (errorCodePos != std::string::npos)
-//            {
-//                int errorCode = std::strtol(errorPage.substr(0, errorCodePos).c_str(), NULL, 10);
-//                std::string errorFilePath = ft_trim(errorPage.substr(errorCodePos + 1));
-//                this->_errorPage[errorCode] = errorFilePath;
-//            }
-//        }
-//        else if (line.find("location") != std::string::npos)
-//        {
-//            Location loc(conf, line, getAllowMethods());
-//            this->_location[loc.getLocaPath()] = loc;
-//        }
-//        else if (line.find("}") != std::string::npos)
-//            break;
-//    }
-//}
 Server::Server(std::istream &conf)
     : _port(""),
       _host(""),
@@ -107,84 +16,175 @@ Server::Server(std::istream &conf)
 {
     if (conf.peek() == std::ifstream::traits_type::eof())
         throw std::runtime_error("server file is empty");
-
-    for (std::string line; std::getline(conf, line);)
+    for (std::string line; std::getline(conf,line);)
     {
-        std::istringstream iss(line);
-        std::string keyword;
-        iss >> keyword;
-        if (keyword == "listen")
+        line = checkComment(line);
+        if (line.find("listen") != std::string::npos)
         {
-            iss >> this->_host;
-            if (this->_host[this->_host.size() - 1] == ';')
-                this->_host.erase(this->_host.size() - 1); // remove the last character if it is ';' //TODO
-            if (this->_host.find(':') != std::string::npos)
+            std::string listen = line.substr(line.find(' ') + 1,line.find(';') - line.find(' ') - 1);
+            size_t colon = listen.find(':');
+            if (colon != std::string::npos)
             {
-                size_t colon = this->_host.find(':');
-                this->_port = this->_host.substr(colon + 1);
-                this->_host.erase(colon);
+                this->_host = listen.substr(0, colon);
+                this->_port = listen.substr(colon + 1);
             }
             else
-                iss >> this->_port;
+                this->_port = listen.substr(colon + 1);
         }
-        else if (keyword == "server_name")
+        else if (line.find("server_name") != std::string::npos)
         {
-            iss >> this->_serverName;
-            if (this->_serverName[this->_serverName.size() - 1] == ';')
-                this->_serverName.erase(this->_serverName.size() - 1); // remove the last character if it is ';' //TODO
+            std::string serverName = line.substr(line.find(' ') + 1,line.find(';') - line.find(' ') - 1);
+            this->_serverName = serverName;
         }
-        else if (keyword == "root")
+        else if (line.find("root") != std::string::npos)
         {
-            iss >> this->_root;
-            if (this->_root[this->_root.size() - 1] == ';')
-                this->_root.erase(this->_root.size() - 1);
+            std::string rootPath = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
+            this->_root = rootPath;
         }
-        else if (keyword == "client_max_body_size")
+        else if (line.find("allowed_method") != std::string::npos)
         {
-            iss >> this->_clientMaxSize;
+            std::istringstream iss(line);
+            std::string keyword, method;
+            iss >> keyword; // skip "allowed_method"
+            while (iss >> method)
+            {
+                if (!method.empty() && method[method.size() - 1] == ';') // check if method ends with ';'
+                    method.erase(method.size() - 1); //if not erase the last character
+                if (!method.empty()) // check if method is not empty
+                    this->_allowMethods.push_back(method); //get the current method to the vector
+            }
         }
-        else if (keyword == "client_body_buffer_size")
+        else if (line.find("client_max_body_size") != std::string::npos)
         {
-            iss >> this->_clientBodyBufferSize;
+            std::string clientMaxSize = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
+            this->_clientMaxSize = std::strtol(clientMaxSize.c_str(), NULL, 10);
         }
-        else if (keyword == "client_header_buffer_size")
+        else if (line.find("client_body_buffer_size") != std::string::npos)
         {
-            iss >> this->_clientHeaderBufferSize;
+            std::string clientBodyBufferSize = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
+            this->_clientBodyBufferSize = std::strtol(clientBodyBufferSize.c_str(), NULL, 10);
         }
-        else if (keyword == "client_timeout")
+        else if (line.find("client_header_buffer_size") != std::string::npos)
         {
-            iss >> this->_clientTimeout;
+            std::string clientHeaderBufferSize = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
+            this->_clientHeaderBufferSize = std::strtol(clientHeaderBufferSize.c_str(), NULL, 10);
         }
-        else if (keyword == "error_page")
+        else if (line.find("client_timeout") != std::string::npos)
         {
-            int errorCode;
-            std::string errorFilePath;
-            iss >> errorCode >> errorFilePath;
-            if (errorFilePath[errorFilePath.size() - 1] == ';') // check if error file path ends with ';'
-                errorFilePath.erase(errorFilePath.size() - 1); // remove the last character if it is ';'
-            this->_errorPage[errorCode] = errorFilePath;
+            std::string clientTimeout = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
+            this->_clientTimeout = std::strtol(clientTimeout.c_str(), NULL, 10);
         }
-        else if (keyword == "allowed_method")
+        else if (line.find("error_page") != std::string::npos)
         {
-            std::string method;
-            iss >> method; // read the first method
-            if (method[method.size() - 1] == ';') // check if method ends with ';'
-                method.erase(method.size() - 1);
-            this->_allowMethods.clear(); // clear the previous allowed methods
-            if (!method.empty())
-                this->_allowMethods.push_back(method); //add the current method to the vector
+            std::string errorPage = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
+            size_t errorCodePos = errorPage.find(' ');
+            if (errorCodePos != std::string::npos)
+            {
+                int errorCode = std::strtol(errorPage.substr(0, errorCodePos).c_str(), NULL, 10);
+                std::string errorFilePath = ft_trim(errorPage.substr(errorCodePos + 1));
+                this->_errorPage[errorCode] = errorFilePath;
+            }
         }
-        else if (keyword == "location")
+        else if (line.find("location") != std::string::npos)
         {
-            std::string locationPath;
-            iss >> locationPath; // read the location path
-            Location loc(conf, locationPath, this->_allowMethods);
-            this->_location[loc.getLocaPath()] = loc; // add the location to the map
+            Location loc(conf, line, getAllowMethods());
+            this->_location[loc.getLocaPath()] = loc;
         }
         else if (line.find("}") != std::string::npos)
             break;
     }
 }
+//Server::Server(std::istream &conf)
+//    : _port(""),
+//      _host(""),
+//      _serverName(""),
+//      _root(""),
+//      _clientMaxSize(0),
+//      _clientBodyBufferSize(0),
+//      _clientHeaderBufferSize(0),
+//      _clientTimeout(0),
+//      _errorPage()
+//{
+//    if (conf.peek() == std::ifstream::traits_type::eof())
+//        throw std::runtime_error("server file is empty");
+
+//    for (std::string line; std::getline(conf, line);)
+//    {
+//        std::istringstream iss(line);
+//        std::string key;
+//        iss >> key;
+//        if (key == "listen")
+//        {
+//            iss >> this->_host;
+//            if (this->_host[this->_host.size() - 1] == ';')
+//                this->_host.erase(this->_host.size() - 1); // remove the last character if it is ';' //TODO
+//            if (this->_host.find(':') != std::string::npos)
+//            {
+//                size_t colon = this->_host.find(':');
+//                this->_port = this->_host.substr(colon + 1);
+//                this->_host.erase(colon);
+//            }
+//            else
+//                iss >> this->_port;
+//        }
+//        else if (key == "server_name")
+//        {
+//            iss >> this->_serverName;
+//            if (this->_serverName[this->_serverName.size() - 1] == ';')
+//                this->_serverName.erase(this->_serverName.size() - 1); // remove the last character if it is ';' //TODO
+//        }
+//        else if (key == "root")
+//        {
+//            iss >> this->_root;
+//            if (this->_root[this->_root.size() - 1] == ';')
+//                this->_root.erase(this->_root.size() - 1);
+//        }
+//        else if (key == "client_max_body_size")
+//        {
+//            iss >> this->_clientMaxSize;
+//        }
+//        else if (key == "client_body_buffer_size")
+//        {
+//            iss >> this->_clientBodyBufferSize;
+//        }
+//        else if (key == "client_header_buffer_size")
+//        {
+//            iss >> this->_clientHeaderBufferSize;
+//        }
+//        else if (key == "client_timeout")
+//        {
+//            iss >> this->_clientTimeout;
+//        }
+//        else if (key == "error_page")
+//        {
+//            int errorCode;
+//            std::string errorFilePath;
+//            iss >> errorCode >> errorFilePath;
+//            if (errorFilePath[errorFilePath.size() - 1] == ';') // check if error file path ends with ';'
+//                errorFilePath.erase(errorFilePath.size() - 1); // remove the last character if it is ';'
+//            this->_errorPage[errorCode] = errorFilePath;
+//        }
+//        else if (key == "allowed_method")
+//        {
+//            std::string method;
+//            iss >> method; // read the first method
+//            if (method[method.size() - 1] == ';') // check if method ends with ';'
+//                method.erase(method.size() - 1);
+//            this->_allowMethods.clear(); // clear the previous allowed methods
+//            if (!method.empty())
+//                this->_allowMethods.push_back(method); //add the current method to the vector
+//        }
+//        else if (key == "location")
+//        {
+//            std::string locationPath;
+//            iss >> locationPath; // read the location path
+//            Location loc(conf, locationPath, this->_allowMethods);
+//            this->_location[loc.getLocaPath()] = loc; // add the location to the map
+//        }
+//        else if (line.find("}") != std::string::npos)
+//            break;
+//    }
+//}
 
 
 /////////////////////////////////////////////// GETTER /////////////////////////////////////////////////////////////

@@ -89,38 +89,33 @@ std::ostream &operator<<(std::ostream &cout, const Server &server)
 
 ///////////////////////////////////////////// HELPER FUNCTION ///////////////////////////////////////////////////////////////
 
-std::map<int, std::vector<Server> > parseAllServers(const std::string &filename)
+std::map< std::pair<std::string, std::string> , std::vector<Server> > parseAllServers(const std::string &filename)
 {
-    std::map<int, std::vector<Server> > listServers;
+    // std::map<int, std::vector<Server> > listServers;
+    std::map< std::pair<std::string, std::string> , std::vector<Server> > listServers;
     std::ifstream conf(filename.c_str());
     std::stringstream serverBlock;
 
     if (!conf.is_open())
         throw std::runtime_error("all server: failed to open configuration file");
 
-    std::string line;
-    while (std::getline(conf, line)) {
-        std::istringstream iss(line);
-        std::string word;
-        iss >> word;
-        if (word == "server") {
-            // You might want to verify it has '{'
-            std::stringstream serverBlock;
-            int braceCount = 0;
-            if (line.find("{") != std::string::npos) braceCount++;
-
-            while (std::getline(conf, line)) {
-                if (line.find("{") != std::string::npos) braceCount++;
-                if (line.find("}") != std::string::npos) braceCount--;
-                serverBlock << line << "\n";
-                if (braceCount == 0)
-                    break;
+    for (std::string line; std::getline(conf, line);)
+    {
+        if (line.find("server") != std::string::npos && line.find("{") != std::string::npos)
+        {
+            serverBlock << line << "\n";
+            int braceCount = 1; //look for the next "}"
+            while (braceCount != 0 && std::getline(conf, line)) {
+                if (line.find('{') != std::string::npos) braceCount++;
+                if (line.find('}') != std::string::npos) braceCount--;
+                serverBlock << line << "\n"; // if not keep parse the line
             }
+            Server server(serverBlock);
+            std::string host = server.getHost();
+            std::string port = server.getPort();
 
-            // Now parse this server block into a Server instance
-            Server s(serverBlock);
-            int port = std::strtol(s.getPort().c_str(), NULL, 10);
-            listServers[port].push_back(s); // Use port as key
+            std::pair<std::string, std::string> key = std::make_pair(host, port);
+            listServers[key].push_back(server);
         }
     }
     conf.close();

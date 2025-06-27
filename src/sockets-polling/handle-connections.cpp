@@ -21,7 +21,7 @@ void dispatchRequest(Connection& connection)
     if (request.getHeader("Connection") == "close")
         connection.connType = CLOSE;
 
-    if (!connection.location.cgi_path.empty()) {
+    if (!connection.location.getCgiPath().empty()) {
         std::cout << GREEN "CGI found\n" RESET;
         Cgi cgi;
 
@@ -114,8 +114,8 @@ int receiveClientRequest(Connection &connection, std::map< std::pair<std::string
 
             connection.assignServerByServerName(servers, ipPort, defaultServer);
             connection.location = connection.server.getLocationPath(request.getURI());
-            std::cout << connection.location.allowMethods.size() << "\n";
-            validateMethod(request.getMethod(), connection.location.allowMethods);
+            std::cout << connection.location.getAllowMethods().size() << "\n";
+            validateMethod(request.getMethod(), connection.location.getAllowMethods());
         }
         catch (const HttpException& e) {
             return handleParsingError(e, response, connection);

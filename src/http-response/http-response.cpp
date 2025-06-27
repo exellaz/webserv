@@ -187,7 +187,7 @@ void HttpResponse::handleGetRequest(const std::string& uri, Server &serverConfig
 
     if (S_ISDIR(info.st_mode))
     {
-        if (location.autoIndex)
+        if (location.getAutoIndex())
         {
             std::cout << GREEN "AutoIndex found\n" RESET; //// debug
             std::string directoryContent = readDirectorytoString(fullPath, uri);

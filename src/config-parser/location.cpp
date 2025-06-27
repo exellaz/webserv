@@ -71,6 +71,98 @@ Location::Location(std::istream &conf, const std::string &locName, const std::ve
             break;
     }
 }
+//Location::Location(std::istream &conf, const std::string &locName, const std::vector<std::string> & allowMethods)
+//    : _locaPath(""),
+//      _index(""),
+//      _root(""),
+//      _alias(""),
+//      _allowMethods(allowMethods),
+//      _returnPath(),
+//      _clientMaxSize(0),
+//      _autoIndex(false),
+//      _allowUpload(false)
+//{
+//    this->_locaPath = ft_trim(locName);
+//    for(std::string line; std::getline(conf, line);)
+//    {
+//        line = checkComment(line);
+//        std::istringstream iss (line);
+//        std::string key;
+//        iss >> key;
+//        if (key == "autoindex")
+//        {
+//            std::string autoIndex;
+//            iss >> autoIndex;
+//            if (autoIndex[autoIndex.size() - 1] == ';')
+//                autoIndex.erase(autoIndex.size() - 1);
+//            if (autoIndex == "on")
+//                this->_autoIndex = true;
+//        }
+//        else if (key == "index")
+//        {
+//            iss >> this->_index;
+//            if (this->_index[this->_index.size() - 1] == ';')
+//                this->_index.erase(this->_index.size() - 1);
+//        }
+//        else if (key == "root")
+//        {
+//            iss >> this->_root;
+//            if (this->_root[this->_root.size() - 1] == ';')
+//                this->_root.erase(this->_root.size() - 1);
+//        }
+//        else if (key == "alias")
+//        {
+//            iss >> this->_alias;
+//            if (this->_alias[this->_alias.size() - 1] == ';')
+//                this->_alias.erase(this->_alias.size() - 1);
+//        }
+//        else if (key == "allowed_method")
+//        {
+//            std::string method;
+//            while (iss >> method)
+//            {
+//                std::string method;
+//                iss >> method; // read the first method
+//                if (method[method.size() - 1] == ';') // check if method ends with ';'
+//                    method.erase(method.size() - 1);
+//                if (method.empty())
+//                    this->_allowMethods.clear(); // clear the previous allowed methods
+//                if (!method.empty())
+//                    this->_allowMethods.push_back(method); //add the current method to the vector
+//            }
+//        }
+//        else if (key == "return")
+//        {
+//            std::string returnPath;
+//            iss >> returnPath;
+//            size_t space = returnPath.find(' ');
+//            if (space != std::string::npos)
+//            {
+//                int errorCode = std::strtol(returnPath.substr(0, space).c_str(), NULL, 10);
+//                std::string path = ft_trim(returnPath.substr(space + 1));
+//                this->_returnPath[errorCode] = path;
+//            }
+//        }
+//        else if (key == "cgi_path")
+//        {
+//            iss >> this->_cgi_path;
+//            if (this->_cgi_path[this->_cgi_path.size() - 1] == ';')
+//                this->_cgi_path.erase(this->_cgi_path.size() - 1);
+//        }
+//        else if (key == "allow_upload")
+//        {
+//            std::string allowUpload;
+//            iss >> allowUpload;
+//            if (allowUpload[allowUpload.size() - 1] == ';')
+//                allowUpload.erase(allowUpload.size() - 1);
+//            if (allowUpload == "on")
+//                this->_allowUpload = true;
+//        }
+
+//        else if (line.find("}") != std::string::npos)
+//            break;
+//    }
+//}
 
 /////////////////////////////////////////////// GETTER /////////////////////////////////////////////////////////////
 

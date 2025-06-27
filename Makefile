@@ -23,7 +23,9 @@ SRCS_FIL = \
 		sockets-polling/timeout.cpp \
 		sockets-polling/chunked-encoding.cpp \
 		\
-		config-parser/Configuration.cpp \
+		config-parser/configuration.cpp \
+		config-parser/location.cpp \
+		config-parser/utils.cpp \
 		http-request/http-request.cpp \
 		http-request/utils.cpp \
 		sockets-polling/utils2.cpp \

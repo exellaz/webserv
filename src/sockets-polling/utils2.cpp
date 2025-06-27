@@ -49,37 +49,37 @@ std::string resolveHttpPath(const std::string& uri, Server &server)
 {
     const Location location = server.getLocationPath(uri);
 
-    if (!location.alias.empty())
+    if (!location.getAlias().empty())
     {
         std::cout << "Alias found\n"; ////debug"
-        std::string getRelativeUri = uri.substr(location.locationPath.length());
+        std::string getRelativeUri = uri.substr(location.getLocaPath().length());
         std::string relativeUri = normalizeSlash(getRelativeUri);
         std::cout << "Relative path: " << relativeUri << "\n"; ////debug
-        if ((!location.index.empty()) && (relativeUri.empty() || relativeUri == "/"))
+        if ((!location.getIndex().empty()) && (relativeUri.empty() || relativeUri == "/"))
         {
-            std::cout << "Alias path with index: " << getFullPath(location.alias + relativeUri + "/" + location.index) << "\n"; ////debug
-            return getFullPath(location.alias + relativeUri + "/" + location.index);
+            std::cout << "Alias path with index: " << getFullPath(location.getAlias() + relativeUri + "/" + location.getIndex()) << "\n"; ////debug
+            return getFullPath(location.getAlias() + relativeUri + "/" + location.getIndex());
         }
         else
         {
-            std::cout << "Alias path without index: " << getFullPath(location.alias + relativeUri) << "\n"; ////debug
-            return getFullPath(location.alias + relativeUri);
+            std::cout << "Alias path without index: " << getFullPath(location.getAlias() + relativeUri) << "\n"; ////debug
+            return getFullPath(location.getAlias() + relativeUri);
         }
     }
-    else if (!location.root.empty())
+    else if (!location.getRoot().empty())
     {
         std::cout << "Root found\n"; ////debug
-        std::string getRelativeUri = uri.substr(location.locationPath.length());
+        std::string getRelativeUri = uri.substr(location.getLocaPath().length());
         std::string relativeUri = normalizeSlash(getRelativeUri);
-        if ((!location.index.empty()) && (relativeUri.empty() || relativeUri == "/"))
+        if ((!location.getIndex().empty()) && (relativeUri.empty() || relativeUri == "/"))
         {
-            std::cout << "Root path with index: " << getFullPath(location.root + uri + "/" + location.index) << "\n"; ////debug
-            return getFullPath(location.root + uri + "/" + location.index);
+            std::cout << "Root path with index: " << getFullPath(location.getRoot() + uri + "/" + location.getIndex()) << "\n"; ////debug
+            return getFullPath(location.getRoot() + uri + "/" + location.getIndex());
         }
         else
         {
-            std::cout << "Root path without index: " << getFullPath(location.root + relativeUri) << "\n"; ////debug
-            return getFullPath(location.root + relativeUri);
+            std::cout << "Root path without index: " << getFullPath(location.getRoot() + relativeUri) << "\n"; ////debug
+            return getFullPath(location.getRoot() + relativeUri);
         }
     }
     return "";
@@ -212,5 +212,5 @@ Server& getDefaultServerBlockByIpPort(std::pair<std::string, std::string> ipPort
             return *(it->second.begin());
     }
     // if cannot match with `ipPort` // ? will this ever happen?
-    return *(servers.begin()->second.begin()); 
+    return *(servers.begin()->second.begin());
 }
