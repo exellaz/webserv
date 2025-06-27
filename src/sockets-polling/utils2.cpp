@@ -32,12 +32,13 @@
 /**
  * @brief get the server by port
 */
-Server getServerByPort(const std::vector<Server> &servers, const std::string port)
+Server getServerByPort(std::map<int, std::vector<Server> > &servers, std::string &port)
 {
-    for (std::vector<Server>::const_iterator it = servers.begin(); it != servers.end(); ++it)
+    for (std::map<int, std::vector<Server> >::iterator it = servers.begin(); it != servers.end(); ++it)
     {
-        if (it->getPort() == port)
-            return *it;
+        for (std::vector<Server>::iterator serverIt = it->second.begin(); serverIt != it->second.end(); ++serverIt)
+            if (serverIt->getPort() == port)
+                return *serverIt;
     }
     return Server();
 }
