@@ -6,7 +6,7 @@
 /*   By: welow <welow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/29 15:29:35 by welow             #+#    #+#             */
-/*   Updated: 2025/06/20 14:17:49 by welow            ###   ########.fr       */
+/*   Updated: 2025/06/27 08:02:28 by welow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 #include <string>
 #include <cstdlib>
+#include <cctype>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -75,7 +76,7 @@ class Location
         ~Location() {};
 };
 
-std::vector<Server> parseAllServers(const std::string &filename);
+std::map<int, std::vector<Server> > parseAllServers(const std::string &filename);
 std::ostream &operator<<(std::ostream &cout, const Server &server);
 
 #endif
