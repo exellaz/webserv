@@ -85,7 +85,7 @@ void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Connection>& con
 void validateMethod(const std::string& method, const std::vector<std::string>& allowedMethods)
 {
     for (std::vector<std::string>::const_iterator It = allowedMethods.begin(); It != allowedMethods.end(); ++It) {
-        std::cout << "Allowed method: " << *It << "\n";
+
         if (*It == method)
             return ;
     }
@@ -107,15 +107,10 @@ int receiveClientRequest(Connection &connection, std::map< std::pair<std::string
     HttpResponse& response = connection.response;
 
     // IP:PORT pair from fd
-    std::pair<std::string, std::string> ipPortPair = getIpAndPortFromSocketFd(connection.fd);
+    std::pair<std::string, std::string> ipPort = getIpAndPortFromSocketFd(connection.fd);
     
     // get default block by IP:PORT pair
-    Server& defaultServer = getDefaultServerBlockByIpPort(ipPortPair, servers);
-    std::cout << BLUE << "default server block: \n";
-    std::cout << "Host: " << defaultServer.getHost() << ", Port: " << defaultServer.getPort() << "\n";
-    std::cout << "default header buf size: " << defaultServer.getClientHeaderBufferSize() << '\n';
-    std::cout << "default body buf size: " << defaultServer.getClientBodyBufferSize() << RESET << '\n';
-
+    Server& defaultServer = getDefaultServerBlockByIpPort(ipPort, servers);
 
     if (!request.isHeaderParsed()) {
         try {
@@ -125,7 +120,9 @@ int receiveClientRequest(Connection &connection, std::map< std::pair<std::string
                 return ret;
             request.parseRequestLine(headerStr);
             request.parseHeaderLines(headerStr);
-            connection.location = defaultServer.getLocationPath(request.getURI());
+
+            connection.assignServerByServerName(servers, ipPort, defaultServer);
+            connection.location = connection.server.getLocationPath(request.getURI());
             validateMethod(request.getMethod(), connection.location.allowMethods);
         }
         catch (const HttpException& e) {
@@ -137,12 +134,6 @@ int receiveClientRequest(Connection &connection, std::map< std::pair<std::string
     response.setHeader("Connection", request.getHeader("Connection"));
     if (request.getHeader("Connection") == "close")
         connection.connType = CLOSE;
-    // try {
-    //     connection.resolveServerConfig(configs, request);
-    // }
-    // catch (const HttpException& e) {
-    //     return handleParsingError(e, response, connection);
-    // }
 
     // Initialise `readBodyMethod`
     if (request.hasHeader("Content-Length"))

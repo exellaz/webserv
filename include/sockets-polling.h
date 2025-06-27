@@ -96,7 +96,7 @@ std::string resolveHttpPath(const std::string& uri, Server &server);
 std::string readDirectorytoString(const std::string &directoryPath, const std::string& uri);
 // std::string getSocketPortNumber(int fd);
 std::pair<std::string, std::string> getIpAndPortFromSocketFd(int fd);
-Server& getDefaultServerBlockByIpPort(std::pair<std::string, std::string> pair, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers);
+Server& getDefaultServerBlockByIpPort(std::pair<std::string, std::string> ipPort, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers);
 
 class BadRequestException : public std::exception {
 public:

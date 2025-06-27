@@ -62,7 +62,7 @@ class Location
         std::string                 cgi_path;       // cgi path for this location
         bool                        allowUpload;
 
-        Location(std::istream &conf, const std::string &locName, const std::vector<std::string> & allowMethods);
+        Location(std::istream &conf, const std::string &locName, const std::vector<std::string> & defaultMethods);
         Location() {};
         ~Location() {};
 };
