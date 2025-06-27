@@ -89,6 +89,7 @@ NOTE:
 - if recv(HEADER_BUFFER_SIZE) reads till the 'body' section, that section of 'body' will remain in buffers after `readHeader()` is called
 
 */
+//int receiveClientRequest(Connection &connection, std::map<int, std::vector<Server> >& server, Server& defaultServer) //TODO
 int receiveClientRequest(Connection &connection, std::map<int, std::vector<Server> >& servers)
 {
     HttpRequest& request = connection.request;
@@ -96,6 +97,7 @@ int receiveClientRequest(Connection &connection, std::map<int, std::vector<Serve
 
     std::string choosePort = getSocketPortNumber(connection.fd);
     connection.server = getServerByPort(servers, choosePort);
+    //TODO check host
 
     if (!request.isHeaderParsed()) {
         try {
