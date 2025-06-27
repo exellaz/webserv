@@ -59,6 +59,7 @@ class Location
         int                         clientMaxSize;  // maximum client request size
         bool                        autoIndex;      // auto generate a directory list if no index file is found
         std::string                 cgi_path;       // cgi path for this location
+        bool                        allowUpload;
 
         Location(std::istream &conf, const std::string &locName, const std::vector<std::string> & allowMethods);
         Location() {};

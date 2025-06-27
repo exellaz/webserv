@@ -110,7 +110,8 @@ Location::Location(std::istream &conf, const std::string &locName, const std::ve
       allowMethods(allowMethods),
       returnPath(),
       clientMaxSize(0),
-      autoIndex(false)
+      autoIndex(false),
+      allowUpload(false)
 {
     this->locationPath = extractLine(locName);
     for(std::string line; std::getline(conf, line);)
@@ -121,10 +122,6 @@ Location::Location(std::istream &conf, const std::string &locName, const std::ve
             std::string autoIndex = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
             if (autoIndex == "on")
                 this->autoIndex = true;
-            else if (autoIndex == "off")
-                this->autoIndex = false;
-            else
-                this->autoIndex = false;
         }
         else if (line.find("index") != std::string::npos)
             this->index = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
@@ -137,15 +134,15 @@ Location::Location(std::istream &conf, const std::string &locName, const std::ve
             this->allowMethods.clear();
             std::istringstream iss(line);
             std::string keyword, method;
-            iss >> keyword; // skip "allowed_method"
+            iss >> keyword;
             while (iss >> method)
             {
                 if (isupper(method[0]) == false)
                     throw std::runtime_error("allowed_method must be uppercase");
-                if (!method.empty() && method[method.size() - 1] == ';') // check if method ends with ';'
-                    method.erase(method.size() - 1); //if not erase the last character
-                if (!method.empty()) // check if method is not empty
-                    this->allowMethods.push_back(method); //get the current method to the vector
+                if (!method.empty() && method[method.size() - 1] == ';')
+                    method.erase(method.size() - 1);
+                if (!method.empty())
+                    this->allowMethods.push_back(method);
             }
         }
         else if (line.find("return") != std::string::npos)
@@ -166,6 +163,12 @@ Location::Location(std::istream &conf, const std::string &locName, const std::ve
         }
         else if (line.find("cgi_path") != std::string::npos)
             this->cgi_path = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
+        else if (line.find("allow_upload") != std::string::npos)
+        {
+            std::string allowUpload = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
+            if (allowUpload == "on")
+                this->allowUpload = true;
+        }
         else if (line.find("}") != std::string::npos)
             break;
     }
@@ -381,10 +384,12 @@ std::ostream &operator<<(std::ostream &cout, const Server &server)
         }
         if (loc.clientMaxSize != 0)
             cout << "client_max_size : [" << loc.clientMaxSize << "]\n";
-        if (loc.autoIndex)
+        if (loc.autoIndex == true)
             cout << "list_directory  : [on]\n";
         if (!loc.cgi_path.empty())
             cout << "cgi_path        : [" << loc.cgi_path << "]\n";
+        if (loc.allowUpload == true)
+            cout << "allow_upload    : [on]\n";
         std::cout << "\n";
     }
     return cout;
