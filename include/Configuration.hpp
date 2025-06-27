@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Configuration.hpp                                  :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: welow <welow@student.42kl.edu.my>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/05/29 15:29:35 by welow             #+#    #+#             */
-/*   Updated: 2025/06/27 10:10:34 by welow            ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #ifndef CONFIGURATION_HPP
 #define CONFIGURATION_HPP
 
@@ -21,6 +9,7 @@
 #include <sstream>
 #include <vector>
 #include <map>
+#include "utils.h"
 
 class Location;
 

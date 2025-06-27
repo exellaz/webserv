@@ -45,14 +45,14 @@ std::string normalizeSlash(const std::string &relativeUri)
 /**
  * @brief get full path from the uri
 */
-std::string resolveHttpPath(const HttpRequest &request, Server &server)
+std::string resolveHttpPath(const std::string& uri, Server &server)
 {
-    const Location location = server.getLocationPath(request.getURI());
+    const Location location = server.getLocationPath(uri);
 
     if (!location.alias.empty())
     {
         std::cout << "Alias found\n"; ////debug"
-        std::string getRelativeUri = request.getURI().substr(location.locationPath.length());
+        std::string getRelativeUri = uri.substr(location.locationPath.length());
         std::string relativeUri = normalizeSlash(getRelativeUri);
         std::cout << "Relative path: " << relativeUri << "\n"; ////debug
         if ((!location.index.empty()) && (relativeUri.empty() || relativeUri == "/"))
@@ -69,12 +69,12 @@ std::string resolveHttpPath(const HttpRequest &request, Server &server)
     else if (!location.root.empty())
     {
         std::cout << "Root found\n"; ////debug
-        std::string getRelativeUri = request.getURI().substr(location.locationPath.length());
+        std::string getRelativeUri = uri.substr(location.locationPath.length());
         std::string relativeUri = normalizeSlash(getRelativeUri);
         if ((!location.index.empty()) && (relativeUri.empty() || relativeUri == "/"))
         {
-            std::cout << "Root path with index: " << getFullPath(location.root + request.getURI() + "/" + location.index) << "\n"; ////debug
-            return getFullPath(location.root + request.getURI() + "/" + location.index);
+            std::cout << "Root path with index: " << getFullPath(location.root + uri + "/" + location.index) << "\n"; ////debug
+            return getFullPath(location.root + uri + "/" + location.index);
         }
         else
         {
@@ -136,11 +136,11 @@ std::string resolveHttpPath(const HttpRequest &request, Server &server)
 /**
  * @brief Reads the contents of a directory and generates an HTML index page
 */
-std::string readDirectorytoString(const std::string &directoryPath, const HttpRequest &request)
+std::string readDirectorytoString(const std::string &directoryPath, const std::string& uri)
 {
     std::stringstream htmlOutput;
-    htmlOutput << "<html><head><title>Index of " << request.getURI() << "</title></head><body>";
-    htmlOutput << "<h1>Index of " << request.getURI() << "</h1><hr><ul>";
+    htmlOutput << "<html><head><title>Index of " << uri << "</title></head><body>";
+    htmlOutput << "<h1>Index of " << uri << "</h1><hr><ul>";
     DIR* dir = opendir(directoryPath.c_str());
     if (!dir)
         return "";
@@ -149,7 +149,7 @@ std::string readDirectorytoString(const std::string &directoryPath, const HttpRe
         std::string name = entry->d_name;
         if (name == ".") continue;
         std::string slash = (entry->d_type == DT_DIR) ? "/" : "";
-        std::string url_base = request.getURI();;
+        std::string url_base = uri;;
         if (url_base.empty() || url_base[url_base.size() - 1] != '/')
             url_base += '/';
         htmlOutput << "<li><a href=\"" << url_base << name << slash << "\">" << name << slash << "</a></li>";

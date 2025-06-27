@@ -4,8 +4,8 @@
 # include <iostream>
 # include <map>
 
-//#include "sockets-polling.h"
-//#include "Configuration.hpp"
+// #include "sockets-polling.h"
+#include "Configuration.hpp"
 
 class Server;
 
@@ -40,7 +40,7 @@ class HttpResponse
         std::string reasonPhrase(StatusCode code);
         std::string buildStatusLine();
         void printResponseHeaders();
-        void handleGetRequest(const HttpRequest& request, Server &serverConfig);
+        void handleGetRequest(const std::string& uri, Server &serverConfig, const Location& location);
         void handlePostRequest(const HttpRequest& request);
         void clearResponse();
 

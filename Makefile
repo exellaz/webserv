@@ -29,7 +29,8 @@ SRCS_FIL = \
 		sockets-polling/utils2.cpp \
 		http-response/http-response.cpp \
 		cgi-handler/cgi-handle.cpp \
-		cgi-handler/cgi-response.cpp
+		cgi-handler/cgi-response.cpp \
+		utils/utils.cpp
 
 SRCS = $(addprefix $(SRCDIR), $(SRCS_FIL))
 

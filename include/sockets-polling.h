@@ -89,11 +89,10 @@ int readFromSocket(Connection &connection, int bufferSize);
 // utils2
 //std::string resolveAliasPath(const std::string &url, const Location &location);
 //std::string readFileToString (std::ifstream &file);
-Server getServerByPort(std::map<int, std::vector<Server> > &servers, std::string &port);
-std::string resolveHttpPath(const HttpRequest &request, Server &server);
+std::string resolveHttpPath(const std::string& uri, Server &server);
 //bool serveStaticFile(const std::string &httpPath, int clientFd);
 //bool serveAutoIndex(const std::string &httpPath, const std::string &url, int clientFd);
-std::string readDirectorytoString(const std::string &directoryPath, const HttpRequest &request);
+std::string readDirectorytoString(const std::string &directoryPath, const std::string& uri);
 std::string getSocketPortNumber(int fd);
 
 class BadRequestException : public std::exception {

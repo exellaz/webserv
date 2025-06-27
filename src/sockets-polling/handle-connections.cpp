@@ -16,13 +16,12 @@ void dispatchRequest(Connection& connection)
 {
     HttpRequest& request = connection.request;
     HttpResponse& response = connection.response;
-    const Location& location = connection.server.getLocationPath(request.getURI());
 
     response.setHeader("Connection", request.getHeader("Connection"));
     if (request.getHeader("Connection") == "close")
         connection.connType = CLOSE;
 
-    if (!location.cgi_path.empty()) {
+    if (!connection.location.cgi_path.empty()) {
         std::cout << GREEN "CGI found\n" RESET;
         Cgi cgi;
 
@@ -39,7 +38,7 @@ void dispatchRequest(Connection& connection)
     }
     else {
         if (request.getMethod() == "GET")
-            response.handleGetRequest(request, connection.server);
+            response.handleGetRequest(request.getURI(), connection.server, connection.location);
         // else if (req.getMethod() == "POST")
         //     res.handlePostRequest(req, connection.config);
         // else if (req.getMethod() == "DELETE")
@@ -83,6 +82,16 @@ void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Connection>& con
         newFd);
 }
 
+void validateMethod(const std::string& method, const std::vector<std::string>& allowedMethods)
+{
+    for (std::vector<std::string>::const_iterator It = allowedMethods.begin(); It != allowedMethods.end(); ++It) {
+        std::cout << "Allowed method: " << *It << "\n";
+        if (*It == method)
+            return ;
+    }
+    throw HttpException(METHOD_NOT_ALLOWED, "Method not allowed");
+}
+
 /*
 NOTE:
 - `readHeader` will remove the 'header' section from `buffers`
@@ -104,6 +113,8 @@ int receiveClientRequest(Connection &connection, std::map<int, std::vector<Serve
                 return ret;
             request.parseRequestLine(headerStr);
             request.parseHeaderLines(headerStr);
+            connection.location = connection.server.getLocationPath(request.getURI());
+            validateMethod(request.getMethod(), connection.location.allowMethods);
         }
         catch (const HttpException& e) {
             return handleParsingError(e, response, connection);

@@ -68,6 +68,8 @@ void HttpRequest::parseRequestLine(const std::string& headerStr)
 
 void HttpRequest::parseHeaderLines(const std::string& str)
 {
+    std::cout << "Method: " << _method << "\n";
+
     std::istringstream stream(str);
     std::string line;
     while (std::getline(stream, line)) {
