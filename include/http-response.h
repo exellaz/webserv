@@ -41,11 +41,12 @@ class HttpResponse
         std::string buildStatusLine();
         void printResponseHeaders();
         void handleGetRequest(const std::string& uri, Server &serverConfig, const Location& location);
-        void handlePostRequest(const HttpRequest& request);
+        void handlePostRequest(const HttpRequest& request, const std::string& locationPath);
         void clearResponse();
 
         std::string getHttpDate();
         std::string toString();
+        void appendToBody(const std::string& bodyData);
 
         void setStatus(StatusCode code);
         void setHeader(const std::string& name, const std::string& value);
@@ -59,6 +60,6 @@ class HttpResponse
         StatusCode _status;
         std::map<std::string, std::string> _headers;
         std::string _body;
-    };
+};
 
 #endif

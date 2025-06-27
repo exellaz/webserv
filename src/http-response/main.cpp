@@ -25,31 +25,20 @@
 int main()
 {
     // const std::string str("GET /index.html HTTP/1.1\r\nHost: example.com\r\nContent-Type : application/x-www-form-urlencoded\r\nContent-Length: 27\r\n\r\nfield1=value1&field2=value2\r\n");
-    const std::string str("GET /index.html HTTP/1.1\r\nHost: example.com\r\nContent-Type: application/x-www-form-urlencoded\r\n\r\n");
-
+    // const std::string str("GET /index.html HTTP/1.1\r\nHost: example.com\r\nContent-Type: application/x-www-form-urlencoded\r\n\r\n");
+    const std::string str("POST /upload HTTP/1.1\r\nContent-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW\r\n\r\n");
+    const std::string bodyStr = "------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"text_file\"; filename=\"sample.txt\"\r\nContent-Type: text/plain\r\n\r\nThis file was uploaded by the handler!\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"text_file2\"; filename=\"sample2.txt\"\r\nContent-Type: text/plain\r\n\r\nThis file was also uploaded by the handler!\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW--";
     HttpRequest request;
     HttpResponse response(OK);
 
-    if (!request.parseRequestLine(str)) {
-        response.setStatus(NOT_IMPLEMENTED);
-        std::cout << "Invalid header\n";
-    }
+    // request.parseRequestLine(str);
+    // request.parseHeaderLines(str);
+    request.setHeader("content-type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW");
+    request.setBody(bodyStr);
+    request.setMethod("POST");
 
-    if (!request.parseHeaderLines(str, response)) {
-        std::cout << "Invalid header field\n";
-    }
-
-    if (!request.parseRequestBody(str))
-        std::cout << "No body found\n";
-
-    std::cout << request << "\n";
-
-    if (request.getMethod() == "GET") {
-        response.handleGetRequest(request, ".");
-    }
-    if (request.getMethod() == "POST") {
-        // response.handlePostRequest(request);
-    }
+    if (request.getMethod() == "POST")
+        response.handlePostRequest(request, "./objs/");
 
     std::cout << response.toString();
     return 0;

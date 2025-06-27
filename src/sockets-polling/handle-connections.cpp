@@ -39,21 +39,12 @@ void dispatchRequest(Connection& connection)
     else {
         if (request.getMethod() == "GET")
             response.handleGetRequest(request.getURI(), connection.server, connection.location);
-        // else if (req.getMethod() == "POST")
-        //     res.handlePostRequest(req, connection.config);
+        else if (request.getMethod() == "POST")
+            response.handlePostRequest(request, "/objs/"); // objs hardcoded, change to full path without index
         // else if (req.getMethod() == "DELETE")
         //     res.handleDeleteRequest(req, connection.config);
     }
 }
-
-// void Connection::resolveServerConfig(std::vector<Server>& servers, HttpRequest& request)
-// {
-//     std::string choosePort = request.getHeader("Host").substr(request.getHeader("Host").rfind(':') + 1);
-//     config = getServerConfigByPort(, choosePort);
-//     location = config.getLocationPath(request.getURI());
-//     if (location.alias.empty() && location.root.empty())
-//         throw HttpException(NOT_FOUND, "Requested resource not found");
-// }
 
 void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Connection>& connections, int listener)
 {
@@ -108,7 +99,7 @@ int receiveClientRequest(Connection &connection, std::map< std::pair<std::string
 
     // IP:PORT pair from fd
     std::pair<std::string, std::string> ipPort = getIpAndPortFromSocketFd(connection.fd);
-    
+
     // get default block by IP:PORT pair
     Server& defaultServer = getDefaultServerBlockByIpPort(ipPort, servers);
 
@@ -123,6 +114,7 @@ int receiveClientRequest(Connection &connection, std::map< std::pair<std::string
 
             connection.assignServerByServerName(servers, ipPort, defaultServer);
             connection.location = connection.server.getLocationPath(request.getURI());
+            std::cout << connection.location.allowMethods.size() << "\n";
             validateMethod(request.getMethod(), connection.location.allowMethods);
         }
         catch (const HttpException& e) {
