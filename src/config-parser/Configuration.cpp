@@ -140,7 +140,7 @@ Location::Location(std::istream &conf, const std::string &locName, const std::ve
                 if (isupper(method[0]) == false)
                     throw std::runtime_error("allowed_method must be uppercase");
                 if (!method.empty() && method[method.size() - 1] == ';')
-                    throw std::runtime_error("allowed_method is empty");
+                    method.erase(method.size() - 1);
                 if (!method.empty())
                     this->allowMethods.push_back(method);
             }
