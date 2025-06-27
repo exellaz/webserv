@@ -397,9 +397,10 @@ std::ostream &operator<<(std::ostream &cout, const Server &server)
 
 ///////////////////////////////////////////// HELPER FUNCTION ///////////////////////////////////////////////////////////////
 
-std::map<int, std::vector<Server> > parseAllServers(const std::string &filename)
+std::map< std::pair<std::string, std::string> , std::vector<Server> > parseAllServers(const std::string &filename)
 {
-    std::map<int, std::vector<Server> > listServers;
+    // std::map<int, std::vector<Server> > listServers;
+    std::map< std::pair<std::string, std::string> , std::vector<Server> > listServers;
     std::ifstream conf(filename.c_str());
     std::stringstream serverBlock;
 
@@ -417,9 +418,12 @@ std::map<int, std::vector<Server> > parseAllServers(const std::string &filename)
                 if (line.find('}') != std::string::npos) braceCount--;
                 serverBlock << line << "\n"; // if not keep parse the line
             }
-            Server servers(serverBlock);
-            int port = std::strtol(servers.getPort().c_str(), NULL, 10);
-            listServers[port].push_back(servers);
+            Server server(serverBlock);
+            std::string host = server.getHost();
+            std::string port = server.getPort();
+            
+            std::pair<std::string, std::string> key = std::make_pair(host, port);
+            listServers[key].push_back(server);
         }
     }
     conf.close();
