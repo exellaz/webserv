@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Configuration.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: welow <welow@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: kkhai-ki <kkhai-ki@student.42kl.edu.my>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/29 15:29:35 by welow             #+#    #+#             */
-/*   Updated: 2025/06/20 14:17:49 by welow            ###   ########.fr       */
+/*   Updated: 2025/06/27 08:25:13 by kkhai-ki         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 #include <sstream>
 #include <vector>
 #include <map>
+#include "utils.h"
 
 class Location;
 
