@@ -59,6 +59,8 @@ public:
 	Server server;
 	Location location;
 
+	std::string locationPath;
+
 	// Buffer methods
 	void appendToBuffer(const char *str, size_t n);
 	const std::string& getBuffer() const;
@@ -70,7 +72,7 @@ public:
 	size_t findInBuffer(const std::string str, size_t pos);
 	// void resolveServerConfig(std::vector<Config>& configs, HttpRequest& request);
 
-	void assignServerByServerName(std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers, 
+	void assignServerByServerName(std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers,
 									std::pair<std::string, std::string> ipPort, Server& defaultServer);
 
 

@@ -40,9 +40,9 @@ void dispatchRequest(Connection& connection)
         if (request.getMethod() == "GET")
             response.handleGetRequest(request.getURI(), connection.server, connection.location);
         else if (request.getMethod() == "POST")
-            response.handlePostRequest(request, "/objs/"); // objs hardcoded, change to full path without index
+            response.handlePostRequest(request, connection.locationPath);
         // else if (req.getMethod() == "DELETE")
-        //     res.handleDeleteRequest(req, connection.config);
+            // res.handleDeleteRequest(req, connection.config);
     }
 }
 

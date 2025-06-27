@@ -1,34 +1,5 @@
 #include "../../include/sockets-polling.h"
 
-//std::string resolveAliasPath(const std::string &url, const Location &location)
-//{
-//    std::string pathInLocation;
-//    std::string fullAliasPath;
-//    std::string locationPath = location.locationPath;
-//    std::string alias = location.alias;
-
-//    //if locationPath is empty
-//    if (url.find(locationPath) == 0)
-//        pathInLocation = url.substr(locationPath.length());
-//    else
-//        pathInLocation = "";
-//    //check if alias is empty && if pathInLocation is empty
-//    if (!pathInLocation.empty() && pathInLocation[0] != '/')
-//        pathInLocation = "/" + pathInLocation;
-//    //if location is empty or pathLocation ends with '/'
-//    if (pathInLocation.empty() || pathInLocation[pathInLocation.size() - 1] == '/')
-//        pathInLocation += location.index;
-//    //if alias is not empty && alias end with '/' && pathInLocation starts with '/'
-//    if (!alias.empty() && alias[alias.size() - 1] == '/' && pathInLocation[0] == '/')
-//        fullAliasPath = alias.substr(0, alias.size() - 1) + pathInLocation;
-//    //if alias end is not '/' && pathInLocation does not start with '/'
-//    else if (alias[alias.size() - 1] != '/' && pathInLocation[0] != '/')
-//        fullAliasPath = alias + "/" + pathInLocation;
-//    else
-//        fullAliasPath = alias + pathInLocation;
-//    return fullAliasPath;
-//}
-
 /**
  * @brief normalize the multiple "/" in the relative uri to one "/"
 */
@@ -40,6 +11,24 @@ std::string normalizeSlash(const std::string &relativeUri)
             return relativeUri; // Contains something else, return as is
     }
     return relativeUri.empty() ? "" : "/"; // Only slashes (and not empty)
+}
+
+void resolveAliasPath(const std::string& uri, Connection &connection)
+{
+    const Location location = connection.server.getLocationPath(uri);
+
+    if (!location.getAlias().empty())
+    {
+        std::cout << "Alias found\n"; ////debug"
+        std::string getRelativeUri = uri.substr(location.getLocaPath().length());
+        std::string relativeUri = normalizeSlash(getRelativeUri);
+        std::cout << "Relative path: " << relativeUri << "\n"; ////debug
+        if ((!location.getIndex().empty()) && (relativeUri.empty() || relativeUri == "/"))
+        {
+            std::cout << GREEN "Alias path with index: " << getFullPath(location.getAlias() + relativeUri + "/") << "\n" RESET; ////debug
+            connection.locationPath = getFullPath(location.getAlias() + relativeUri + "/");
+        }
+    }
 }
 
 /**

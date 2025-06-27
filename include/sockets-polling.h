@@ -88,8 +88,9 @@ time_t getNowInSeconds();
 int readFromSocket(Connection &connection, int bufferSize);
 
 // utils2
-//std::string resolveAliasPath(const std::string &url, const Location &location);
 //std::string readFileToString (std::ifstream &file);
+std::string normalizeSlash(const std::string &relativeUri);
+void resolveAliasPath(const std::string& uri, Connection &connection);
 std::string resolveHttpPath(const std::string& uri, Server &server);
 //bool serveStaticFile(const std::string &httpPath, int clientFd);
 //bool serveAutoIndex(const std::string &httpPath, const std::string &url, int clientFd);
