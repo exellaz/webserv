@@ -70,7 +70,7 @@ void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Connection>& con
 int readRequestHeader(Connection &conn, std::string& headerStr, int bufferSize);
 // void readRequestBody(int fd, std::string& bodyStr, std::string& buffer, enum reqBodyType type);
 int readRequestBody(Connection &conn, std::string& bodyStr, int bufferSize);
-int receiveClientRequest(Connection &connection, std::vector<Server>& servers);
+int receiveClientRequest(Connection &connection, std::map<int, std::vector<Server> >& servers);
 int readByChunkedEncoding(Connection &conn, std::string& bodyStr, int bufferSize);
 
 // Timeout
@@ -89,7 +89,7 @@ int readFromSocket(Connection &connection, int bufferSize);
 // utils2
 //std::string resolveAliasPath(const std::string &url, const Location &location);
 //std::string readFileToString (std::ifstream &file);
-Server getServerByPort(const std::vector<Server> &servers, const std::string port);
+Server getServerByPort(std::map<int, std::vector<Server> > &servers, std::string &port);
 std::string resolveHttpPath(const HttpRequest &request, Server &server);
 //bool serveStaticFile(const std::string &httpPath, int clientFd);
 //bool serveAutoIndex(const std::string &httpPath, const std::string &url, int clientFd);
