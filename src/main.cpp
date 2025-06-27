@@ -47,7 +47,6 @@ int main(int argc, char **argv)
         std::vector<Connection> connections;
         std::vector<int> listeners;
 
-        // TODO: open listenerSocket per IP:PORT pair
         for (std::map<std::pair<std::string, std::string>, std::vector<Server> >::iterator it = servers.begin(); it != servers.end(); ++it)
         {
             Server &curServer = *(it->second.begin());
@@ -63,13 +62,13 @@ int main(int argc, char **argv)
             std::cout << CYAN << "\n+++++++ Waiting for POLL event ++++++++" << RESET << "\n\n";
 
             // wait until 1 or more fds become ready for reading (POLLIN) or other events.
-            int nearestTimeout = getNearestUpcomingTimeout(connections, listeners.size());
+            int nearestTimeout = getNearestUpcomingTimeout(connections, listeners.size(), servers);
             int pollCount = poll(&pfds[0], pfds.size(), nearestTimeout);
             if (pollCount == -1) {
                 throw PollErrorException();
             }
 
-            disconnectTimedOutClients(connections, pfds, listeners.size());
+            disconnectTimedOutClients(connections, pfds, listeners.size(), servers);
 
             // Run through the existing connections looking for data to read
             for(size_t i = 0; i < pfds.size(); i++) {

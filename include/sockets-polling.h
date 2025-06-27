@@ -37,8 +37,6 @@
 #define GREY "\033[90m"
 #define BLUE "\033[0;34m"
 
-#define CLIENT_TIMEOUT 60 // in seconds
-
 #define HEADER_END "\r\n\r\n"
 #define CRLF "\r\n"
 #define CRLF_LENGTH 2
@@ -63,9 +61,8 @@ int receiveClientRequest(Connection &connection, std::map< std::pair<std::string
 int readByChunkedEncoding(Connection &conn, std::string& bodyStr, const size_t bufferSize, const size_t maxSize);
 
 // Timeout
-int getNearestUpcomingTimeout(std::vector<Connection>& connections, size_t listenerCount);
-void disconnectTimedOutClients(std::vector<Connection>& connections, std::vector<struct pollfd>& pfds, size_t listenerCount);
-
+int getNearestUpcomingTimeout(std::vector<Connection>& connections, size_t listenerCount, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers);
+void disconnectTimedOutClients(std::vector<Connection>& connections, std::vector<struct pollfd>& pfds, size_t listenerCount, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers);
 // Utils
 void *getInAddr(struct sockaddr *sa);
 int  set_nonblocking(int fd);
