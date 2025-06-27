@@ -6,7 +6,7 @@
 /*   By: welow <welow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/29 15:31:13 by welow             #+#    #+#             */
-/*   Updated: 2025/06/27 08:03:32 by welow            ###   ########.fr       */
+/*   Updated: 2025/06/27 09:42:50 by welow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,7 +103,7 @@ Server::Server(std::istream &conf)
         }
         else if (line.find("location") != std::string::npos)
         {
-            Location loc(conf, line);
+            Location loc(conf, line, getAllowMethods());
             this->_location[loc.locationPath] = loc;
         }
         else if (line.find("}") != std::string::npos)
@@ -114,12 +114,12 @@ Server::Server(std::istream &conf)
 /**
  * @brief Location constructor
 */
-Location::Location(std::istream &conf, const std::string &locName)
+Location::Location(std::istream &conf, const std::string &locName, const std::vector<std::string> & allowMethods)
     : locationPath(""),
       index(""),
       root(""),
       alias(""),
-      allowMethods(),
+      allowMethods(allowMethods),
       returnPath(),
       clientMaxSize(0),
       autoIndex(false)
@@ -146,6 +146,7 @@ Location::Location(std::istream &conf, const std::string &locName)
             this->alias = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
         else if (line.find("allowed_method") != std::string::npos)
         {
+            this->allowMethods.clear();
             std::istringstream iss(line);
             std::string keyword, method;
             iss >> keyword; // skip "allowed_method"
@@ -410,7 +411,7 @@ std::map<int, std::vector<Server> > parseAllServers(const std::string &filename)
     std::stringstream serverBlock;
 
     if (!conf.is_open())
-        throw std::runtime_error("Failed to open configuration file");
+        throw std::runtime_error("all server: failed to open configuration file");
 
     for (std::string line; std::getline(conf, line);)
     {
@@ -430,6 +431,35 @@ std::map<int, std::vector<Server> > parseAllServers(const std::string &filename)
     }
     conf.close();
     return listServers;
+}
+
+std::map<int, Server> parseDefaultServer(const std::string &filename)
+{
+    std::map<int, Server> defaultServer;
+    std::ifstream conf(filename.c_str());
+    std::stringstream serverBlock;
+
+    if (!conf.is_open())
+        throw std::runtime_error("default server: Failed to open configuration file");
+
+    for (std::string line; std::getline(conf, line);)
+    {
+        if (line.find("server") != std::string::npos && line.find("{") != std::string::npos)
+        {
+            serverBlock << line << "\n";
+            int braceCount = 1; //look for the next "}"
+            while (braceCount != 0 && std::getline(conf, line)) {
+                if (line.find('{') != std::string::npos) braceCount++;
+                if (line.find('}') != std::string::npos) braceCount--;
+                serverBlock << line << "\n"; // if not keep parse the line
+            }
+            Server servers(serverBlock);
+            int port = std::strtol(servers.getPort().c_str(), NULL, 10);
+            defaultServer[port] = servers;
+        }
+    }
+    conf.close();
+    return defaultServer;
 }
 
 /**

@@ -6,7 +6,7 @@
 /*   By: welow <welow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/29 15:29:35 by welow             #+#    #+#             */
-/*   Updated: 2025/06/27 08:02:28 by welow            ###   ########.fr       */
+/*   Updated: 2025/06/27 09:40:58 by welow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,12 +71,13 @@ class Location
         bool                        autoIndex;      // auto generate a directory list if no index file is found
         std::string                 cgi_path;       // cgi path for this location
 
-        Location(std::istream &conf, const std::string &locName);
+        Location(std::istream &conf, const std::string &locName, const std::vector<std::string> & allowMethods);
         Location() {};
         ~Location() {};
 };
 
 std::map<int, std::vector<Server> > parseAllServers(const std::string &filename);
+std::map<int, Server> parseDefaultServer(const std::string &filename);
 std::ostream &operator<<(std::ostream &cout, const Server &server);
 
 #endif
