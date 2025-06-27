@@ -50,7 +50,8 @@ time_t getNowInSeconds() {
 
 int readFromSocket(Connection &connection, int bufferSize)
 {
-    char buf[bufferSize + 1];
+    // char buf[bufferSize + 1];
+    char* buf = new char[bufferSize + 1];
 
     ssize_t n = recv(connection.fd, buf, bufferSize, 0);
     std::cout << "n: " << n << '\n';
@@ -65,6 +66,7 @@ int readFromSocket(Connection &connection, int bufferSize)
     }
     buf[n] = '\0';
     connection.appendToBuffer(buf, n);
+    delete[] buf;
 
     return n;
 }
