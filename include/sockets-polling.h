@@ -70,7 +70,8 @@ void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Connection>& con
 int readRequestHeader(Connection &conn, std::string& headerStr, int bufferSize);
 // void readRequestBody(int fd, std::string& bodyStr, std::string& buffer, enum reqBodyType type);
 int readRequestBody(Connection &conn, std::string& bodyStr, int bufferSize);
-int receiveClientRequest(Connection &connection, std::map<int, std::vector<Server> >& servers);
+// int receiveClientRequest(Connection &connection, std::map<int, std::vector<Server> >& servers);
+int receiveClientRequest(Connection &connection, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers);
 int readByChunkedEncoding(Connection &conn, std::string& bodyStr, int bufferSize);
 
 // Timeout
@@ -93,7 +94,9 @@ std::string resolveHttpPath(const std::string& uri, Server &server);
 //bool serveStaticFile(const std::string &httpPath, int clientFd);
 //bool serveAutoIndex(const std::string &httpPath, const std::string &url, int clientFd);
 std::string readDirectorytoString(const std::string &directoryPath, const std::string& uri);
-std::string getSocketPortNumber(int fd);
+// std::string getSocketPortNumber(int fd);
+std::pair<std::string, std::string> getIpAndPortFromSocketFd(int fd);
+Server& getDefaultServerBlockByIpPort(std::pair<std::string, std::string> pair, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers);
 
 class BadRequestException : public std::exception {
 public:

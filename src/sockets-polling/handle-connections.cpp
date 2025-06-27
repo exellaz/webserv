@@ -92,29 +92,40 @@ void validateMethod(const std::string& method, const std::vector<std::string>& a
     throw HttpException(METHOD_NOT_ALLOWED, "Method not allowed");
 }
 
+
+
+
 /*
 NOTE:
 - `readHeader` will remove the 'header' section from `buffers`
 - if recv(HEADER_BUFFER_SIZE) reads till the 'body' section, that section of 'body' will remain in buffers after `readHeader()` is called
 
 */
-int receiveClientRequest(Connection &connection, std::map<int, std::vector<Server> >& servers)
+int receiveClientRequest(Connection &connection, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers)
 {
     HttpRequest& request = connection.request;
     HttpResponse& response = connection.response;
 
-    //TODO check host
-    (void)servers;
+    // IP:PORT pair from fd
+    std::pair<std::string, std::string> ipPortPair = getIpAndPortFromSocketFd(connection.fd);
+    
+    // get default block by IP:PORT pair
+    Server& defaultServer = getDefaultServerBlockByIpPort(ipPortPair, servers);
+    std::cout << BLUE << "default server block: \n";
+    std::cout << "Host: " << defaultServer.getHost() << ", Port: " << defaultServer.getPort() << "\n";
+    std::cout << "default header buf size: " << defaultServer.getClientHeaderBufferSize() << '\n';
+    std::cout << "default body buf size: " << defaultServer.getClientBodyBufferSize() << RESET << '\n';
+
 
     if (!request.isHeaderParsed()) {
         try {
             std::string headerStr;
-            int ret = readRequestHeader(connection, headerStr, connection.server.getClientHeaderBufferSize());
+            int ret = readRequestHeader(connection, headerStr, defaultServer.getClientHeaderBufferSize());
             if (ret < 0)
                 return ret;
             request.parseRequestLine(headerStr);
             request.parseHeaderLines(headerStr);
-            connection.location = connection.server.getLocationPath(request.getURI());
+            connection.location = defaultServer.getLocationPath(request.getURI());
             validateMethod(request.getMethod(), connection.location.allowMethods);
         }
         catch (const HttpException& e) {
@@ -144,7 +155,7 @@ int receiveClientRequest(Connection &connection, std::map<int, std::vector<Serve
     if (connection.readBodyMethod != NO_BODY) {
         try {
             std::string bodyStr;
-            int ret2 = readRequestBody(connection, bodyStr, connection.server.getClientBodyBufferSize());
+            int ret2 = readRequestBody(connection, bodyStr, defaultServer.getClientBodyBufferSize());
             if (ret2 < 0)
                 return ret2;
             request.setBody(bodyStr);
