@@ -40,24 +40,24 @@ int main(int argc, char **argv)
     }
 
     try {
-        std::vector<Server> servers = parseAllServers(configFile);
+        // std::map<int, std::vector<Server> > servers = parseAllServers(configFile);
+        std::map< std::pair<std::string, std::string> , std::vector<Server> > servers = parseAllServers(configFile);
 
         std::vector<struct pollfd> pfds;
         std::vector<Connection> connections;
         std::vector<int> listeners;
-        std::map<int, std::string> listenerToConfig;
 
-        for (size_t i = 0; i < servers.size(); ++i)
+        // TODO: open listenerSocket per IP:PORT pair
+        for (std::map<std::pair<std::string, std::string>, std::vector<Server> >::iterator it = servers.begin(); it != servers.end(); ++it)
         {
-            if (servers[i].getPort().empty() || servers[i].getHost().empty())
-                continue;
-            int listener = setupListeningSocket(pfds, connections, servers[i]);
+            Server &curServer = *(it->second.begin());
+            int listener = setupListeningSocket(pfds, connections, curServer); //? set map in this
             listeners.push_back(listener);
         }
-        for (std::vector<int>::iterator it = listeners.begin(); it != listeners.end(); ++it) { ////debug
+        for (std::vector<int>::iterator it = listeners.begin(); it != listeners.end(); ++it) ////debug
             std::cout << "Listener socket fd: " << *it << "\n";
-        }
 
+        
         while(1) {
 
             std::cout << CYAN << "\n+++++++ Waiting for POLL event ++++++++" << RESET << "\n\n";
@@ -83,7 +83,7 @@ int main(int argc, char **argv)
                     if (find(listeners.begin(), listeners.end(), pfds[i].fd) != listeners.end())
                         acceptClient(pfds, connections, pfds[i].fd);
                     else {
-                        int res = receiveClientRequest(connections[i], servers); //pass multiple servers
+                        int res = receiveClientRequest(connections[i], servers);
                         if (res == RECV_CLOSED) {
                             std::cout << "server: socket " << pfds[i].fd << " hung up\n";
                             disconnectClient(connections, pfds, i);
@@ -138,11 +138,13 @@ int main(int argc, char **argv)
                 }
             }
         }
+        
     }
     catch (const std::exception &e)
     {
         std::cerr << RED << "Error: " << RESET << e.what() << "\n";
     }
+
 
     return 0;
 }

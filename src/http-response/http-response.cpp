@@ -9,7 +9,7 @@
 #include <ctime>
 
 #include "sockets-polling.h"
-#include "Configuration.hpp"
+// #include "Configuration.hpp"
 
 HttpResponse::HttpResponse(StatusCode code)
     : _status(code)
@@ -168,11 +168,11 @@ std::string getMimeType(const std::string& path)
 //    setHeader("Content-Type", mime);
 //    setBody(fileContents);
 //}
-void HttpResponse::handleGetRequest(const HttpRequest& request, Server &serverConfig)
+void HttpResponse::handleGetRequest(const std::string& uri, Server &serverConfig, const Location& location)
 {
     // Map URI to filesystem path (able to handle aliases or root)
-    std::string fullPath = resolveHttpPath(request, serverConfig);
-    Location location = serverConfig.getLocationPath(request.getURI());
+    std::string fullPath = resolveHttpPath(uri, serverConfig);
+    // Location location = serverConfig.getLocationPath(uri);
 
     struct stat info;
     std::cout << fullPath << "\n";
@@ -190,7 +190,7 @@ void HttpResponse::handleGetRequest(const HttpRequest& request, Server &serverCo
         if (location.autoIndex)
         {
             std::cout << GREEN "AutoIndex found\n" RESET; //// debug
-            std::string directoryContent = readDirectorytoString(fullPath, request);
+            std::string directoryContent = readDirectorytoString(fullPath, uri);
             setStatus(OK);
             setHeader("Content-Type", "text/html");
             setBody(directoryContent);
@@ -215,12 +215,6 @@ void HttpResponse::handleGetRequest(const HttpRequest& request, Server &serverCo
         return ;
     }
 }
-
-
-// void HttpResponse::handlePostRequest(const HttpRequest& request)
-// {
-
-// }
 
 void HttpResponse::clearResponse()
 {
@@ -258,6 +252,15 @@ void HttpResponse::setBody(const std::string& bodyData)
     std::stringstream stream;
 
     _body = bodyData;
+    stream << _body.size();
+    setHeader("Content-Length", stream.str());
+}
+
+void HttpResponse::appendToBody(const std::string& bodyData)
+{
+    std::stringstream stream;
+
+    _body.append(bodyData);
     stream << _body.size();
     setHeader("Content-Length", stream.str());
 }

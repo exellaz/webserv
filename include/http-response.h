@@ -4,8 +4,8 @@
 # include <iostream>
 # include <map>
 
-//#include "sockets-polling.h"
-//#include "Configuration.hpp"
+// #include "sockets-polling.h"
+#include "Configuration.hpp"
 
 class Server;
 
@@ -40,12 +40,13 @@ class HttpResponse
         std::string reasonPhrase(StatusCode code);
         std::string buildStatusLine();
         void printResponseHeaders();
-        void handleGetRequest(const HttpRequest& request, Server &serverConfig);
-        void handlePostRequest(const HttpRequest& request);
+        void handleGetRequest(const std::string& uri, Server &serverConfig, const Location& location);
+        void handlePostRequest(const HttpRequest& request, const std::string& locationPath);
         void clearResponse();
 
         std::string getHttpDate();
         std::string toString();
+        void appendToBody(const std::string& bodyData);
 
         void setStatus(StatusCode code);
         void setHeader(const std::string& name, const std::string& value);
@@ -59,6 +60,6 @@ class HttpResponse
         StatusCode _status;
         std::map<std::string, std::string> _headers;
         std::string _body;
-    };
+};
 
 #endif

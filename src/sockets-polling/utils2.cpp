@@ -30,19 +30,6 @@
 //}
 
 /**
- * @brief get the server by port
-*/
-Server getServerByPort(const std::vector<Server> &servers, const std::string port)
-{
-    for (std::vector<Server>::const_iterator it = servers.begin(); it != servers.end(); ++it)
-    {
-        if (it->getPort() == port)
-            return *it;
-    }
-    return Server();
-}
-
-/**
  * @brief normalize the multiple "/" in the relative uri to one "/"
 */
 std::string normalizeSlash(const std::string &relativeUri)
@@ -58,14 +45,14 @@ std::string normalizeSlash(const std::string &relativeUri)
 /**
  * @brief get full path from the uri
 */
-std::string resolveHttpPath(const HttpRequest &request, Server &server)
+std::string resolveHttpPath(const std::string& uri, Server &server)
 {
-    const Location location = server.getLocationPath(request.getURI());
+    const Location location = server.getLocationPath(uri);
 
     if (!location.alias.empty())
     {
         std::cout << "Alias found\n"; ////debug"
-        std::string getRelativeUri = request.getURI().substr(location.locationPath.length());
+        std::string getRelativeUri = uri.substr(location.locationPath.length());
         std::string relativeUri = normalizeSlash(getRelativeUri);
         std::cout << "Relative path: " << relativeUri << "\n"; ////debug
         if ((!location.index.empty()) && (relativeUri.empty() || relativeUri == "/"))
@@ -82,12 +69,12 @@ std::string resolveHttpPath(const HttpRequest &request, Server &server)
     else if (!location.root.empty())
     {
         std::cout << "Root found\n"; ////debug
-        std::string getRelativeUri = request.getURI().substr(location.locationPath.length());
+        std::string getRelativeUri = uri.substr(location.locationPath.length());
         std::string relativeUri = normalizeSlash(getRelativeUri);
         if ((!location.index.empty()) && (relativeUri.empty() || relativeUri == "/"))
         {
-            std::cout << "Root path with index: " << getFullPath(location.root + request.getURI() + "/" + location.index) << "\n"; ////debug
-            return getFullPath(location.root + request.getURI() + "/" + location.index);
+            std::cout << "Root path with index: " << getFullPath(location.root + uri + "/" + location.index) << "\n"; ////debug
+            return getFullPath(location.root + uri + "/" + location.index);
         }
         else
         {
@@ -149,11 +136,11 @@ std::string resolveHttpPath(const HttpRequest &request, Server &server)
 /**
  * @brief Reads the contents of a directory and generates an HTML index page
 */
-std::string readDirectorytoString(const std::string &directoryPath, const HttpRequest &request)
+std::string readDirectorytoString(const std::string &directoryPath, const std::string& uri)
 {
     std::stringstream htmlOutput;
-    htmlOutput << "<html><head><title>Index of " << request.getURI() << "</title></head><body>";
-    htmlOutput << "<h1>Index of " << request.getURI() << "</h1><hr><ul>";
+    htmlOutput << "<html><head><title>Index of " << uri << "</title></head><body>";
+    htmlOutput << "<h1>Index of " << uri << "</h1><hr><ul>";
     DIR* dir = opendir(directoryPath.c_str());
     if (!dir)
         return "";
@@ -162,7 +149,7 @@ std::string readDirectorytoString(const std::string &directoryPath, const HttpRe
         std::string name = entry->d_name;
         if (name == ".") continue;
         std::string slash = (entry->d_type == DT_DIR) ? "/" : "";
-        std::string url_base = request.getURI();;
+        std::string url_base = uri;;
         if (url_base.empty() || url_base[url_base.size() - 1] != '/')
             url_base += '/';
         htmlOutput << "<li><a href=\"" << url_base << name << slash << "\">" << name << slash << "</a></li>";
@@ -179,13 +166,51 @@ std::string readDirectorytoString(const std::string &directoryPath, const HttpRe
  * @note 3. sockaddr is used to store the address of the socket
  * @note 4. sockaddr_in is used to store the address of the socket in IPv4 format
 */
-std::string getSocketPortNumber(int fd)
+// std::string getSocketPortNumber(int fd)
+// {
+//     std::stringstream intToString;
+//     struct sockaddr_storage remoteAddr;
+//     socklen_t addrLen = sizeof(remoteAddr);
+//     getsockname(fd, (struct sockaddr *)&remoteAddr, &addrLen);
+//     int localPort = ntohs(((struct sockaddr_in*)&remoteAddr)->sin_port);
+//     intToString << localPort;
+//     return (intToString.str());
+// }
+
+/**
+ * @note 1. getSockName() retrieves the local address of the socket
+ * @note 2. ntohs() converts the port number from network byte order to host byte ( mean from big-endian to 16-bit number)
+ * @note 3. sockaddr is used to store the address of the socket
+ * @note 4. sockaddr_in is used to store the address of the socket in IPv4 format
+*/
+std::pair<std::string, std::string> getIpAndPortFromSocketFd(int fd)
 {
-    std::stringstream intToString;
     struct sockaddr_storage remoteAddr;
     socklen_t addrLen = sizeof(remoteAddr);
     getsockname(fd, (struct sockaddr *)&remoteAddr, &addrLen);
-    int localPort = ntohs(((struct sockaddr_in*)&remoteAddr)->sin_port);
-    intToString << localPort;
-    return (intToString.str());
+
+    int port = ntohs(((struct sockaddr_in*)&remoteAddr)->sin_port);
+    std::stringstream portStream;
+    portStream << port;
+
+    int ip = ntohl(((struct sockaddr_in*)&remoteAddr)->sin_addr.s_addr);
+    std::ostringstream ipStream;
+    ipStream << ((ip >> 24) & 0xFF) << "."
+                << ((ip >> 16) & 0xFF) << "."
+                << ((ip >> 8)  & 0xFF) << "."
+                << (ip & 0xFF);
+
+    return std::make_pair(ipStream.str(), portStream.str());
+}
+
+
+Server& getDefaultServerBlockByIpPort(std::pair<std::string, std::string> ipPort, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers)
+{
+    for (std::map<std::pair<std::string, std::string>, std::vector<Server> >::iterator it = servers.begin(); it != servers.end(); ++it)
+    {
+        if (it->first == ipPort)
+            return *(it->second.begin());
+    }
+    // if cannot match with `ipPort` // ? will this ever happen?
+    return *(servers.begin()->second.begin()); 
 }

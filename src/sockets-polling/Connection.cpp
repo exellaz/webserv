@@ -92,6 +92,33 @@ size_t Connection::findInBuffer(const std::string str, size_t pos)
 	return _buffer.find(str, pos);
 }
 
+void Connection::assignServerByServerName(std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers, 
+											std::pair<std::string, std::string> ipPort, Server& defaultServer)
+{
+	const std::string& hostStr = request.getHeader("Host");
+
+	size_t colonPos = hostStr.find(":");
+	std::string serverName = request.getHeader("Host").substr(0, colonPos);
+
+	std::map<std::pair<std::string, std::string>, std::vector<Server> >::iterator it = servers.begin();
+    for (; it != servers.end(); ++it)
+    {
+        if (it->first == ipPort) {
+			std::vector<Server>& vec = it->second;
+			std::vector<Server>::iterator serverIt = vec.begin();
+			for (; serverIt != vec.end(); ++serverIt) {
+				if (serverIt->getServerName() == serverName) {
+					this->server = *serverIt;
+					return ;
+				}
+			}
+		}      
+    }
+
+	// if ServerName not match -> pick defaultServer
+	this->server = defaultServer;
+}
+
 std::ostream & operator<<( std::ostream & o, Connection const & connection )
 {
 	o << "\nConnection: \n"

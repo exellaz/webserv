@@ -1,25 +1,16 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Configuration.hpp                                  :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: welow <welow@student.42kl.edu.my>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/05/29 15:29:35 by welow             #+#    #+#             */
-/*   Updated: 2025/06/20 14:17:49 by welow            ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #ifndef CONFIGURATION_HPP
 #define CONFIGURATION_HPP
 
 #include <string>
 #include <cstdlib>
+#include <cctype>
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <vector>
 #include <map>
+#include "utils.h"
+#include <utility>
 
 class Location;
 
@@ -69,13 +60,16 @@ class Location
         int                         clientMaxSize;  // maximum client request size
         bool                        autoIndex;      // auto generate a directory list if no index file is found
         std::string                 cgi_path;       // cgi path for this location
+        bool                        allowUpload;
 
-        Location(std::istream &conf, const std::string &locName);
+        Location(std::istream &conf, const std::string &locName, const std::vector<std::string> & defaultMethods);
         Location() {};
         ~Location() {};
 };
 
-std::vector<Server> parseAllServers(const std::string &filename);
+// std::map<int, std::vector<Server> > parseAllServers(const std::string &filename);
+std::map< std::pair<std::string, std::string> , std::vector<Server> > parseAllServers(const std::string &filename);
+
 std::ostream &operator<<(std::ostream &cout, const Server &server);
 
 #endif
