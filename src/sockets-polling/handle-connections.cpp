@@ -119,6 +119,16 @@ int receiveClientRequest(Connection &connection, std::map< std::pair<std::string
 
             connection.assignServerByServerName(servers, ipPort, defaultServer);
             connection.location = connection.server.getLocationPath(request.getURI());
+			if (connection.location.getLocaPath().empty())
+			{
+				//validate if the request URI is a valid file or directory
+				struct stat info;
+				if (stat(request.getURI().c_str(), &info) == 0 && (S_ISDIR(info.st_mode) || S_ISREG(info.st_mode)))
+				{
+					connection.locationPath = request.getURI();
+					connection.location.setAllowMethod(defaultServer.getAllowMethods());
+				}
+			}
             std::cout << "METHOD SIZE: " << connection.location.getAllowMethods().size() << "\n"; //// debug
             validateMethod(request.getMethod(), connection.location.getAllowMethods());
         }

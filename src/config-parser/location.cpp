@@ -102,6 +102,11 @@ Location::Location(std::istream &conf, const std::string &locName, const std::ve
 
 /////////////////////////////////////////////// GETTER /////////////////////////////////////////////////////////////
 
+void    Location::setAllowMethod(const std::vector<std::string> &methods)
+{
+	this->_allowMethods = methods;
+}
+
 const std::string   &Location::getLocaPath() const
 {
     return this->_locaPath;
@@ -150,4 +155,18 @@ const std::string    &Location::getCgiPath() const
 bool    Location::getAllowUpload() const
 {
     return this->_allowUpload;
+}
+
+void Location::clearLocationBlock()
+{
+	this->_locaPath.clear();
+	this->_index.clear();
+	this->_root.clear();
+	this->_alias.clear();
+	this->_allowMethods.clear();
+	this->_returnPath.clear();
+	this->_clientMaxSize = 0;
+	this->_autoIndex = false;
+	this->_cgi_path.clear();
+	this->_allowUpload = false;
 }

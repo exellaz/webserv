@@ -85,6 +85,7 @@ class Location
         bool                        _allowUpload;
 
     public:
+		void setAllowMethod(const std::vector<std::string> &methods);
         const std::string           &getLocaPath() const;
         const std::string           &getIndex() const;
         const std::string           &getRoot() const;
@@ -99,6 +100,8 @@ class Location
         Location(std::istream &conf, const std::string &locName, const std::vector<std::string> & defaultMethods);
         Location() {};
         ~Location() {};
+
+		void clearLocationBlock();
 };
 
 // std::map<int, std::vector<Server> > parseAllServers(const std::string &filename);
