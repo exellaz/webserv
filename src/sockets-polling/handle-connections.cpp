@@ -40,12 +40,12 @@ void dispatchRequest(Connection& connection)
         if (request.getMethod() == "GET")
         {
             std::cout << GREEN "GET request\n" RESET;
-            response.handleGetRequest(connection.locationPath, connection.server, connection.location);
+            response.handleGetRequest(connection.locationPath, connection.location, connection.isJustLocationPath);
         }
         else if (request.getMethod() == "POST")
         {
             std::cout << GREEN "POST request\n" RESET;
-            response.handlePostRequest(request, connection.locationPath);
+            response.handlePostRequest(request, connection.locationPath, connection.isJustLocationPath);
         }
         // else if (req.getMethod() == "DELETE")
             // res.handleDeleteRequest(req, connection.config);

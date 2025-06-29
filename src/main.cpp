@@ -94,7 +94,7 @@ int main(int argc, char **argv)
                             continue;
                         else if (res != -3) {
                             try {
-                                resolveAliasPath(connections[i].request.getURI(), connections[i]);
+                                resolveLocationPath(connections[i].request.getURI(), connections[i]);
                                 std::cout << "Only path: " << connections[i].locationPath << "\n"; ////debug
                                 dispatchRequest(connections[i]);
                             }

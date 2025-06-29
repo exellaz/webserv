@@ -60,6 +60,7 @@ public:
 	Location location;
 
 	std::string locationPath;
+	bool isJustLocationPath;
 
 	// Buffer methods
 	void appendToBuffer(const char *str, size_t n);

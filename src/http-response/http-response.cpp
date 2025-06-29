@@ -168,25 +168,34 @@ std::string getMimeType(const std::string& path)
 //    setHeader("Content-Type", mime);
 //    setBody(fileContents);
 //}
-void HttpResponse::handleGetRequest(const std::string& uri, Server &serverConfig, const Location& location)
+
+std::string validateIndex(const std::string& locationPath, const Location &location, bool isJustLocationPath)
 {
-    // Map URI to filesystem path (able to handle aliases or root)
-    //std::string fullPath = resolveHttpPath(uri, serverConfig); //TODO the index do here
-    // Location location = serverConfig.getLocationPath(uri);
-    (void)serverConfig;
-    std::cout << GREEN "URI BEFORE: " << uri << "\n" RESET; //// debug
     std::string fullPath;
-    if (!location.getIndex().empty())
+    if ((!location.getIndex().empty()) && isJustLocationPath == true)
     {
-        fullPath = uri + location.getIndex();
+        fullPath = locationPath + location.getIndex();
         std::cout << GREEN "URI AFTER: " << fullPath << "\n" RESET; //// debug
     }
+    else
+    {
+        fullPath = locationPath;
+        std::cout << BLUE "URI AFTER: " << fullPath << "\n" RESET; //// debug
+    }
+    return fullPath;
+}
+
+void HttpResponse::handleGetRequest(const std::string& locationPath, const Location& location, bool isJustLocationPath)
+{
+    // Map URI to filesystem path (able to handle aliases or root)
+    std::cout << GREEN "URI BEFORE: " << locationPath << "\n" RESET; //// debug
+    std::string fullPath = validateIndex(locationPath, location, isJustLocationPath);
 
     struct stat info;
     std::cout << fullPath << "\n";
     if (stat(fullPath.c_str(), &info) < 0)
     {
-		std::cout << "not file or folder\n";
+        std::cout << "not file or folder\n";
         setStatus(NOT_FOUND);
         setHeader("Content-Type", "text/html");
         setBody("<html><body><h1>404 Not Found</h1></body></html>\n");
@@ -198,7 +207,7 @@ void HttpResponse::handleGetRequest(const std::string& uri, Server &serverConfig
         if (location.getAutoIndex())
         {
             std::cout << GREEN "AutoIndex found\n" RESET; //// debug
-            std::string directoryContent = readDirectorytoString(fullPath, uri);
+            std::string directoryContent = readDirectorytoString(fullPath, locationPath);
             setStatus(OK);
             setHeader("Content-Type", "text/html");
             setBody(directoryContent);
