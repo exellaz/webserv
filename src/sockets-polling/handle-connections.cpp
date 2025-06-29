@@ -42,7 +42,6 @@ void dispatchRequest(Connection& connection)
         else if (request.getMethod() == "POST")
             response.handlePostRequest(request, "/objs/"); // objs hardcoded, change to full path without index
         else if (request.getMethod() == "DELETE")
-            // res.handleDeleteRequest(req, connection.config);
             throw HttpException(METHOD_NOT_ALLOWED, "Delete without CGI not allowed");
     }
 }
