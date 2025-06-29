@@ -15,11 +15,10 @@ int readByContentLength(Connection &conn, std::string& bodyStr, const size_t buf
     while (bytesRead < conn.contentLength) {
         ret = readFromSocket(conn, bufferSize);
         if (ret <= 0)
-			return ret; // RECV_AGAIN or RECV_CLOSED or RECV_ERROR
-		
+			return ret; // RECV_AGAIN or RECV_CLOSED
+
 		conn.startTime = getNowInSeconds(); // reset timer
 		bytesRead += ret;
-		std::cout << "bytesRead: " << bytesRead << '\n'; ////debug
 	}
 
 	if (bytesRead == conn.contentLength) {
@@ -35,7 +34,7 @@ int readByContentLength(Connection &conn, std::string& bodyStr, const size_t buf
 int readRequestBody(Connection &conn, std::string& bodyStr, const size_t bufferSize, const size_t maxSize)
 {
     std::cout << GREY << "===== readRequestBody =====" << RESET << '\n';
-    int ret;
+    int ret = RECV_OK;
     if (conn.readBodyMethod == CONTENT_LENGTH) {
         std::cout << "CONTENT_LENGTH\n";
         ret = readByContentLength(conn, bodyStr, bufferSize, maxSize);
