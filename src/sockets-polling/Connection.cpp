@@ -29,7 +29,6 @@ Connection& Connection::operator=(const Connection& other)
 	if (this == &other)
 		return *this;
 
-	fd 						 = other.fd;
 	connState 				 = other.connState;
 	startTime 				 = other.startTime;
 	connType 				 = other.connType;
