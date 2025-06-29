@@ -6,15 +6,13 @@ static time_t getTimeoutBySocketFd(int fd, std::map< std::pair<std::string, std:
 	std::pair<std::string, std::string> ipPort = getIpAndPortFromSocketFd(fd);
     Server& defaultServer = getDefaultServerBlockByIpPort(ipPort, servers);
 
-	std::cout << "fd: " << fd << ", timeout: " << defaultServer.getClientTimeout() << '\n';
-
 	return defaultServer.getClientTimeout();
 }
 
-int getNearestUpcomingTimeout(std::vector<Connection>& connections, size_t listenerCount, 
+int getNearestUpcomingTimeout(std::vector<Connection>& connections, size_t listenerCount,
 								std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers)
 {
-	if (connections.size() == listenerCount) // only listener fds 	
+	if (connections.size() == listenerCount) // only listener fds
 		return -1;
 	time_t clientTimeout;
 
@@ -32,7 +30,7 @@ int getNearestUpcomingTimeout(std::vector<Connection>& connections, size_t liste
 	return (int)nearestTimeout * 1000; //convert to miliseconds
 }
 
-void disconnectTimedOutClients(std::vector<Connection>& connections, std::vector<struct pollfd>& pfds, size_t listenerCount, 
+void disconnectTimedOutClients(std::vector<Connection>& connections, std::vector<struct pollfd>& pfds, size_t listenerCount,
 								std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers)
 {
 	if (connections.size() == listenerCount) // only listener fds

@@ -51,6 +51,12 @@ enum readReturnVal {
 // Setup Listening Socket
 int setupListeningSocket(std::vector<struct pollfd>& pfds, std::vector<Connection>& connections, Server& server);
 // CONNECTIONS
+void handlePollIn(std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers,
+                    std::vector<struct pollfd>& pfds, std::vector<Connection>& connections,
+                    std::vector<int>& listeners, int i);
+void handlePollOut(std::vector<struct pollfd>& pfds, std::vector<Connection>& connections, int i);
+void handlePollHup(std::vector<Connection>& connections, int i);
+void handlePollErr(std::vector<Connection>& connections, int i);
 void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Connection>& connections, int listener);
 
 // Read Request Utils

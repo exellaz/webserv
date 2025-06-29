@@ -10,6 +10,11 @@
 #include <iostream>
 #include <sys/time.h>
 
+enum ConnState {
+	ACTIVE,
+	DISCONNECTED
+};
+
 enum connectionType {
 	CLOSE,
 	KEEP_ALIVE,
@@ -40,6 +45,7 @@ public:
 	~Connection();
 
 	int fd;
+	enum ConnState connState;
 	time_t startTime; // Timeout
 
 	enum connectionType connType;
@@ -70,7 +76,7 @@ public:
 	size_t findInBuffer(const std::string str, size_t pos);
 	// void resolveServerConfig(std::vector<Config>& configs, HttpRequest& request);
 
-	void assignServerByServerName(std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers, 
+	void assignServerByServerName(std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers,
 									std::pair<std::string, std::string> ipPort, Server& defaultServer);
 
 

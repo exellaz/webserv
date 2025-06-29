@@ -14,6 +14,7 @@ NAME = webserv
 SRCDIR = src/
 SRCS_FIL = \
 		main.cpp \
+		sockets-polling/poll.cpp \
 		sockets-polling/handle-connections.cpp \
 		sockets-polling/utils.cpp \
 		sockets-polling/setup-listening-socket.cpp \
