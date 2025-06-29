@@ -80,7 +80,7 @@ void HttpResponse::handlePostRequest(const HttpRequest& request, const Connectio
     if (pos == std::string::npos)
         throw HttpException(BAD_REQUEST, "Missing boundary in Content-Type");
 
-    validateUploadPath(locationPath);
+    validateUploadPath(connection.locationPath);
 
     const std::string& body = request.getBody();
     std::string boundary = "--" + contentType.substr(pos + 9);
