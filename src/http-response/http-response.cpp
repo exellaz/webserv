@@ -1,5 +1,6 @@
 #include "http-response.h"
 #include "http-request.h"
+#include "Connection.h"
 #include <sstream>
 #include <cstdlib>
 
@@ -185,11 +186,11 @@ std::string validateIndex(const std::string& locationPath, const Location &locat
     return fullPath;
 }
 
-void HttpResponse::handleGetRequest(const std::string& locationPath, const Location& location, bool isJustLocationPath)
+void HttpResponse::handleGetRequest(const Location& location, const Connection &connection)
 {
     // Map URI to filesystem path (able to handle aliases or root)
-    std::cout << GREEN "URI BEFORE: " << locationPath << "\n" RESET; //// debug
-    std::string fullPath = validateIndex(locationPath, location, isJustLocationPath);
+    std::cout << GREEN "URI BEFORE: " << connection.locationPath << "\n" RESET; //// debug
+    std::string fullPath = validateIndex(connection.locationPath, location, connection.isJustLocationPath);
 
     struct stat info;
     std::cout << fullPath << "\n";
@@ -207,7 +208,7 @@ void HttpResponse::handleGetRequest(const std::string& locationPath, const Locat
         if (location.getAutoIndex())
         {
             std::cout << GREEN "AutoIndex found\n" RESET; //// debug
-            std::string directoryContent = readDirectorytoString(fullPath, locationPath);
+            std::string directoryContent = readDirectorytoString(fullPath, connection.locationPath);
             setStatus(OK);
             setHeader("Content-Type", "text/html");
             setBody(directoryContent);

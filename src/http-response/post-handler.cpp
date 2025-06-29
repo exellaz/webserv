@@ -1,6 +1,7 @@
 #include "http-response.h"
 #include "http-request.h"
 #include "http-exception.h"
+#include "Connection.h"
 
 static std::vector<std::string> extractMultipartParts(const std::string& body, const std::string& boundary)
 {
@@ -55,9 +56,9 @@ static std::string saveUploadedFile(const std::string& locationPath, const std::
     return path;
 }
 
-void HttpResponse::handlePostRequest(const HttpRequest& request, const std::string& locationPath, bool isJustLocationPath)
+void HttpResponse::handlePostRequest(const HttpRequest& request, const Connection &connection)
 {
-    if (isJustLocationPath == false)
+    if (connection.isJustLocationPath == false)
         throw HttpException(BAD_REQUEST, "POST request is not allowed because is not a directory");
     std::string contentType = request.getHeader("Content-Type");
     if (contentType.find("multipart/form-data") == std::string::npos)
@@ -83,7 +84,7 @@ void HttpResponse::handlePostRequest(const HttpRequest& request, const std::stri
         if (fileContent.empty())
             continue;
 
-        std::string outputPath = saveUploadedFile(locationPath, filename, fileContent);
+        std::string outputPath = saveUploadedFile(connection.locationPath, filename, fileContent);
         if (first) {
             setStatus(CREATED);
             setBody("File uploaded successfully to: " + outputPath);
