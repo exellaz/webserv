@@ -14,6 +14,7 @@ SRC = main.cpp \
 	  configuration.cpp \
 	  utils.cpp \
 	  location.cpp \
+	  ../utils/utils.cpp \
 
 OBJ = $(SRC:.cpp=.o)
 

@@ -12,6 +12,31 @@
 #include "utils.h"
 #include <utility>
 
+#define RED "\033[31m"
+#define RESET "\033[0m"
+
+enum Directive
+{
+    LISTEN,
+    SERVERNAME,
+    ROOT,
+    ALLOWED_METHOD,
+    CLIENT_MAX_BODY_SIZE,
+    CLIENT_BODY_BUFFER_SIZE,
+    CLIENT_HEADER_BUFFER_SIZE,
+    CLIENT_TIMEOUT,
+    ERROR_PAGE,
+    LOCATION,
+    LOCATION_PATH,
+    INDEX,
+    ALIAS,
+    RETURN_PATH,
+    AUTO_INDEX,
+    ALLOW_UPLOAD,
+    CGI_PATH,
+    UNKNOWN
+};
+
 class Location;
 
 class Server
@@ -86,4 +111,10 @@ std::ostream &operator<<(std::ostream &cout, const Server &server);
 std::string ft_trim(const std::string &str);
 std::string	checkComment(const std::string &line);
 std::string	extractLine(const std::string &line);
+std::vector<std::string> checkMethod(std::string allowMethod);
+std::string checkPort(std::string port);
+int checkNumber(std::string number);
+Directive getKey(const std::string &line);
+void checkValidDirective(const std::string &line, Directive directiveType);
+
 #endif

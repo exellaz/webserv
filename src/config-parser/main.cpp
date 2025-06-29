@@ -6,7 +6,7 @@
 /*   By: welow <welow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/29 16:14:15 by welow             #+#    #+#             */
-/*   Updated: 2025/06/27 21:48:25 by welow            ###   ########.fr       */
+/*   Updated: 2025/06/29 16:30:56 by welow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,10 +52,10 @@ int main(int ac, char **av)
             {
                 std::cout << *serverIt; //print server information
             }
-            std::cout << "------------------------\n\n" RESET;
+            std::cout <<RED "------------------------\n\n" RESET;
         }
 
-        std::cout << config << "\n"; //print server information
+        //std::cout << config << "\n"; //print server information
 
 		////method to get config info
 		//std::cout << "----- test -----" << "\n";
