@@ -19,7 +19,7 @@
 #include <dirent.h> //for opendir, readdir, closedir
 #include <sys/stat.h> // for stat
 #include <algorithm> // for find
-#include "./Configuration.hpp"
+#include "Configuration.hpp"
 #include "http-request.h"
 #include "./Buffer.h"
 #include "Connection.h"
@@ -27,7 +27,6 @@
 #include <algorithm>
 #include <cctype>
 #include "Cgi.hpp"
-
 
 #define RESET "\033[0m"
 #define BOLD "\033[1m"

@@ -1,5 +1,8 @@
 #include "Configuration.hpp"
 
+#define RED "\033[31m"
+#define RESET "\033[0m"
+
 std::map< std::pair<std::string, std::string> , std::vector<Server> > parseAllServers(const std::string &filename)
 {
     // std::map<int, std::vector<Server> > listServers;

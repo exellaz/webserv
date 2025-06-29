@@ -1,5 +1,8 @@
 #include "../../include/Configuration.hpp"
 
+#define RED "\033[31m"
+#define RESET "\033[0m"
+
 Server::Server(std::istream &conf)
     : _port(""),
       _host(""),

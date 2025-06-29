@@ -12,9 +12,6 @@
 #include "utils.h"
 #include <utility>
 
-#define RED "\033[31m"
-#define RESET "\033[0m"
-
 enum Directive
 {
     LISTEN,

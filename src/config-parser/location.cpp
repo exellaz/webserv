@@ -1,5 +1,8 @@
 #include "Configuration.hpp"
 
+#define RED "\033[31m"
+#define RESET "\033[0m"
+
 Location::Location(std::istream &conf, const std::string &locName, const std::vector<std::string> & allowMethods)
     : _locaPath(""),
       _index(""),

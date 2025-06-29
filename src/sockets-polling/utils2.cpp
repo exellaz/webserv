@@ -20,59 +20,61 @@ void resolveAliasPath(const std::string& uri, Connection &connection)
     if (!location.getAlias().empty())
     {
         std::cout << "Alias found\n"; ////debug"
-        std::string getRelativeUri = uri.substr(location.getLocaPath().length());
-        std::string relativeUri = normalizeSlash(getRelativeUri);
-        std::cout << "Relative path: " << relativeUri << "\n"; ////debug
-        if ((!location.getIndex().empty()) && (relativeUri.empty() || relativeUri == "/"))
-        {
-            std::cout << GREEN "Alias path with index: " << getFullPath(location.getAlias() + relativeUri + "/") << "\n" RESET; ////debug
-            connection.locationPath = getFullPath(location.getAlias() + relativeUri + "/");
-        }
-    }
-}
-
-/**
- * @brief get full path from the uri
-*/
-std::string resolveHttpPath(const std::string& uri, Server &server)
-{
-    const Location location = server.getLocationPath(uri);
-
-    if (!location.getAlias().empty())
-    {
-        std::cout << "Alias found\n"; ////debug"
-        std::string getRelativeUri = uri.substr(location.getLocaPath().length());
-        std::string relativeUri = normalizeSlash(getRelativeUri);
-        std::cout << "Relative path: " << relativeUri << "\n"; ////debug
-        if ((!location.getIndex().empty()) && (relativeUri.empty() || relativeUri == "/"))
-        {
-            std::cout << "Alias path with index: " << getFullPath(location.getAlias() + relativeUri + "/" + location.getIndex()) << "\n"; ////debug
-            return getFullPath(location.getAlias() + relativeUri + "/" + location.getIndex());
-        }
-        else
-        {
-            std::cout << "Alias path without index: " << getFullPath(location.getAlias() + relativeUri) << "\n"; ////debug
-            return getFullPath(location.getAlias() + relativeUri);
-        }
+            std::cout << GREEN "Alias path with index: " << getFullPath(location.getAlias() + "/") << "\n" RESET; ////debug
+            connection.locationPath = getFullPath(location.getAlias() + "/");
+        //TODO check for index
     }
     else if (!location.getRoot().empty())
     {
         std::cout << "Root found\n"; ////debug
-        std::string getRelativeUri = uri.substr(location.getLocaPath().length());
-        std::string relativeUri = normalizeSlash(getRelativeUri);
-        if ((!location.getIndex().empty()) && (relativeUri.empty() || relativeUri == "/"))
-        {
-            std::cout << "Root path with index: " << getFullPath(location.getRoot() + uri + "/" + location.getIndex()) << "\n"; ////debug
-            return getFullPath(location.getRoot() + uri + "/" + location.getIndex());
-        }
-        else
-        {
-            std::cout << "Root path without index: " << getFullPath(location.getRoot() + relativeUri) << "\n"; ////debug
-            return getFullPath(location.getRoot() + relativeUri);
-        }
+        std::cout << GREEN "Root path with index: " << getFullPath(location.getRoot() + uri + "/") << "\n" RESET; ////debug
+        connection.locationPath = getFullPath(location.getRoot() + uri + "/");
+        //TODO check for index
     }
-    return "";
 }
+
+///**
+// * @brief get full path from the uri
+//*/
+//std::string resolveHttpPath(const std::string& uri, Server &server)
+//{
+//    const Location location = server.getLocationPath(uri);
+
+//    if (!location.getAlias().empty())
+//    {
+//        std::cout << "Alias found\n"; ////debug"
+//        std::string getRelativeUri = uri.substr(location.getLocaPath().length());
+//        std::string relativeUri = normalizeSlash(getRelativeUri);
+//        std::cout << "Relative path: " << relativeUri << "\n"; ////debug
+//        if ((!location.getIndex().empty()) && (relativeUri.empty() || relativeUri == "/"))
+//        {
+//            std::cout << "Alias path with index: " << getFullPath(location.getAlias() + relativeUri + "/" + location.getIndex()) << "\n"; ////debug
+//            return getFullPath(location.getAlias() + relativeUri + "/" + location.getIndex());
+//        }
+//        else
+//        {
+//            std::cout << "Alias path without index: " << getFullPath(location.getAlias() + relativeUri) << "\n"; ////debug
+//            return getFullPath(location.getAlias() + relativeUri);
+//        }
+//    }
+//    else if (!location.getRoot().empty())
+//    {
+//        std::cout << "Root found\n"; ////debug
+//        std::string getRelativeUri = uri.substr(location.getLocaPath().length());
+//        std::string relativeUri = normalizeSlash(getRelativeUri);
+//        if ((!location.getIndex().empty()) && (relativeUri.empty() || relativeUri == "/"))
+//        {
+//            std::cout << "Root path with index: " << getFullPath(location.getRoot() + uri + "/" + location.getIndex()) << "\n"; ////debug
+//            return getFullPath(location.getRoot() + uri + "/" + location.getIndex());
+//        }
+//        else
+//        {
+//            std::cout << "Root path without index: " << getFullPath(location.getRoot() + relativeUri) << "\n"; ////debug
+//            return getFullPath(location.getRoot() + relativeUri);
+//        }
+//    }
+//    return "";
+//}
 
 //bool serveStaticFile(const std::string &httpPath, int clientFd)
 //{

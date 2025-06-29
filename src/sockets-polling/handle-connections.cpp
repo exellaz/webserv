@@ -38,9 +38,15 @@ void dispatchRequest(Connection& connection)
     }
     else {
         if (request.getMethod() == "GET")
-            response.handleGetRequest(request.getURI(), connection.server, connection.location);
+        {
+            std::cout << GREEN "GET request\n" RESET;
+            response.handleGetRequest(connection.locationPath, connection.server, connection.location);
+        }
         else if (request.getMethod() == "POST")
+        {
+            std::cout << GREEN "POST request\n" RESET;
             response.handlePostRequest(request, connection.locationPath);
+        }
         // else if (req.getMethod() == "DELETE")
             // res.handleDeleteRequest(req, connection.config);
     }
@@ -113,7 +119,7 @@ int receiveClientRequest(Connection &connection, std::map< std::pair<std::string
 
             connection.assignServerByServerName(servers, ipPort, defaultServer);
             connection.location = connection.server.getLocationPath(request.getURI());
-            std::cout << connection.location.getAllowMethods().size() << "\n";
+            std::cout << "METHOD SIZE: " << connection.location.getAllowMethods().size() << "\n"; //// debug
             validateMethod(request.getMethod(), connection.location.getAllowMethods());
         }
         catch (const HttpException& e) {

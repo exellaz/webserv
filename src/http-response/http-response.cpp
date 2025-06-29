@@ -171,8 +171,16 @@ std::string getMimeType(const std::string& path)
 void HttpResponse::handleGetRequest(const std::string& uri, Server &serverConfig, const Location& location)
 {
     // Map URI to filesystem path (able to handle aliases or root)
-    std::string fullPath = resolveHttpPath(uri, serverConfig);
+    //std::string fullPath = resolveHttpPath(uri, serverConfig); //TODO the index do here
     // Location location = serverConfig.getLocationPath(uri);
+    (void)serverConfig;
+    std::cout << GREEN "URI BEFORE: " << uri << "\n" RESET; //// debug
+    std::string fullPath;
+    if (!location.getIndex().empty())
+    {
+        fullPath = uri + location.getIndex();
+        std::cout << GREEN "URI AFTER: " << fullPath << "\n" RESET; //// debug
+    }
 
     struct stat info;
     std::cout << fullPath << "\n";
