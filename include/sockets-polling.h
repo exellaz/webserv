@@ -36,47 +36,39 @@
 #define GREY "\033[90m"
 #define BLUE "\033[0;34m"
 
-#define PORT "8080"
-
-#define NGX_AGAIN -1
-#define NGX_OK 0
-#define NGX_ERROR -2
-#define NGX_REQUEST_HEADER_TOO_LARGE -431
-#define HEADER_BUFFER_SIZE 1024 // defines the size of the buffer allocated
-#define LARGE_HEADER_BUFFER_SIZE 8192
-#define MAX_LARGE_BUFFERS 4
-#define BODY_BUFFER_SIZE 8192
-#define CLIENT_TIMEOUT 60 // in seconds
-#define MAX_BODY_SIZE 1048576
 #define HEADER_END "\r\n\r\n"
 #define CRLF "\r\n"
 #define CRLF_LENGTH 2
+#define DOUBLE_CRLF_LENGTH 4
 
-enum recvResult {
+enum readReturnVal {
     RECV_OK = 0,
     RECV_AGAIN = -1,
     RECV_CLOSED = -2,
+	REQUEST_ERR = -3,
 };
 
 // Setup Listening Socket
-// int setupListeningSocket(std::vector<struct pollfd>& pfds, Config& config);
 int setupListeningSocket(std::vector<struct pollfd>& pfds, std::vector<Connection>& connections, Server& server);
 // CONNECTIONS
+void handlePollIn(std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers,
+                    std::vector<struct pollfd>& pfds, std::vector<Connection>& connections,
+                    std::vector<int>& listeners, int i);
+void handlePollOut(std::vector<struct pollfd>& pfds, std::vector<Connection>& connections, int i);
+void handlePollHup(std::vector<Connection>& connections, int i);
+void handlePollErr(std::vector<Connection>& connections, int i);
 void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Connection>& connections, int listener);
 
 // Read Request Utils
-/*int readFromSocket(int fd, std::string& buffer, size_t bufferSize);*/
-int readRequestHeader(Connection &conn, std::string& headerStr, int bufferSize);
-// void readRequestBody(int fd, std::string& bodyStr, std::string& buffer, enum reqBodyType type);
-int readRequestBody(Connection &conn, std::string& bodyStr, int bufferSize);
+int readRequestHeader(Connection &conn, std::string& headerStr, const size_t bufferSize);
+int readRequestBody(Connection &conn, std::string& bodyStr, const size_t bufferSize, const size_t maxSize);
 // int receiveClientRequest(Connection &connection, std::map<int, std::vector<Server> >& servers);
 int receiveClientRequest(Connection &connection, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers);
-int readByChunkedEncoding(Connection &conn, std::string& bodyStr, int bufferSize);
+int readByChunkedEncoding(Connection &conn, std::string& bodyStr, const size_t bufferSize, const size_t maxSize);
 
 // Timeout
-int getNearestUpcomingTimeout(std::vector<Connection>& connections, size_t listenerCount);
-void disconnectTimedOutClients(std::vector<Connection>& connections, std::vector<struct pollfd>& pfds, size_t listenerCount);
-
+int getNearestUpcomingTimeout(std::vector<Connection>& connections, size_t listenerCount, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers);
+void disconnectTimedOutClients(std::vector<Connection>& connections, std::vector<struct pollfd>& pfds, size_t listenerCount, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers);
 // Utils
 void *getInAddr(struct sockaddr *sa);
 int  set_nonblocking(int fd);
@@ -92,15 +84,6 @@ void resolveLocationPath(const std::string& uri, Connection &connection);
 std::string readDirectorytoString(const std::string &directoryPath, const std::string& uri);
 std::pair<std::string, std::string> getIpAndPortFromSocketFd(int fd);
 Server& getDefaultServerBlockByIpPort(std::pair<std::string, std::string> ipPort, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers);
-
-class BadRequestException : public std::exception {
-public:
-    // 'throw()' specifies that func won't throw any exceptions
-    const char* what() const throw() {
-        return "400: Bad Request";
-    }
-
-};
 
 class PollErrorException : public std::exception {
 public:

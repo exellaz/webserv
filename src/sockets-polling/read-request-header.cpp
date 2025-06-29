@@ -1,6 +1,6 @@
 #include "../../include/sockets-polling.h"
 
-int readRequestHeader(Connection &conn, std::string& headerStr, int bufferSize)
+int readRequestHeader(Connection &conn, std::string& headerStr, const size_t bufferSize)
 {
     std::cout << GREY << "===== readRequestHeader =====" << RESET << '\n';
 
@@ -19,9 +19,8 @@ int readRequestHeader(Connection &conn, std::string& headerStr, int bufferSize)
                 continue;
         }
         else
-            return ret; // RECV_AGAIN or RECV_CLOSED or RECV_ERROR
+            return ret; // RECV_AGAIN or RECV_CLOSED
     }
-
 
     const std::string& buffer = conn.getBuffer();
 
@@ -31,23 +30,17 @@ int readRequestHeader(Connection &conn, std::string& headerStr, int bufferSize)
         throw HttpException(BAD_REQUEST, "No header found");
     }
     // if no body
-    if (buffer.begin() + found == buffer.end() - 4) {
+    if (buffer.begin() + found == buffer.end() - DOUBLE_CRLF_LENGTH) {
         std::cout << "getHeaderStr: no body found\n";
-        headerStr = buffer.substr(0, buffer.length() - 4); // exclude "abc\r\n\r\n abc"
+        headerStr = buffer.substr(0, buffer.length() - DOUBLE_CRLF_LENGTH);
         conn.clearBuffer();
     }
     else {
         headerStr = buffer.substr(0, found);
         // replace buffer with body part only
-        conn.setBuffer(buffer.substr(found + 4));
+        conn.setBuffer(buffer.substr(found + DOUBLE_CRLF_LENGTH));
     }
 
-    // std::cout << "\n===== Header String: =====\n";
-    // std::cout << headerStr << '\n';
-    // std::cout << "==========================\n\n";
-    // std::cout << "----Leftover in Buffer: ----\n";
-    // std::cout << buffer << '\n';
-    // std::cout << "----------------------------\n";
     return ret;
 }
 

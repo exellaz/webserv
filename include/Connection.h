@@ -10,6 +10,11 @@
 #include <iostream>
 #include <sys/time.h>
 
+enum ConnState {
+	ACTIVE,
+	DISCONNECTED
+};
+
 enum connectionType {
 	CLOSE,
 	KEEP_ALIVE,
@@ -39,7 +44,8 @@ public:
 	// Destructor
 	~Connection();
 
-	int fd;
+	const int fd;
+	enum ConnState connState;
 	time_t startTime; // Timeout
 
 	enum connectionType connType;
@@ -51,7 +57,7 @@ public:
 	enum readChunkedRequestStatus readChunkedRequestStatus;
 	size_t chunkSize;
 	std::string chunkReqBuf;
-
+	bool isFirstTimeReadingBody;
 	bool isResponseReady;
 
 	HttpRequest request;

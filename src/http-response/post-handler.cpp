@@ -2,6 +2,18 @@
 #include "http-request.h"
 #include "http-exception.h"
 #include "Connection.h"
+#include <sys/stat.h>
+#include <unistd.h>
+
+static void validateUploadPath(const std::string& path) {
+    struct stat info;
+    if (stat(path.c_str(), &info) != 0)
+        throw HttpException(FORBIDDEN, "Upload path does not exist");
+    if (!S_ISDIR(info.st_mode))
+        throw HttpException(FORBIDDEN, "Upload path is not a directory");
+    if (access(path.c_str(), W_OK) != 0)
+        throw HttpException(FORBIDDEN, "Upload path is not writable");
+}
 
 static std::vector<std::string> extractMultipartParts(const std::string& body, const std::string& boundary)
 {
@@ -67,6 +79,8 @@ void HttpResponse::handlePostRequest(const HttpRequest& request, const Connectio
     size_t pos = contentType.find("boundary=");
     if (pos == std::string::npos)
         throw HttpException(BAD_REQUEST, "Missing boundary in Content-Type");
+
+    validateUploadPath(locationPath);
 
     const std::string& body = request.getBody();
     std::string boundary = "--" + contentType.substr(pos + 9);

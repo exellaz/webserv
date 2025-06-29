@@ -9,7 +9,7 @@ int handleParsingError(const HttpException& e, HttpResponse& response, Connectio
     response.setHeader("Connection", "close");
     connection.connType = CLOSE;
     connection.isResponseReady = true;
-    return -3;
+    return REQUEST_ERR;
 }
 
 void dispatchRequest(Connection& connection)
@@ -47,8 +47,8 @@ void dispatchRequest(Connection& connection)
             std::cout << GREEN "POST request\n" RESET;
             response.handlePostRequest(request, connection);
         }
-        // else if (req.getMethod() == "DELETE")
-            // res.handleDeleteRequest(req, connection.config);
+        else if (request.getMethod() == "DELETE")
+            throw HttpException(METHOD_NOT_ALLOWED, "Delete without CGI not allowed");
     }
 }
 
@@ -143,7 +143,8 @@ int receiveClientRequest(Connection &connection, std::map< std::pair<std::string
     if (connection.readBodyMethod != NO_BODY) {
         try {
             std::string bodyStr;
-            int ret2 = readRequestBody(connection, bodyStr, defaultServer.getClientBodyBufferSize());
+
+            int ret2 = readRequestBody(connection, bodyStr, defaultServer.getClientBodyBufferSize(), defaultServer.getClientMaxSize());
             if (ret2 < 0)
                 return ret2;
             request.setBody(bodyStr);
@@ -154,6 +155,6 @@ int receiveClientRequest(Connection &connection, std::map< std::pair<std::string
     }
 
     std::cout << request;
-    return 0;
+    return RECV_OK;
 }
 
