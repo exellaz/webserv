@@ -40,6 +40,7 @@
 #define HEADER_END "\r\n\r\n"
 #define CRLF "\r\n"
 #define CRLF_LENGTH 2
+#define DOUBLE_CRLF_LENGTH 4
 
 enum readReturnVal {
     RECV_OK = 0,

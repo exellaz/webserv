@@ -150,6 +150,6 @@ int receiveClientRequest(Connection &connection, std::map< std::pair<std::string
     }
 
     std::cout << request;
-    return 0;
+    return RECV_OK;
 }
 

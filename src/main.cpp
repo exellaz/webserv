@@ -4,24 +4,6 @@
 #include "../include/http-response.h"
 #include <algorithm>
 
-// void sendResponseToClient(int fd, HttpResponse& response)
-// {
-//     send(fd, response.toString().c_str(), response.toString().size(), 0);
-//     std::cout << "server: Response sent to client.\n";
-// }
-
-/**
- * @brief check the pdfs.fd is similar to the connection.fd
-*/
-std::vector<Connection>::iterator CheckConnection(std::vector<Connection> &connections, int fd)
-{
-    for (std::vector<Connection>::iterator it = connections.begin(); it != connections.end(); ++it) {
-        if (it->fd == fd)
-            return it;
-    }
-    return connections.end();
-}
-
 int main(int argc, char **argv)
 {
     std::string configFile;
@@ -76,6 +58,7 @@ int main(int argc, char **argv)
                     handlePollHup(connections, i);
                 else if (pfds[i].revents & POLLERR)
                     handlePollErr(connections, i);
+
                 // erase DISCONNECTED client from `pfds` & `Connections`
                 for(size_t i = 0; i < pfds.size(); i++) {
                     if (connections[i].connState == DISCONNECTED)
