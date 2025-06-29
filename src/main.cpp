@@ -95,7 +95,7 @@ int main(int argc, char **argv)
                         else if (res != -3) {
                             try {
                                 resolveAliasPath(connections[i].request.getURI(), connections[i]);
-                                std::cout << "Only Alias path: " << connections[i].locationPath << "\n"; ////debug
+                                std::cout << "Only path: " << connections[i].locationPath << "\n"; ////debug
                                 dispatchRequest(connections[i]);
                             }
                             catch (const HttpException& e) {

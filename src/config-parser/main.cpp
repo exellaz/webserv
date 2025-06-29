@@ -6,7 +6,7 @@
 /*   By: welow <welow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/29 16:14:15 by welow             #+#    #+#             */
-/*   Updated: 2025/06/29 16:30:56 by welow            ###   ########.fr       */
+/*   Updated: 2025/06/29 18:10:56 by welow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,21 +41,21 @@ int main(int ac, char **av)
 
 		//visualize
         // std::map<int, std::vector<Server> > listServers = parseAllServers(configFile);
-        std::map< std::pair<std::string, std::string> , std::vector<Server> > listServers = parseAllServers(configFile);
+        //std::map< std::pair<std::string, std::string> , std::vector<Server> > listServers = parseAllServers(configFile);
 
-        for (std::map< std::pair<std::string, std::string>, std::vector<Server> >::iterator it = listServers.begin(); it != listServers.end(); ++it)
-        {
-            std::cout << BLUE "Host:: " << it->first.first << ", Port:: " << it->first.second << RESET << "\n";
-            std::cout << "------------------------\n";
-            std::cout << ORANGE << "SERVER SIZE: " << it->second.size() << RESET << '\n';
-            for (std::vector<Server>::iterator serverIt = it->second.begin(); serverIt != it->second.end(); ++serverIt)
-            {
-                std::cout << *serverIt; //print server information
-            }
-            std::cout <<RED "------------------------\n\n" RESET;
-        }
+        //for (std::map< std::pair<std::string, std::string>, std::vector<Server> >::iterator it = listServers.begin(); it != listServers.end(); ++it)
+        //{
+        //    std::cout << BLUE "Host:: " << it->first.first << ", Port:: " << it->first.second << RESET << "\n";
+        //    std::cout << "------------------------\n";
+        //    std::cout << ORANGE << "SERVER SIZE: " << it->second.size() << RESET << '\n';
+        //    for (std::vector<Server>::iterator serverIt = it->second.begin(); serverIt != it->second.end(); ++serverIt)
+        //    {
+        //        std::cout << *serverIt; //print server information
+        //    }
+        //    std::cout <<RED "------------------------\n\n" RESET;
+        //}
 
-        //std::cout << config << "\n"; //print server information
+        std::cout << config << "\n"; //print server information
 
 		////method to get config info
 		//std::cout << "----- test -----" << "\n";

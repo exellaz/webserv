@@ -56,11 +56,7 @@ Location::Location(std::istream &conf, const std::string &locName, const std::ve
             {
                 checkValidDirective(line, ALLOWED_METHOD);
                 this->_allowMethods.clear(); // clear the previous allowed methods
-                std::string methods = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
-                std::istringstream iss(methods);
-                std::string method;
-                while (iss >> method)
-                        this->_allowMethods = checkMethod(method);
+                this->_allowMethods = checkMethod(line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1));
                 break;
             }
             case RETURN_PATH:
