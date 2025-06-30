@@ -67,18 +67,12 @@ void HttpResponse::printResponseHeaders()
 std::string HttpResponse::toString() {
     std::ostringstream responseStream;
 
-    // Add date header
     _headers["Date"] = getHttpDate();
-
-    // Status line
     responseStream << buildStatusLine();
-
-    // All headers
     for (std::map<std::string, std::string>::const_iterator it = _headers.begin();
          it != _headers.end(); ++it) {
         responseStream << it->first << ": " << it->second << "\r\n";
     }
-
     responseStream << "\r\n";
     responseStream << _body;
     return responseStream.str();
@@ -145,70 +139,28 @@ std::string getMimeType(const std::string& path)
     return "application/octet-stream";
 }
 
-////original code
-//void HttpResponse::handleGetRequest(const HttpRequest& request, Config &serverConfig)
-//{
-    // Map URI to filesystem path
-    //std::string fullPath = mapUriToPath(docRoot, request.getURI());
-//    std::string fullPath = resolveHttpPath(request, serverConfig);
-
-    // Read from file
-//    std::string fileContents = readFileToString(fullPath);
-//    if (fileContents.empty()) {
-        // If file not found or not readable -> 404 Not Found
-//        std::string body = "<html><body><h1>404 Not Found</h1></body></html>\n";
-//        setStatus(NOT_FOUND);
-//        setHeader("Content-Type", "text/html");
-//        setBody(body);
-//        return ;
-//    }
-
-    // If file found -> 200 OK
-//    std::string mime = getMimeType(fullPath);
-//    setHeader("Content-Type", mime);
-//    setBody(fileContents);
-//}
 void HttpResponse::handleGetRequest(const std::string& uri, Server &serverConfig, const Location& location)
 {
-    // Map URI to filesystem path (able to handle aliases or root)
     std::string fullPath = resolveHttpPath(uri, serverConfig);
-    // Location location = serverConfig.getLocationPath(uri);
 
     struct stat info;
-    std::cout << fullPath << "\n";
     if (stat(fullPath.c_str(), &info) < 0)
-    {
-		std::cout << "not file or folder\n";
-        setStatus(NOT_FOUND);
-        setHeader("Content-Type", "text/html");
-        setBody("<html><body><h1>404 Not Found</h1></body></html>\n");
-        return ;
-    }
+        throw HttpException(NOT_FOUND, "Path is not a file or directory");
 
-    if (S_ISDIR(info.st_mode))
-    {
-        if (location.autoIndex)
-        {
-            std::cout << GREEN "AutoIndex found\n" RESET; //// debug
-            std::string directoryContent = readDirectorytoString(fullPath, uri);
-            setStatus(OK);
-            setHeader("Content-Type", "text/html");
-            setBody(directoryContent);
-            return ;
-        }
+    if (S_ISDIR(info.st_mode) && location.autoIndex) {
+        std::cout << GREEN "AutoIndex found\n" RESET; //// debug
+        std::string directoryContent = readDirectorytoString(fullPath, uri);
+        setStatus(OK);
+        setHeader("Content-Type", "text/html");
+        setBody(directoryContent);
+        return ;
     }
     else if (S_ISREG(info.st_mode))
     {
         std::cout << GREEN "Static file found\n" RESET; //// debug
         std::string fileContents = readFileToString(fullPath);
         if (fileContents.empty())
-        {
-            std::cout << GREEN "Static file not found or not readable\n" RESET; //// debug
-            setStatus(NOT_FOUND);
-            setHeader("Content-Type", "text/html");
-            setBody("<html><body><h1>404 Not Found</h1></body></html>\n");
-            return ;
-        }
+            throw HttpException(NOT_FOUND, "File not found or readable");
         std::string mime = getMimeType(fullPath);
         setHeader("Content-Type", mime);
         setBody(fileContents);
