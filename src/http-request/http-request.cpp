@@ -1,43 +1,6 @@
 #include "http-request.h"
 #include "http-exception.h"
 
-bool HttpRequest::isTChar(char c) const
-{
-    const std::string tcharSymbols = "!#$%&'*+-.^_`|~";
-    return std::isalnum(static_cast<unsigned char>(c)) || tcharSymbols.find(c) != std::string::npos;
-}
-
-bool HttpRequest::isValidToken(const std::string& token) const
-{
-    for (std::string::const_iterator It = token.begin(); It != token.end(); ++It) {
-        if (!isTChar(*It))
-            return false;
-    }
-    return !token.empty();
-}
-
-bool HttpRequest::isValidHeaderValue(const std::string& value) const
-{
-    for (std::string::const_iterator It = value.begin(); It != value.end(); ++It) {
-        unsigned char c = static_cast<unsigned char>(*It);
-        if (c == 9 || (c >= 32 && c <= 126) || c >= 128)
-            continue;
-
-        return false;
-    }
-    return true;
-}
-
-void HttpRequest::extractQueryString() {
-    size_t qpos = _uri.find('?');
-    if (qpos != std::string::npos) {
-        _queryString = _uri.substr(qpos + 1);
-        _uri = _uri.substr(0, qpos);
-    }
-    else
-        _queryString.clear();
-}
-
 void HttpRequest::parseRequestLine(const std::string& headerStr)
 {
     std::istringstream stream(headerStr);
@@ -120,6 +83,43 @@ void HttpRequest::parseHeaderLines(const std::string& str)
     if (hasHeader("Content-Length") && !isDigitsOnly(getHeader("Content-Length")))
         throw HttpException(BAD_REQUEST, "Invalid content length");
     _headerParsed = true;
+}
+
+bool HttpRequest::isTChar(char c) const
+{
+    const std::string tcharSymbols = "!#$%&'*+-.^_`|~";
+    return std::isalnum(static_cast<unsigned char>(c)) || tcharSymbols.find(c) != std::string::npos;
+}
+
+bool HttpRequest::isValidToken(const std::string& token) const
+{
+    for (std::string::const_iterator It = token.begin(); It != token.end(); ++It) {
+        if (!isTChar(*It))
+            return false;
+    }
+    return !token.empty();
+}
+
+bool HttpRequest::isValidHeaderValue(const std::string& value) const
+{
+    for (std::string::const_iterator It = value.begin(); It != value.end(); ++It) {
+        unsigned char c = static_cast<unsigned char>(*It);
+        if (c == 9 || (c >= 32 && c <= 126) || c >= 128)
+            continue;
+
+        return false;
+    }
+    return true;
+}
+
+void HttpRequest::extractQueryString() {
+    size_t qpos = _uri.find('?');
+    if (qpos != std::string::npos) {
+        _queryString = _uri.substr(qpos + 1);
+        _uri = _uri.substr(0, qpos);
+    }
+    else
+        _queryString.clear();
 }
 
 void HttpRequest::clearRequest()

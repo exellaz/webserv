@@ -288,29 +288,28 @@ Location Server::getLocationPath(const std::string &path)
     if (path.empty() || path[0] != '/')
         throw HttpException(BAD_REQUEST, "Invalid request path");
 
-    std::string match;
-    for (std::map<std::string, Location>::iterator it = this->_location.begin(); it != this->_location.end(); ++it)
-    {
-        const std::string& loc = it->first;
-        if (loc == "/")
-        {
-            if (loc == path)
-                return it->second;
-            continue;
-        }
+    std::string bestMatch;
+    size_t bestLength = 0;
 
-        bool prefixMatch = path.compare(0, loc.length(), loc) == 0;
-        //bool exactMatch = path.length() == loc.length();
-        //bool nextCharSlash = path.length() > loc.length() && path[loc.length()] == '/';
-        if (prefixMatch)
-            match = loc;
+    for (std::map<std::string, Location>::iterator it = _location.begin(); it != _location.end(); ++it) {
+        const std::string& loc = it->first;
+
+        if (loc == path)
+            return it->second;
+
+        if (path.compare(0, loc.size(), loc) == 0 && loc.size() > bestLength) {
+            bestMatch = loc;
+            bestLength = loc.size();
+        }
     }
-    if (!match.empty())
-        return this->_location[match];
+
+    if (!bestMatch.empty())
+        return _location[bestMatch];
+
     if (_location.count("/"))
         return _location["/"];
 
-    throw HttpException(NOT_FOUND, "No match for location: " + path);
+    throw HttpException(NOT_FOUND, "No matching location for URI: " + path);
 }
 
 ////////////////////////////////////////////// OUTPUT OPERATOR //////////////////////////////////////////////////////////////
