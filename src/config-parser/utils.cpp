@@ -184,17 +184,26 @@ void checkValidDirective(const std::string &line, Directive directiveType)
     {
         int statusCode;
         std::string value;
-        size_t open_quote, close_quote;
         if (!(rest_iss >> statusCode))
             throw std::runtime_error(RED "missing status code in return directive: [" + line + "]" RESET);
         std::getline(rest_iss, value);
         value = ft_trim(value);
-        if (value.empty() || value[0] != '"' || value[value.size() - 1] != '"')
-            throw std::runtime_error(RED "missing quote or extra value in return directive: [" + line + "]" RESET);
-        open_quote = value.find('"');
-        close_quote = value.rfind('"');
-        if (open_quote != 0 || close_quote != value.size() - 1 || value.find('"', 1) != close_quote)
-            throw std::runtime_error(RED "extra value found in return directive: [" + line + "]" RESET);
+        if (value.empty())
+            throw std::runtime_error(RED "missing value in return directive: [" + line + "]" RESET);
+        if (value[0] == '"')
+		{
+            if (value[value.size() - 1] != '"')
+                throw std::runtime_error(RED "missing closing quote in return directive: [" + line + "]" RESET);
+            size_t open_quote = value.find('"');
+            size_t close_quote = value.rfind('"');
+            if (open_quote != 0 || close_quote != value.size() - 1 || value.find('"', 1) != close_quote)
+                throw std::runtime_error(RED "extra value found in return directive: [" + line + "]" RESET);
+        }
+		else
+		{
+            if (value.find('"') != std::string::npos)
+                throw std::runtime_error(RED "unexpected quote in unquoted return directive: [" + line + "]" RESET);
+        }
         return;
     }
     if (getKey(key) == ALLOWED_METHOD)
