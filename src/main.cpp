@@ -32,39 +32,50 @@ int main(int argc, char **argv)
         for (std::map<std::pair<std::string, std::string>, std::vector<Server> >::iterator it = servers.begin(); it != servers.end(); ++it)
         {
             Server &curServer = *(it->second.begin());
-            int listener = setupListeningSocket(pfds, clients, curServer); //? set map in this
-            listeners.push_back(listener);
+            setupListeningSocket(pfds, listeners, curServer);
         }
         for (std::vector<int>::iterator it = listeners.begin(); it != listeners.end(); ++it) ////debug
             std::cout << "Listener socket fd: " << *it << "\n";
 
-        while(1) {
+        while(true) {
             std::cout << CYAN << "\n+++++++ Waiting for POLL event ++++++++" << RESET << "\n\n";
 
-            int nearestTimeout = getNearestUpcomingTimeout(clients, listeners.size(), servers);
+            int nearestTimeout = getNearestUpcomingTimeout(clients, servers);
             int pollCount = poll(&pfds[0], pfds.size(), nearestTimeout);
             if (pollCount == -1)
                 throw PollErrorException();
 
-            disconnectTimedOutClients(clients, pfds, listeners.size(), servers);
+            disconnectTimedOutClients(clients, pfds, servers);
 
             // Run through the existing clients looking for data to read
             for(size_t i = 0; i < pfds.size(); i++) {
-                // Check if socket is ready to read
-                if (pfds[i].revents & (POLLIN ))
-                    handlePollIn(servers, pfds, clients, listeners, i);
-                else if (pfds[i].revents & POLLOUT)
-                    handlePollOut(pfds, clients, i);
-                else if (pfds[i].revents & POLLHUP)
-                    handlePollHup(clients, i);
-                else if (pfds[i].revents & POLLERR)
-                    handlePollErr(clients, i);
-
-                // erase DISCONNECTED client from `pfds` & `Connections`
-                for(size_t i = 0; i < pfds.size(); i++) {
-                    if (clients[i].connState == DISCONNECTED)
-                        disconnectClient(clients, pfds, i--);
+                if (pfds[i].revents == 0)
+                    continue;
+                if (isListener(listeners, pfds[i].fd) && pfds[i].revents & POLLIN) {
+                    acceptClient(pfds, clients, pfds[i].fd);
+                    continue;
                 }
+                Client *client = findClientByFd(clients, pfds[i].fd);
+                if (client == NULL)
+                    std::cout << "CLIENT IS NULL\n";
+
+                if (pfds[i].revents & POLLIN)
+                    handlePollIn(servers, pfds[i], *client);
+                else if (pfds[i].revents & POLLOUT)
+                    handlePollOut(pfds[i], *client);
+                else if (pfds[i].revents & POLLHUP)
+                    handlePollHup(*client);
+                else if (pfds[i].revents & POLLERR)
+                    handlePollErr(*client);
+
+            }
+            // erase DISCONNECTED client from `pfds` & `Connections`
+            std::vector<Client>::iterator it = clients.begin();
+            for(; it != clients.end();) {
+                if (it->connState == DISCONNECTED)
+                    disconnectClient(clients, it, pfds);
+                else
+                    ++it;
             }
         }
 

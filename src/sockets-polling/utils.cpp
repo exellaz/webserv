@@ -31,15 +31,30 @@ void addToPfds(std::vector<struct pollfd>& pfds, int newFd)
     pfds.push_back(pfd);
 }
 
-void disconnectClient(std::vector<Client>& clients, std::vector<struct pollfd>& pfds, int index)
+// void disconnectClient(std::vector<Client>& clients, std::vector<struct pollfd>& pfds, int index)
+// {
+//     std::cout << RED << "server: disconnected client socket " << clients[index].fd << "\n" << RESET << '\n';
+//     close(clients[index].fd);
+
+//     clients.erase(clients.begin() + index);
+//     pfds.erase(pfds.begin() + index);
+// }
+
+
+void disconnectClient(std::vector<Client>& clients, std::vector<Client>::iterator clientIt, std::vector<struct pollfd>& pfds)
 {
-    std::cout << RED << "server: disconnected client socket " << clients[index].fd << "\n" << RESET << '\n';
-    close(clients[index].fd);
+    std::cout << RED << "server: disconnected client socket " << clientIt->fd << "\n" << RESET << '\n';
 
-    clients.erase(clients.begin() + index);
-    pfds.erase(pfds.begin() + index);
+    std::vector<struct pollfd>::iterator pfdIt = pfds.begin();
+    for (; pfdIt != pfds.end(); ++pfdIt) {
+        if (pfdIt->fd == clientIt->fd)
+            break;
+    }
+
+    close(clientIt->fd);
+    clients.erase(clientIt);
+    pfds.erase(pfdIt); // ! SEG FAULT when timeout
 }
-
 
 
 time_t getNowInSeconds() {
@@ -69,4 +84,22 @@ int readFromSocket(Client &client, int bufferSize)
     delete[] buf;
 
     return n;
+}
+
+
+bool isListener(std::vector<int>& listeners, int fd)
+{
+    if (find(listeners.begin(), listeners.end(), fd) != listeners.end())
+        return true;
+    return false;
+}
+
+Client* findClientByFd(std::vector<Client>& clients, int fd)
+{
+    std::vector<Client>::iterator it = clients.begin();
+    for (; it != clients.end(); ++it) {
+        if (it->fd == fd)
+            return &(*it);
+    }
+    return NULL;
 }

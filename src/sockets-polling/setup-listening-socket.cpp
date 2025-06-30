@@ -53,28 +53,25 @@ int getListenerSocket(Server& server)
 }
 
 // returns listening socket fd
-int setupListeningSocket(std::vector<struct pollfd>& pfds, std::vector<Client>& clients, Server& server) {
+void setupListeningSocket(std::vector<struct pollfd>& pfds, std::vector<int>& listeners, Server& server) {
 
-    int listener = getListenerSocket(server);
-    if (listener == -1) {
+    int listenerFd = getListenerSocket(server);
+    if (listenerFd == -1) {
 		std::cerr << "Error: error getting listening socket\n";
-        exit(1);
+        exit(1); // TODO: throw exception
     }
 
-    if (set_nonblocking(listener) == -1) {
+    if (set_nonblocking(listenerFd) == -1) {
         perror("set_nonblocking");
-        close(listener);
-        exit(4);
+        close(listenerFd);
+        exit(4); // TODO: throw exception
     }
 
-    // Add the listener to set
+    // Add the listenerFd to set
 	struct pollfd pfd;
-    pfd.fd = listener;
+    pfd.fd = listenerFd;
     pfd.events = POLLIN; // Report ready to read on incoming connection
 	pfds.push_back(pfd);
 
-	clients.push_back(Client(listener, getNowInSeconds()));
-
-
-	return listener;
+	listeners.push_back(listenerFd);
 }

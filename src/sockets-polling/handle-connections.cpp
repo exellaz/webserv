@@ -48,6 +48,8 @@ void dispatchRequest(Client& client)
 
 void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Client>& clients, int listener)
 {
+    std::cout << "POLLIN: socket " << listener << '\n';
+
     // If listener is ready to read, handle new client
     struct sockaddr_storage remoteAddr; // Client address
     socklen_t addrLen = sizeof remoteAddr;
@@ -98,6 +100,7 @@ int receiveClientRequest(Client &client, std::map< std::pair<std::string, std::s
     HttpResponse& response = client.response;
 
     // IP:PORT pair from fd
+    std::cout << "NULLL\n";
     std::pair<std::string, std::string> ipPort = getIpAndPortFromSocketFd(client.fd);
 
     // get default block by IP:PORT pair
@@ -149,7 +152,7 @@ int receiveClientRequest(Client &client, std::map< std::pair<std::string, std::s
         }
     }
 
-    std::cout << request;
+    // std::cout << request;
     return RECV_OK;
 }
 
