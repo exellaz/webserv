@@ -135,7 +135,7 @@ std::string readDirectorytoString(const std::string &directoryPath, const std::s
         std::string url_base = uri;
         if (url_base.empty() || url_base[url_base.size() - 1] != '/')
             url_base += '/';
-        htmlOutput << "<li><a href=\"" << url_base << name << slash << "\">" << name << slash << "</a></li>";
+        htmlOutput << "<li><a href=\"" << name << slash << "\">" << name << slash << "</a></li>";
     }
     closedir(dir);
     htmlOutput << "</ul><hr></body></html>";
