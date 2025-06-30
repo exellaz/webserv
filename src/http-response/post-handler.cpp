@@ -70,8 +70,6 @@ static std::string saveUploadedFile(const std::string& locationPath, const std::
 
 void HttpResponse::handlePostRequest(const HttpRequest& request, const Connection &connection)
 {
-    if (connection.isJustLocationPath == false)
-        throw HttpException(BAD_REQUEST, "POST request is not allowed because is not a directory");
     std::string contentType = request.getHeader("Content-Type");
     if (contentType.find("multipart/form-data") == std::string::npos)
         throw HttpException(BAD_REQUEST, "Expected multipart/form-data");
