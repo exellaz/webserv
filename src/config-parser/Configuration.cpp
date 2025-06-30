@@ -1,4 +1,5 @@
 #include "../../include/Configuration.hpp"
+#include "http-exception.h"
 
 static std::string ft_trim(const std::string &str);
 static std::string	checkComment(const std::string &line);
@@ -284,6 +285,9 @@ const std::map<std::string, Location>	&Server::getLocations() const
 */
 Location Server::getLocationPath(const std::string &path)
 {
+    if (path.empty() || path[0] != '/')
+        throw HttpException(BAD_REQUEST, "Invalid request path");
+
     std::string match;
     for (std::map<std::string, Location>::iterator it = this->_location.begin(); it != this->_location.end(); ++it)
     {
@@ -299,11 +303,14 @@ Location Server::getLocationPath(const std::string &path)
         //bool exactMatch = path.length() == loc.length();
         //bool nextCharSlash = path.length() > loc.length() && path[loc.length()] == '/';
         if (prefixMatch)
-                match = loc;
+            match = loc;
     }
     if (!match.empty())
         return this->_location[match];
-    return Location();
+    if (_location.count("/"))
+        return _location["/"];
+
+    throw HttpException(NOT_FOUND, "No match for location: " + path);
 }
 
 ////////////////////////////////////////////// OUTPUT OPERATOR //////////////////////////////////////////////////////////////
@@ -422,7 +429,7 @@ std::map< std::pair<std::string, std::string> , std::vector<Server> > parseAllSe
             Server server(serverBlock);
             std::string host = server.getHost();
             std::string port = server.getPort();
-            
+
             std::pair<std::string, std::string> key = std::make_pair(host, port);
             listServers[key].push_back(server);
         }
