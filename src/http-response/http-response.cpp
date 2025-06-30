@@ -1,13 +1,4 @@
 #include "http-response.h"
-#include "http-request.h"
-#include <sstream>
-#include <cstdlib>
-
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <ctime>
-
-#include "sockets-polling.h"
 
 HttpResponse::HttpResponse()
     : _status(OK)
