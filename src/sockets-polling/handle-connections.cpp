@@ -20,8 +20,28 @@ void dispatchRequest(Connection& connection)
     response.setHeader("Connection", request.getHeader("Connection"));
     if (request.getHeader("Connection") == "close")
         connection.connType = CLOSE;
+    if (!connection.location.getReturnPath().empty())
+    {
+        int statusCode = connection.location.getReturnPath().begin()->first;
+        std::string returnPath = connection.location.getReturnPath().begin()->second;
+        if (statusCode == MOVED_PERMANENTLY || statusCode == FOUND)
+        {
+            connection.response.setStatus(static_cast<HttpCodes::StatusCode>(statusCode));
+            connection.response.setHeader("Location", returnPath);
+            connection.response.setBody("");
+        }
+        else if (statusCode == OK)
+        {
+            connection.response.setStatus(static_cast<HttpCodes::StatusCode>(statusCode));
+            connection.response.setHeader("Content-Type", "text/plain");
+           if (returnPath[0] == '"' && returnPath[returnPath.size() - 1] == '"')
+                returnPath = returnPath.substr(1, returnPath.size() - 2);
+            connection.response.setBody(returnPath);
 
-    if (!connection.location.getCgiPath().empty()) {
+        }
+    }
+    else if (!connection.location.getCgiPath().empty())
+    {
         std::cout << GREEN "CGI found\n" RESET;
         Cgi cgi;
 
@@ -119,16 +139,16 @@ int receiveClientRequest(Connection &connection, std::map< std::pair<std::string
 
             connection.assignServerByServerName(servers, ipPort, defaultServer);
             connection.location = connection.server.getLocationPath(request.getURI());
-			// if (connection.location.getLocaPath().empty())
-			// {
-			// 	//validate if the request URI is a valid file or directory
-			// 	struct stat info;
-			// 	if (stat(request.getURI().c_str(), &info) == 0 && (S_ISDIR(info.st_mode) || S_ISREG(info.st_mode)))
-			// 	{
-			// 		connection.locationPath = request.getURI();
-			// 		connection.location.setAllowMethod(defaultServer.getAllowMethods());
-			// 	}
-			// }
+            // if (connection.location.getLocaPath().empty())
+            // {
+            // 	//validate if the request URI is a valid file or directory
+            // 	struct stat info;
+            // 	if (stat(request.getURI().c_str(), &info) == 0 && (S_ISDIR(info.st_mode) || S_ISREG(info.st_mode)))
+            // 	{
+            // 		connection.locationPath = request.getURI();
+            // 		connection.location.setAllowMethod(defaultServer.getAllowMethods());
+            // 	}
+            // }
             std::cout << "METHOD SIZE: " << connection.location.getAllowMethods().size() << "\n"; //// debug
             validateMethod(request.getMethod(), connection.location.getAllowMethods());
         }
