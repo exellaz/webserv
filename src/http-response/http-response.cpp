@@ -1,5 +1,6 @@
 #include "http-response.h"
 #include "http-request.h"
+#include "Connection.h"
 #include <sstream>
 #include <cstdlib>
 
@@ -168,17 +169,33 @@ std::string getMimeType(const std::string& path)
 //    setHeader("Content-Type", mime);
 //    setBody(fileContents);
 //}
-void HttpResponse::handleGetRequest(const std::string& uri, Server &serverConfig, const Location& location)
+
+std::string validateIndex(const std::string& locationPath, const Location &location)
+{
+    struct stat info;
+    if (stat(locationPath.c_str(), &info) == 0 && S_ISDIR(info.st_mode) && (!location.getIndex().empty()))
+    {
+        std::cout << GREEN "URI AFTER: " << locationPath + "/" + location.getIndex() << "\n" RESET; //// debug
+        return (locationPath + "/" + location.getIndex());
+    }
+    else
+    {
+        std::cout << BLUE "URI AFTER: " << locationPath << "\n" RESET;
+        return (locationPath);
+    }
+}
+
+void HttpResponse::handleGetRequest(const Location& location, const Connection &connection)
 {
     // Map URI to filesystem path (able to handle aliases or root)
-    std::string fullPath = resolveHttpPath(uri, serverConfig);
-    // Location location = serverConfig.getLocationPath(uri);
+    std::cout << GREEN "URI BEFORE: " << connection.locationPath << "\n" RESET; //// debug
+    std::string fullPath = validateIndex(connection.locationPath, location);
 
     struct stat info;
     std::cout << fullPath << "\n";
     if (stat(fullPath.c_str(), &info) < 0)
     {
-		std::cout << "not file or folder\n";
+        std::cout << "not file or folder\n";
         setStatus(NOT_FOUND);
         setHeader("Content-Type", "text/html");
         setBody("<html><body><h1>404 Not Found</h1></body></html>\n");
@@ -187,10 +204,10 @@ void HttpResponse::handleGetRequest(const std::string& uri, Server &serverConfig
 
     if (S_ISDIR(info.st_mode))
     {
-        if (location.autoIndex)
+        if (location.getAutoIndex())
         {
             std::cout << GREEN "AutoIndex found\n" RESET; //// debug
-            std::string directoryContent = readDirectorytoString(fullPath, uri);
+            std::string directoryContent = readDirectorytoString(fullPath, connection.locationPath);
             setStatus(OK);
             setHeader("Content-Type", "text/html");
             setBody(directoryContent);

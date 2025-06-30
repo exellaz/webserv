@@ -30,6 +30,8 @@ namespace HttpCodes {
     };
 };
 
+class Connection;
+
 using namespace HttpCodes;
 class HttpResponse
 {
@@ -40,8 +42,10 @@ class HttpResponse
         std::string reasonPhrase(StatusCode code);
         std::string buildStatusLine();
         void printResponseHeaders();
-        void handleGetRequest(const std::string& uri, Server &serverConfig, const Location& location);
-        void handlePostRequest(const HttpRequest& request, const std::string& locationPath);
+        //void handleGetRequest(const std::string& locationPath, const Location& location, bool isJustLocationPath);
+        //void handlePostRequest(const HttpRequest& request, const std::string& locationPath, bool isJustLocationPath);
+        void handleGetRequest(const Location& location, const Connection &connection);
+        void handlePostRequest(const HttpRequest& request, const Connection &connection);
         void clearResponse();
 
         std::string getHttpDate();

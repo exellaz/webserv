@@ -12,6 +12,28 @@
 #include "utils.h"
 #include <utility>
 
+enum Directive
+{
+    LISTEN,
+    SERVERNAME,
+    ROOT,
+    ALLOWED_METHOD,
+    CLIENT_MAX_BODY_SIZE,
+    CLIENT_BODY_BUFFER_SIZE,
+    CLIENT_HEADER_BUFFER_SIZE,
+    CLIENT_TIMEOUT,
+    ERROR_PAGE,
+    LOCATION,
+    LOCATION_PATH,
+    INDEX,
+    ALIAS,
+    RETURN_PATH,
+    AUTO_INDEX,
+    ALLOW_UPLOAD,
+    CGI_PATH,
+    UNKNOWN
+};
+
 class Location;
 
 class Server
@@ -50,26 +72,49 @@ class Server
 
 class Location
 {
+    private:
+        std::string                 _locaPath;   // location path
+        std::string                 _index;          // index file
+        std::string                 _root;  // root directory for this location
+        std::string                 _alias;     // alias for this location
+        std::vector<std::string>	_allowMethods;   // allowed method type (GET, POST)
+        std::map<int, std::string>  _returnPath;     // path to redirect to for return responses
+        int                         _clientMaxSize;  // maximum client request size
+        bool                        _autoIndex;      // auto generate a directory list if no index file is found
+        std::string                 _cgi_path;       // cgi path for this location
+        bool                        _allowUpload;
+
     public:
-        std::string                 locationPath;   // location path
-        std::string                 index;          // index file
-        std::string                 root;  // root directory for this location
-        std::string                 alias;     // alias for this location
-        std::vector<std::string>	allowMethods;   // allowed method type (GET, POST)
-        std::map<int, std::string>  returnPath;     // path to redirect to for return responses
-        int                         clientMaxSize;  // maximum client request size
-        bool                        autoIndex;      // auto generate a directory list if no index file is found
-        std::string                 cgi_path;       // cgi path for this location
-        bool                        allowUpload;
+		void setAllowMethod(const std::vector<std::string> &methods);
+        const std::string           &getLocaPath() const;
+        const std::string           &getIndex() const;
+        const std::string           &getRoot() const;
+        const std::string           &getAlias() const;
+        const std::vector<std::string> &getAllowMethods() const;
+        const std::map<int, std::string> &getReturnPath() const;
+        int                         getClientMaxSize() const;
+        bool                        getAutoIndex() const;
+        const std::string           &getCgiPath() const;
+        bool                        getAllowUpload() const;
 
         Location(std::istream &conf, const std::string &locName, const std::vector<std::string> & defaultMethods);
         Location() {};
         ~Location() {};
+
+		void clearLocationBlock();
 };
 
 // std::map<int, std::vector<Server> > parseAllServers(const std::string &filename);
 std::map< std::pair<std::string, std::string> , std::vector<Server> > parseAllServers(const std::string &filename);
 
 std::ostream &operator<<(std::ostream &cout, const Server &server);
+std::string ft_trim(const std::string &str);
+std::string	checkComment(const std::string &line);
+std::string	extractLine(const std::string &line);
+std::vector<std::string> checkMethod(std::string allowMethod);
+std::string checkPort(std::string port);
+int checkNumber(std::string number);
+Directive getKey(const std::string &line);
+void checkValidDirective(const std::string &line, Directive directiveType);
 
 #endif

@@ -21,7 +21,7 @@ void dispatchRequest(Connection& connection)
     if (request.getHeader("Connection") == "close")
         connection.connType = CLOSE;
 
-    if (!connection.location.cgi_path.empty()) {
+    if (!connection.location.getCgiPath().empty()) {
         std::cout << GREEN "CGI found\n" RESET;
         Cgi cgi;
 
@@ -38,9 +38,15 @@ void dispatchRequest(Connection& connection)
     }
     else {
         if (request.getMethod() == "GET")
-            response.handleGetRequest(request.getURI(), connection.server, connection.location);
+        {
+            std::cout << GREEN "GET request\n" RESET;
+            response.handleGetRequest(connection.location, connection);
+        }
         else if (request.getMethod() == "POST")
-            response.handlePostRequest(request, "/objs/"); // objs hardcoded, change to full path without index
+        {
+            std::cout << GREEN "POST request\n" RESET;
+            response.handlePostRequest(request, connection);
+        }
         else if (request.getMethod() == "DELETE")
             throw HttpException(METHOD_NOT_ALLOWED, "Delete without CGI not allowed");
     }
@@ -76,7 +82,6 @@ void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Connection>& con
 void validateMethod(const std::string& method, const std::vector<std::string>& allowedMethods)
 {
     for (std::vector<std::string>::const_iterator It = allowedMethods.begin(); It != allowedMethods.end(); ++It) {
-
         if (*It == method)
             return ;
     }
@@ -114,8 +119,18 @@ int receiveClientRequest(Connection &connection, std::map< std::pair<std::string
 
             connection.assignServerByServerName(servers, ipPort, defaultServer);
             connection.location = connection.server.getLocationPath(request.getURI());
-            std::cout << connection.location.allowMethods.size() << "\n";
-            validateMethod(request.getMethod(), connection.location.allowMethods);
+			if (connection.location.getLocaPath().empty())
+			{
+				//validate if the request URI is a valid file or directory
+				struct stat info;
+				if (stat(request.getURI().c_str(), &info) == 0 && (S_ISDIR(info.st_mode) || S_ISREG(info.st_mode)))
+				{
+					connection.locationPath = request.getURI();
+					connection.location.setAllowMethod(defaultServer.getAllowMethods());
+				}
+			}
+            std::cout << "METHOD SIZE: " << connection.location.getAllowMethods().size() << "\n"; //// debug
+            validateMethod(request.getMethod(), connection.location.getAllowMethods());
         }
         catch (const HttpException& e) {
             return handleParsingError(e, response, connection);
