@@ -20,6 +20,8 @@ void handlePollIn(std::map< std::pair<std::string, std::string> , std::vector<Se
             return;
         else if (res != REQUEST_ERR) {
             try {
+                resolveLocationPath(connections[i].request.getURI(), connections[i]);
+                std::cout << "Only path: " << connections[i].locationPath << "\n"; ////debug
                 dispatchRequest(connections[i]);
             }
             catch (const HttpException& e) {

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sting <sting@student.42.fr>                +#+  +:+       +#+        */
+/*   By: welow <welow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/29 16:14:15 by welow             #+#    #+#             */
-/*   Updated: 2025/06/27 14:02:58 by sting            ###   ########.fr       */
+/*   Updated: 2025/06/29 18:10:56 by welow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,35 +36,37 @@ int main(int ac, char **av)
 	try
 	{
 		(void)ac;
-		std::ifstream conf(configFile.c_str());
-		Server config(conf);
+        std::ifstream conf(configFile.c_str());
+		Server config(conf); //create a Server object with the config file
 
 		//visualize
         // std::map<int, std::vector<Server> > listServers = parseAllServers(configFile);
-        std::map< std::pair<std::string, std::string> , std::vector<Server> > listServers = parseAllServers(configFile);
+        //std::map< std::pair<std::string, std::string> , std::vector<Server> > listServers = parseAllServers(configFile);
 
-        for (std::map< std::pair<std::string, std::string>, std::vector<Server> >::iterator it = listServers.begin(); it != listServers.end(); ++it)
-        {
-            std::cout << BLUE "Host:: " << it->first.first << ", Port:: " << it->first.second << RESET << "\n";
-            std::cout << "------------------------\n";
-            std::cout << ORANGE << "SERVER SIZE: " << it->second.size() << RESET << '\n';
-            for (std::vector<Server>::iterator serverIt = it->second.begin(); serverIt != it->second.end(); ++serverIt)
-            {
-                std::cout << *serverIt; //print server information
-            }
-            std::cout << "------------------------\n\n" RESET;
-        }
+        //for (std::map< std::pair<std::string, std::string>, std::vector<Server> >::iterator it = listServers.begin(); it != listServers.end(); ++it)
+        //{
+        //    std::cout << BLUE "Host:: " << it->first.first << ", Port:: " << it->first.second << RESET << "\n";
+        //    std::cout << "------------------------\n";
+        //    std::cout << ORANGE << "SERVER SIZE: " << it->second.size() << RESET << '\n';
+        //    for (std::vector<Server>::iterator serverIt = it->second.begin(); serverIt != it->second.end(); ++serverIt)
+        //    {
+        //        std::cout << *serverIt; //print server information
+        //    }
+        //    std::cout <<RED "------------------------\n\n" RESET;
+        //}
 
-		//method to get config info
-		std::cout << "----- test -----" << "\n";
-		std::cout << "host                                : " << config.getHost() << "\n"; //to get server
-		std::cout << "location [/] root directory         : " << config.getLocationPath("/").root << "\n"; //to get root directory of location path
-		std::cout << "error page (404)                    : " << config.getErrorPageByCode(404) << "\n"; //to get error page by code
-        
+        std::cout << config << "\n"; //print server information
+
+		////method to get config info
+		//std::cout << "----- test -----" << "\n";
+		//std::cout << "host                                : " << config.getHost() << "\n"; //to get server
+		//std::cout << "location [/] root directory         : " << config.getLocationPath("/").getRoot() << "\n"; //to get root directory of location path
+		//std::cout << "error page (404)                    : " << config.getErrorPageByCode(404) << "\n"; //to get error page by code
+
         // ! SEGFAULT
 		// std::cout << "location [/get_output] allow method : " << config.getLocationPath("/youtube").allowMethods[0] << "\n"; //to get allowed method of location path
-		
-        std::cout << "location [/youtube] return          : " << config.getLocationPath("/youtube").returnPath[301] << "\n"; //to get return path of location path
+
+        //std::cout << "location [/youtube] return          : " << config.getLocationPath("/youtube").returnPath[301] << "\n"; //to get return path of location path
 	}
 	catch (const std::exception &e)
 	{

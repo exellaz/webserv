@@ -37,6 +37,7 @@ int main(int argc, char **argv)
         for (std::vector<int>::iterator it = listeners.begin(); it != listeners.end(); ++it) ////debug
             std::cout << "Listener socket fd: " << *it << "\n";
 
+
         while(1) {
             std::cout << CYAN << "\n+++++++ Waiting for POLL event ++++++++" << RESET << "\n\n";
 
