@@ -20,7 +20,7 @@ SRCS_FIL = \
 		sockets-polling/setup-listening-socket.cpp \
 		sockets-polling/read-request-header.cpp \
 		sockets-polling/read-request-body.cpp \
-		sockets-polling/Connection.cpp \
+		sockets-polling/Client.cpp \
 		sockets-polling/timeout.cpp \
 		sockets-polling/chunked-encoding.cpp \
 		\

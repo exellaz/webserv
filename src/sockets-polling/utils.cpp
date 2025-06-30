@@ -31,12 +31,12 @@ void addToPfds(std::vector<struct pollfd>& pfds, int newFd)
     pfds.push_back(pfd);
 }
 
-void disconnectClient(std::vector<Connection>& connections, std::vector<struct pollfd>& pfds, int index)
+void disconnectClient(std::vector<Client>& clients, std::vector<struct pollfd>& pfds, int index)
 {
-    std::cout << RED << "server: disconnected client socket " << connections[index].fd << "\n" << RESET << '\n';
-    close(connections[index].fd);
+    std::cout << RED << "server: disconnected client socket " << clients[index].fd << "\n" << RESET << '\n';
+    close(clients[index].fd);
 
-    connections.erase(connections.begin() + index);
+    clients.erase(clients.begin() + index);
     pfds.erase(pfds.begin() + index);
 }
 
@@ -48,12 +48,12 @@ time_t getNowInSeconds() {
     return tv.tv_sec;
 }
 
-int readFromSocket(Connection &connection, int bufferSize)
+int readFromSocket(Client &client, int bufferSize)
 {
     // char buf[bufferSize + 1];
     char* buf = new char[bufferSize + 1];
 
-    ssize_t n = recv(connection.fd, buf, bufferSize, 0);
+    ssize_t n = recv(client.fd, buf, bufferSize, 0);
     std::cout << "n: " << n << '\n';
 
     if (n == 0) {
@@ -65,7 +65,7 @@ int readFromSocket(Connection &connection, int bufferSize)
         return RECV_AGAIN;
     }
     buf[n] = '\0';
-    connection.appendToBuffer(buf, n);
+    client.appendToBuffer(buf, n);
     delete[] buf;
 
     return n;

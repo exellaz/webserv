@@ -22,7 +22,7 @@
 #include "./Configuration.hpp"
 #include "http-request.h"
 #include "./Buffer.h"
-#include "Connection.h"
+#include "Client.h"
 #include "http-response.h"
 #include <algorithm>
 #include <cctype>
@@ -50,34 +50,33 @@ enum readReturnVal {
 };
 
 // Setup Listening Socket
-int setupListeningSocket(std::vector<struct pollfd>& pfds, std::vector<Connection>& connections, Server& server);
+int setupListeningSocket(std::vector<struct pollfd>& pfds, std::vector<Client>& clients, Server& server);
 // CONNECTIONS
 void handlePollIn(std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers,
-                    std::vector<struct pollfd>& pfds, std::vector<Connection>& connections,
+                    std::vector<struct pollfd>& pfds, std::vector<Client>& clients,
                     std::vector<int>& listeners, int i);
-void handlePollOut(std::vector<struct pollfd>& pfds, std::vector<Connection>& connections, int i);
-void handlePollHup(std::vector<Connection>& connections, int i);
-void handlePollErr(std::vector<Connection>& connections, int i);
-void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Connection>& connections, int listener);
+void handlePollOut(std::vector<struct pollfd>& pfds, std::vector<Client>& clients, int i);
+void handlePollHup(std::vector<Client>& clients, int i);
+void handlePollErr(std::vector<Client>& clients, int i);
+void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Client>& clients, int listener);
 
 // Read Request Utils
-int readRequestHeader(Connection &conn, std::string& headerStr, const size_t bufferSize);
-int readRequestBody(Connection &conn, std::string& bodyStr, const size_t bufferSize, const size_t maxSize);
-// int receiveClientRequest(Connection &connection, std::map<int, std::vector<Server> >& servers);
-int receiveClientRequest(Connection &connection, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers);
-int readByChunkedEncoding(Connection &conn, std::string& bodyStr, const size_t bufferSize, const size_t maxSize);
+int readRequestHeader(Client &client, std::string& headerStr, const size_t bufferSize);
+int readRequestBody(Client &client, std::string& bodyStr, const size_t bufferSize, const size_t maxSize);
+int receiveClientRequest(Client &client, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers);
+int readByChunkedEncoding(Client &client, std::string& bodyStr, const size_t bufferSize, const size_t maxSize);
 
 // Timeout
-int getNearestUpcomingTimeout(std::vector<Connection>& connections, size_t listenerCount, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers);
-void disconnectTimedOutClients(std::vector<Connection>& connections, std::vector<struct pollfd>& pfds, size_t listenerCount, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers);
+int getNearestUpcomingTimeout(std::vector<Client>& clients, size_t listenerCount, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers);
+void disconnectTimedOutClients(std::vector<Client>& clients, std::vector<struct pollfd>& pfds, size_t listenerCount, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers);
 // Utils
 void *getInAddr(struct sockaddr *sa);
 int  set_nonblocking(int fd);
 void addToPfds(std::vector<struct pollfd>& pfds, int newFd);
 //void delFromPfds(std::vector<struct pollfd>& pfds, int i);
-void disconnectClient(std::vector<Connection>& connections, std::vector<struct pollfd>& pfds, int index);
+void disconnectClient(std::vector<Client>& clients, std::vector<struct pollfd>& pfds, int index);
 time_t getNowInSeconds();
-int readFromSocket(Connection &connection, int bufferSize);
+int readFromSocket(Client &client, int bufferSize);
 
 // utils2
 //std::string resolveAliasPath(const std::string &url, const Location &location);

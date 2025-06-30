@@ -3,6 +3,7 @@
 #include "../include/http-request.h"
 #include "../include/http-response.h"
 #include <algorithm>
+#include <map>
 
 int main(int argc, char **argv)
 {
@@ -25,13 +26,13 @@ int main(int argc, char **argv)
         std::map< std::pair<std::string, std::string> , std::vector<Server> > servers = parseAllServers(configFile);
 
         std::vector<struct pollfd> pfds;
-        std::vector<Connection> connections;
         std::vector<int> listeners;
+        std::vector<Client> clients;
 
         for (std::map<std::pair<std::string, std::string>, std::vector<Server> >::iterator it = servers.begin(); it != servers.end(); ++it)
         {
             Server &curServer = *(it->second.begin());
-            int listener = setupListeningSocket(pfds, connections, curServer); //? set map in this
+            int listener = setupListeningSocket(pfds, clients, curServer); //? set map in this
             listeners.push_back(listener);
         }
         for (std::vector<int>::iterator it = listeners.begin(); it != listeners.end(); ++it) ////debug
@@ -40,29 +41,29 @@ int main(int argc, char **argv)
         while(1) {
             std::cout << CYAN << "\n+++++++ Waiting for POLL event ++++++++" << RESET << "\n\n";
 
-            int nearestTimeout = getNearestUpcomingTimeout(connections, listeners.size(), servers);
+            int nearestTimeout = getNearestUpcomingTimeout(clients, listeners.size(), servers);
             int pollCount = poll(&pfds[0], pfds.size(), nearestTimeout);
             if (pollCount == -1)
                 throw PollErrorException();
 
-            disconnectTimedOutClients(connections, pfds, listeners.size(), servers);
+            disconnectTimedOutClients(clients, pfds, listeners.size(), servers);
 
-            // Run through the existing connections looking for data to read
+            // Run through the existing clients looking for data to read
             for(size_t i = 0; i < pfds.size(); i++) {
                 // Check if socket is ready to read
                 if (pfds[i].revents & (POLLIN ))
-                    handlePollIn(servers, pfds, connections, listeners, i);
+                    handlePollIn(servers, pfds, clients, listeners, i);
                 else if (pfds[i].revents & POLLOUT)
-                    handlePollOut(pfds, connections, i);
+                    handlePollOut(pfds, clients, i);
                 else if (pfds[i].revents & POLLHUP)
-                    handlePollHup(connections, i);
+                    handlePollHup(clients, i);
                 else if (pfds[i].revents & POLLERR)
-                    handlePollErr(connections, i);
+                    handlePollErr(clients, i);
 
                 // erase DISCONNECTED client from `pfds` & `Connections`
                 for(size_t i = 0; i < pfds.size(); i++) {
-                    if (connections[i].connState == DISCONNECTED)
-                        disconnectClient(connections, pfds, i--);
+                    if (clients[i].connState == DISCONNECTED)
+                        disconnectClient(clients, pfds, i--);
                 }
             }
         }

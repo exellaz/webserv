@@ -1,6 +1,6 @@
 #include "../../include/sockets-polling.h"
 
-int readRequestHeader(Connection &conn, std::string& headerStr, const size_t bufferSize)
+int readRequestHeader(Client &client, std::string& headerStr, const size_t bufferSize)
 {
     std::cout << GREY << "===== readRequestHeader =====" << RESET << '\n';
 
@@ -9,10 +9,10 @@ int readRequestHeader(Connection &conn, std::string& headerStr, const size_t buf
 
     while (1) {
 
-        ret = readFromSocket(conn, bufferSize);
+        ret = readFromSocket(client, bufferSize);
         if (ret > 0) {
-            conn.startTime = getNowInSeconds(); // reset timer
-            found = conn.getBuffer().find(HEADER_END);
+            client.startTime = getNowInSeconds(); // reset timer
+            found = client.getBuffer().find(HEADER_END);
             if (found != std::string::npos)
                 break;
             else
@@ -22,7 +22,7 @@ int readRequestHeader(Connection &conn, std::string& headerStr, const size_t buf
             return ret; // RECV_AGAIN or RECV_CLOSED
     }
 
-    const std::string& buffer = conn.getBuffer();
+    const std::string& buffer = client.getBuffer();
 
     // TODO: if CRLF not found -> throw exception?
     if (found == std::string::npos) {
@@ -33,12 +33,12 @@ int readRequestHeader(Connection &conn, std::string& headerStr, const size_t buf
     if (buffer.begin() + found == buffer.end() - DOUBLE_CRLF_LENGTH) {
         std::cout << "getHeaderStr: no body found\n";
         headerStr = buffer.substr(0, buffer.length() - DOUBLE_CRLF_LENGTH);
-        conn.clearBuffer();
+        client.clearBuffer();
     }
     else {
         headerStr = buffer.substr(0, found);
         // replace buffer with body part only
-        conn.setBuffer(buffer.substr(found + DOUBLE_CRLF_LENGTH));
+        client.setBuffer(buffer.substr(found + DOUBLE_CRLF_LENGTH));
     }
 
     return ret;
