@@ -5,11 +5,16 @@
 
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <unistd.h>
 #include <ctime>
 
 #include "sockets-polling.h"
-// #include "Configuration.hpp"
+
+HttpResponse::HttpResponse()
+    : _status(OK)
+{
+    _headers["Server"] = "Webserv/1.0";
+    _headers["Connection"] = "keep-alive";
+}
 
 HttpResponse::HttpResponse(StatusCode code)
     : _status(code)
@@ -18,12 +23,24 @@ HttpResponse::HttpResponse(StatusCode code)
     _headers["Connection"] = "keep-alive";
 }
 
-HttpResponse::HttpResponse()
-    : _status(OK)
+HttpResponse::HttpResponse(const HttpResponse& other)
+    : _status(other._status),
+    _headers(other._headers),
+    _body(other._body)
+{}
+
+HttpResponse& HttpResponse::operator=(const HttpResponse& other)
 {
-    _headers["Server"] = "Webserv/1.0";
-    _headers["Connection"] = "keep-alive";
+    if (this != &other) {
+        _status = other._status;
+        _headers = other._headers;
+        _body = other._body;
+    }
+    return *this;
 }
+
+HttpResponse::~HttpResponse()
+{}
 
 std::string HttpResponse::reasonPhrase(StatusCode code)
 {
@@ -64,20 +81,6 @@ void HttpResponse::printResponseHeaders()
     std::cout << "\r\n" << _body;
 }
 
-std::string HttpResponse::toString() {
-    std::ostringstream responseStream;
-
-    _headers["Date"] = getHttpDate();
-    responseStream << buildStatusLine();
-    for (std::map<std::string, std::string>::const_iterator it = _headers.begin();
-         it != _headers.end(); ++it) {
-        responseStream << it->first << ": " << it->second << "\r\n";
-    }
-    responseStream << "\r\n";
-    responseStream << _body;
-    return responseStream.str();
-}
-
 void HttpResponse::clearResponse()
 {
     _status = OK;
@@ -99,45 +102,16 @@ std::string HttpResponse::getHttpDate()
     return std::string(buf);
 }
 
-void HttpResponse::setStatus(StatusCode code)
-{
-    _status = code;
-}
+std::string HttpResponse::toString() {
+    std::ostringstream responseStream;
 
-void HttpResponse::setHeader(const std::string& name, const std::string& value)
-{
-    _headers[name] = value;
-}
-
-void HttpResponse::setBody(const std::string& bodyData)
-{
-    std::stringstream stream;
-
-    _body = bodyData;
-    stream << _body.size();
-    setHeader("Content-Length", stream.str());
-}
-
-void HttpResponse::appendToBody(const std::string& bodyData)
-{
-    std::stringstream stream;
-
-    _body.append(bodyData);
-    stream << _body.size();
-    setHeader("Content-Length", stream.str());
-}
-
-StatusCode HttpResponse::getStatus()
-{
-    return _status;
-}
-
-std::string HttpResponse::getHeader(const std::string& name)
-{
-    return _headers[name];
-}
-
-std::string HttpResponse::getBody()
-{
-    return _body;
+    _headers["Date"] = getHttpDate();
+    responseStream << buildStatusLine();
+    for (std::map<std::string, std::string>::const_iterator it = _headers.begin();
+         it != _headers.end(); ++it) {
+        responseStream << it->first << ": " << it->second << "\r\n";
+    }
+    responseStream << "\r\n";
+    responseStream << _body;
+    return responseStream.str();
 }

@@ -142,7 +142,6 @@ HttpRequest::HttpRequest(const HttpRequest& other)
     _body(other._body)
 {}
 
-// Copy assignment operator
 HttpRequest& HttpRequest::operator=(const HttpRequest& other)
 {
     if (this != &other) {
@@ -157,7 +156,6 @@ HttpRequest& HttpRequest::operator=(const HttpRequest& other)
     return *this;
 }
 
-// Destructor
 HttpRequest::~HttpRequest()
 {}
 

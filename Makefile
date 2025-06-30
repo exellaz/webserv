@@ -29,6 +29,7 @@ SRCS_FIL = \
 		http-request/utils.cpp \
 		sockets-polling/utils2.cpp \
 		http-response/http-response.cpp \
+		http-response/utils.cpp \
 		http-response/get-handler.cpp \
 		http-response/post-handler.cpp \
 		cgi-handler/cgi-handle.cpp \
