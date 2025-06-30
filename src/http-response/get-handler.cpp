@@ -48,17 +48,32 @@ static std::string getMimeType(const std::string& path)
     return "application/octet-stream";
 }
 
-void HttpResponse::handleGetRequest(const std::string& uri, Server &serverConfig, const Location& location)
+std::string validateIndex(const std::string& locationPath, const Location &location)
 {
-    std::string fullPath = resolveHttpPath(uri, serverConfig);
+    struct stat info;
+    if (stat(locationPath.c_str(), &info) == 0 && S_ISDIR(info.st_mode) && (!location.getIndex().empty()))
+    {
+        std::cout << GREEN "URI AFTER: " << locationPath + "/" + location.getIndex() << "\n" RESET; //// debug
+        return (locationPath + "/" + location.getIndex());
+    }
+    else
+    {
+        std::cout << BLUE "URI AFTER: " << locationPath << "\n" RESET;
+        return (locationPath);
+    }
+}
+
+void HttpResponse::handleGetRequest(const Location& location, const Connection &connection)
+{
+    std::string fullPath = validateIndex(connection.locationPath, location);
 
     struct stat info;
     if (stat(fullPath.c_str(), &info) < 0)
         throw HttpException(NOT_FOUND, "Path is not a file or directory");
 
-    if (S_ISDIR(info.st_mode) && location.autoIndex) {
+    if (S_ISDIR(info.st_mode)) {
         std::cout << GREEN "AutoIndex found\n" RESET; //// debug
-        std::string directoryContent = readDirectorytoString(fullPath, uri);
+        std::string directoryContent = readDirectorytoString(fullPath, connection.locationPath);
         setStatus(OK);
         setHeader("Content-Type", "text/html");
         setBody(directoryContent);
