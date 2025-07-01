@@ -49,10 +49,12 @@ int main(int argc, char **argv)
             for(size_t i = 0; i < pfds.size(); i++) {
                 if (pfds[i].revents == 0)
                     continue;
+                // check for Incoming Client Connection
                 if (isListener(listeners, pfds[i].fd) && pfds[i].revents & POLLIN) {
                     acceptClient(pfds, clients, pfds[i].fd);
                     continue;
                 }
+                // check for Client Poll Event
                 Client *client = findClientByFd(clients, pfds[i].fd);
                 if (pfds[i].revents & POLLIN)
                     handlePollIn(servers, pfds[i], *client);

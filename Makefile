@@ -14,8 +14,10 @@ NAME = webserv
 SRCDIR = src/
 SRCS_FIL = \
 		main.cpp \
+		sockets-polling/accept-client.cpp \
 		sockets-polling/poll.cpp \
-		sockets-polling/handle-connections.cpp \
+		sockets-polling/receive-client-request.cpp \
+		sockets-polling/dispatch-request.cpp \
 		sockets-polling/utils.cpp \
 		sockets-polling/setup-listening-socket.cpp \
 		sockets-polling/read-request-header.cpp \

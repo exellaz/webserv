@@ -51,18 +51,17 @@ enum readReturnVal {
 // Setup Listening Socket
 void setupListeningSocket(std::vector<struct pollfd>& pfds, std::vector<int>& listeners, Server& server);
 
-// LISTENER
 bool isListener(std::vector<int>& listeners, int fd);
-
-// CONNECTIONS
 Client* findClientByFd(std::vector<Client>& clients, int fd);
+void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Client>& clients, int listener);
 
+// handle poll events
 void handlePollIn(std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers,
                     struct pollfd& pfd, Client& client);
 void handlePollOut(struct pollfd& pfd, Client& client);
 void handlePollHup(Client& client);
 void handlePollErr(Client& client);
-void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Client>& clients, int listener);
+
 
 // Read Request Utils
 int readRequestHeader(Client &client, std::string& headerStr, const size_t bufferSize);
@@ -71,14 +70,13 @@ int receiveClientRequest(Client &client, std::map< std::pair<std::string, std::s
 int readByChunkedEncoding(Client &client, std::string& bodyStr, const size_t bufferSize, const size_t maxSize);
 
 // Timeout
+time_t getNowInSeconds();
 int getNearestUpcomingTimeout(std::vector<Client>& clients, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers);
 void disconnectTimedOutClients(std::vector<Client>& clients, std::vector<struct pollfd>& pfds, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers);
+
 // Utils
-void *getInAddr(struct sockaddr *sa);
-int  set_nonblocking(int fd);
-void addToPfds(std::vector<struct pollfd>& pfds, int newFd);
+int  setNonBlocking(int fd);
 std::vector<Client>::iterator disconnectClient(std::vector<Client>& clients, std::vector<Client>::iterator &clientIt, std::vector<struct pollfd>& pfds);
-time_t getNowInSeconds();
 int readFromSocket(Client &client, int bufferSize);
 void clearDisconnectedClients(std::vector<Client>& clients, std::vector<struct pollfd>& pfds);
 

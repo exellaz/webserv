@@ -61,8 +61,8 @@ void setupListeningSocket(std::vector<struct pollfd>& pfds, std::vector<int>& li
         exit(1); // TODO: throw exception
     }
 
-    if (set_nonblocking(listenerFd) == -1) {
-        perror("set_nonblocking");
+    if (setNonBlocking(listenerFd) == -1) {
+        perror("setNonBlocking");
         close(listenerFd);
         exit(4); // TODO: throw exception
     }
