@@ -35,6 +35,11 @@ const std::map<std::string, std::string>& HttpRequest::getHeaders() const
     return _headers;
 }
 
+const std::string& HttpRequest::getQueryString() const
+{
+    return _queryString;
+}
+
 const std::string& HttpRequest::getHeader(const std::string& name) const
 {
     static const std::string empty;
@@ -72,4 +77,9 @@ void HttpRequest::setHeader(const std::string& name, const std::string& value)
 void HttpRequest::setBody(const std::string& body)
 {
     _body = body;
+}
+
+void HttpRequest::setQueryString(const std::string& str)
+{
+    _queryString = str;
 }

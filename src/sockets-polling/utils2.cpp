@@ -94,9 +94,10 @@ std::string readDirectorytoString(const std::string &directoryPath, const std::s
     struct dirent* entry;
     while ((entry = readdir(dir)) != NULL) {
         std::string name = entry->d_name;
-        if (name == ".") continue;
+        if (name == ".")
+            continue;
         std::string slash = (entry->d_type == DT_DIR) ? "/" : "";
-        std::string url_base = uri;;
+        std::string url_base = uri;
         if (url_base.empty() || url_base[url_base.size() - 1] != '/')
             url_base += '/';
         htmlOutput << "<li><a href=\"" << url_base << name << slash << "\">" << name << slash << "</a></li>";

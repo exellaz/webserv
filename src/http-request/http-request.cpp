@@ -1,33 +1,6 @@
 #include "http-request.h"
 #include "http-exception.h"
 
-bool HttpRequest::isTChar(char c) const
-{
-    const std::string tcharSymbols = "!#$%&'*+-.^_`|~";
-    return std::isalnum(static_cast<unsigned char>(c)) || tcharSymbols.find(c) != std::string::npos;
-}
-
-bool HttpRequest::isValidToken(const std::string& token) const
-{
-    for (std::string::const_iterator It = token.begin(); It != token.end(); ++It) {
-        if (!isTChar(*It))
-            return false;
-    }
-    return !token.empty();
-}
-
-bool HttpRequest::isValidHeaderValue(const std::string& value) const
-{
-    for (std::string::const_iterator It = value.begin(); It != value.end(); ++It) {
-        unsigned char c = static_cast<unsigned char>(*It);
-        if (c == 9 || (c >= 32 && c <= 126) || c >= 128)
-            continue;
-
-        return false;
-    }
-    return true;
-}
-
 void HttpRequest::parseRequestLine(const std::string& headerStr)
 {
     std::istringstream stream(headerStr);
@@ -59,6 +32,7 @@ void HttpRequest::parseRequestLine(const std::string& headerStr)
         if (_version != "HTTP/1.1")
             throw HttpException(VERSION_NOT_SUPPORTED, "Only HTTP/1.1 supported");
 
+        extractQueryString();
         return ;
     }
 
@@ -111,6 +85,43 @@ void HttpRequest::parseHeaderLines(const std::string& str)
     _headerParsed = true;
 }
 
+bool HttpRequest::isTChar(char c) const
+{
+    const std::string tcharSymbols = "!#$%&'*+-.^_`|~";
+    return std::isalnum(static_cast<unsigned char>(c)) || tcharSymbols.find(c) != std::string::npos;
+}
+
+bool HttpRequest::isValidToken(const std::string& token) const
+{
+    for (std::string::const_iterator It = token.begin(); It != token.end(); ++It) {
+        if (!isTChar(*It))
+            return false;
+    }
+    return !token.empty();
+}
+
+bool HttpRequest::isValidHeaderValue(const std::string& value) const
+{
+    for (std::string::const_iterator It = value.begin(); It != value.end(); ++It) {
+        unsigned char c = static_cast<unsigned char>(*It);
+        if (c == 9 || (c >= 32 && c <= 126) || c >= 128)
+            continue;
+
+        return false;
+    }
+    return true;
+}
+
+void HttpRequest::extractQueryString() {
+    size_t qpos = _uri.find('?');
+    if (qpos != std::string::npos) {
+        _queryString = _uri.substr(qpos + 1);
+        _uri = _uri.substr(0, qpos);
+    }
+    else
+        _queryString.clear();
+}
+
 void HttpRequest::clearRequest()
 {
     _headerParsed = false;
@@ -120,6 +131,7 @@ void HttpRequest::clearRequest()
     _version.clear();
     _headers.clear();
     _body.clear();
+    _queryString.clear();
 }
 
 HttpRequest::HttpRequest()
@@ -129,7 +141,8 @@ HttpRequest::HttpRequest()
     _uri(),
     _version(),
     _headers(),
-    _body()
+    _body(),
+    _queryString()
 {}
 
 HttpRequest::HttpRequest(const HttpRequest& other)
@@ -139,10 +152,10 @@ HttpRequest::HttpRequest(const HttpRequest& other)
     _uri(other._uri),
     _version(other._version),
     _headers(other._headers),
-    _body(other._body)
+    _body(other._body),
+    _queryString(other._queryString)
 {}
 
-// Copy assignment operator
 HttpRequest& HttpRequest::operator=(const HttpRequest& other)
 {
     if (this != &other) {
@@ -153,11 +166,11 @@ HttpRequest& HttpRequest::operator=(const HttpRequest& other)
         _version = other._version;
         _headers = other._headers;
         _body = other._body;
+        _queryString = other._queryString;
     }
     return *this;
 }
 
-// Destructor
 HttpRequest::~HttpRequest()
 {}
 
@@ -166,6 +179,7 @@ std::ostream& operator<<(std::ostream &stream, const HttpRequest& src)
     stream << "Method: " << src.getMethod() << "\n";
     stream << "URI: " << src.getURI() << "\n";
     stream << "Version: " << src.getVersion() << "\n";
+    stream << "Query String: " << src.getQueryString() << "\n";
     stream << "\nHeaders\n";
     for (std::map<std::string, std::string>::const_iterator It = src.getHeaders().begin(); It != src.getHeaders().end(); ++It)
         stream << It->first << ": " << It->second << "\n";

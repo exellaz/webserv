@@ -3,6 +3,7 @@
 
 # include <iostream>
 # include <map>
+# include <ctime>
 
 // #include "sockets-polling.h"
 #include "Configuration.hpp"
@@ -38,19 +39,20 @@ class HttpResponse
     public:
         HttpResponse();
         HttpResponse(StatusCode code);
+        HttpResponse(const HttpResponse& other);
+        HttpResponse& operator=(const HttpResponse& other);
+        ~HttpResponse();
 
         std::string reasonPhrase(StatusCode code);
         std::string buildStatusLine();
         void printResponseHeaders();
-        //void handleGetRequest(const std::string& locationPath, const Location& location, bool isJustLocationPath);
-        //void handlePostRequest(const HttpRequest& request, const std::string& locationPath, bool isJustLocationPath);
+        void appendToBody(const std::string& bodyData);
         void handleGetRequest(const Location& location, const Connection &connection);
         void handlePostRequest(const HttpRequest& request, const Connection &connection);
         void clearResponse();
 
         std::string getHttpDate();
         std::string toString();
-        void appendToBody(const std::string& bodyData);
 
         void setStatus(StatusCode code);
         void setHeader(const std::string& name, const std::string& value);
