@@ -40,7 +40,7 @@ void dispatchRequest(Connection& connection)
 
         }
     }
-    else if (!connection.location.getCgiPath().empty())
+    if (connection.location.getCgiPath() == true)
     {
         std::cout << GREEN "CGI found\n" RESET;
         Cgi cgi;

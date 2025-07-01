@@ -12,7 +12,7 @@ Location::Location(std::istream &conf, const std::string &locName, const std::ve
       _returnPath(),
       _clientMaxSize(0),
       _autoIndex(false),
-      _cgi_path(""),
+      _cgi_path(false),
       _allowUpload(false)
 {
     this->_locaPath = extractLine(locName);
@@ -82,7 +82,9 @@ Location::Location(std::istream &conf, const std::string &locName, const std::ve
             case CGI_PATH:
             {
                 checkValidDirective(line, CGI_PATH);
-                this->_cgi_path = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
+                std::string cgiPath = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
+                if (cgiPath == "on")
+                    this->_cgi_path = true;
                 break;
             }
             case ALLOW_UPLOAD:
@@ -98,7 +100,6 @@ Location::Location(std::istream &conf, const std::string &locName, const std::ve
         }
     }
 }
-
 
 /////////////////////////////////////////////// GETTER /////////////////////////////////////////////////////////////
 
@@ -147,7 +148,7 @@ bool    Location::getAutoIndex() const
     return this->_autoIndex;
 }
 
-const std::string    &Location::getCgiPath() const
+bool    Location::getCgiPath() const
 {
     return this->_cgi_path;
 }
@@ -167,6 +168,6 @@ void Location::clearLocationBlock()
 	this->_returnPath.clear();
 	this->_clientMaxSize = 0;
 	this->_autoIndex = false;
-	this->_cgi_path.clear();
+	this->_cgi_path = false;
 	this->_allowUpload = false;
 }

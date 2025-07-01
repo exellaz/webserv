@@ -216,6 +216,15 @@ void checkValidDirective(const std::string &line, Directive directiveType)
             throw std::runtime_error(RED "missing allowed method in allowed_method directive: [" + line + "]" RESET);
         return ;
     }
+    if (getKey(key) == AUTO_INDEX || getKey(key) == ALLOW_UPLOAD || getKey(key) == CGI_PATH)
+    {
+        std::string value;
+        if (!(rest_iss >> value))
+            throw std::runtime_error(RED "missing directive value: [" + line + "]" RESET);
+        if (value != "on" && value != "off")
+            throw std::runtime_error(RED "invalid directive value, must be 'on' or 'off': [" + line + "]" RESET);
+        return ;
+    }
     if (getKey(key) == LOCATION)
     {
         std::string key;
@@ -319,8 +328,8 @@ std::ostream &operator<<(std::ostream &cout, const Server &server)
             cout << "client_max_size : [" << loc.getClientMaxSize() << "]\n";
         if (loc.getAutoIndex() == true)
             cout << "list_directory  : [on]\n";
-        if (!loc.getCgiPath().empty())
-            cout << "cgi_path        : [" << loc.getCgiPath() << "]\n";
+        if (loc.getCgiPath() == true)
+            cout << "cgi_path        : [on]\n";
         if (loc.getAllowUpload() == true)
             cout << "allow_upload    : [on]\n";
         std::cout << "\n";
