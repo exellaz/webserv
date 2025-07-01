@@ -73,7 +73,7 @@ void HttpResponse::handleGetRequest(const Location& location, const Connection &
 
     if (S_ISDIR(info.st_mode)) {
         std::cout << GREEN "AutoIndex found\n" RESET; //// debug
-        std::string directoryContent = readDirectorytoString(fullPath, connection.locationPath);
+        std::string directoryContent = readDirectorytoString(fullPath, connection.request.getURI());
         setStatus(OK);
         setHeader("Content-Type", "text/html");
         setBody(directoryContent);
