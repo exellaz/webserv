@@ -5,7 +5,6 @@
 
 std::map< std::pair<std::string, std::string> , std::vector<Server> > parseAllServers(const std::string &filename)
 {
-    // std::map<int, std::vector<Server> > listServers;
     std::map< std::pair<std::string, std::string> , std::vector<Server> > listServers;
     std::ifstream conf(filename.c_str());
     std::stringstream serverBlock;
@@ -19,9 +18,12 @@ std::map< std::pair<std::string, std::string> , std::vector<Server> > parseAllSe
         {
             serverBlock << line << "\n";
             int braceCount = 1; //look for the next "}"
-            while (braceCount != 0 && std::getline(conf, line)) {
-                if (line.find('{') != std::string::npos) braceCount++;
-                if (line.find('}') != std::string::npos) braceCount--;
+            while (braceCount != 0 && std::getline(conf, line))
+            {
+                if (line.find('{') != std::string::npos)
+                    braceCount++;
+                if (line.find('}') != std::string::npos)
+                    braceCount--;
                 serverBlock << line << "\n"; // if not keep parse the line
             }
             Server server(serverBlock);
@@ -76,6 +78,9 @@ std::string	extractLine(const std::string &line)
     return ft_trim(path);
 }
 
+/**
+ * @brief check the method is valid
+*/
 std::vector<std::string> checkMethod(std::string allowMethod)
 {
     std::vector<std::string> methods;
@@ -95,6 +100,9 @@ std::vector<std::string> checkMethod(std::string allowMethod)
     return methods;
 }
 
+/**
+ * @brief check the port number
+*/
 std::string checkPort(std::string port)
 {
     if (port.empty())
@@ -107,6 +115,9 @@ std::string checkPort(std::string port)
     return port;
 }
 
+/**
+ * @brief check if the number
+*/
 int checkNumber(std::string number)
 {
     if (number.empty())
@@ -116,6 +127,9 @@ int checkNumber(std::string number)
     return (std::strtol(number.c_str(), NULL, 10));
 }
 
+/**
+ * @brief get the directive type
+*/
 Directive getKey(const std::string &line)
 {
     std::istringstream iss(line);
@@ -159,6 +173,10 @@ Directive getKey(const std::string &line)
         return UNKNOWN;
 }
 
+/**
+ * @brief check if the directive is valid
+ * @note 1. getline(iss, rest, ';') => read theiss output and store to rest until ';' is found
+*/
 void checkValidDirective(const std::string &line, Directive directiveType)
 {
     std::string rest;
