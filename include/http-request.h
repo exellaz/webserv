@@ -26,27 +26,31 @@ class HttpRequest
 
         void parseRequestLine(const std::string& headerStr);
         void parseHeaderLines(const std::string& line);
+        void extractQueryString();
+
         void clearRequest();
 
         bool hasHeader(const std::string& name) const;
         bool isValidToken(const std::string& token) const;
         bool isTChar(char c) const;
         bool isValidHeaderValue(const std::string& value) const;
-
         bool isHeaderParsed() const;
         bool isBodyParsed() const;
+
         const std::string& getMethod() const;
         const std::string& getURI() const;
         const std::string& getVersion() const;
         const std::map<std::string, std::string>& getHeaders() const;
         const std::string& getHeader(const std::string& name) const;
         const std::string& getBody() const;
+        const std::string& getQueryString() const;
 
         void setMethod(const std::string& method);
         void setURI(const std::string& uri);
         void setVersion(const std::string& version);
         void setHeader(const std::string& name, const std::string& value);
         void setBody(const std::string& body);
+        void setQueryString(const std::string& str);
 
     private:
         bool _headerParsed;
@@ -56,6 +60,7 @@ class HttpRequest
         std::string _version;
         std::map<std::string, std::string> _headers;
         std::string _body;
+        std::string _queryString;
 
 };
 

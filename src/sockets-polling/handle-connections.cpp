@@ -137,6 +137,7 @@ int receiveClientRequest(Connection &connection, std::map< std::pair<std::string
         }
     }
 
+    std::cout << request;
     // Refactor later
     response.setHeader("Connection", request.getHeader("Connection"));
     if (request.getHeader("Connection") == "close")
@@ -164,7 +165,6 @@ int receiveClientRequest(Connection &connection, std::map< std::pair<std::string
         }
     }
 
-    std::cout << request;
     return RECV_OK;
 }
 
