@@ -16,16 +16,18 @@ SRCS_FIL = \
 		main.cpp \
 		sockets-polling/accept-client.cpp \
 		sockets-polling/poll.cpp \
-		sockets-polling/receive-client-request.cpp \
 		sockets-polling/dispatch-request.cpp \
 		sockets-polling/utils.cpp \
-		sockets-polling/setup-listening-socket.cpp \
-		sockets-polling/read-request-header.cpp \
-		sockets-polling/read-request-body.cpp \
 		sockets-polling/Client.cpp \
 		sockets-polling/timeout.cpp \
-		sockets-polling/chunked-encoding.cpp \
 		sockets-polling/print.cpp \
+		sockets-polling/setup-listening-socket.cpp \
+		\
+		read-request/receive-client-request.cpp \
+		read-request/read-request-header.cpp \
+		read-request/read-request-body.cpp \
+		read-request/read-from-socket.cpp \
+		read-request/chunked-encoding.cpp \
 		\
 		config-parser/configuration.cpp \
 		config-parser/location.cpp \

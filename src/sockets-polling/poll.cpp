@@ -1,4 +1,5 @@
 #include "../include/sockets-polling.h"
+#include "../include/read-request.h"
 
 static void setPfdTrackPollOutOnly(struct pollfd& pfd) {
     pfd.events &= ~POLLIN;

@@ -1,5 +1,5 @@
-#include "../../include/sockets-polling.h"
-#include "../include/timeout.h"
+#include "timeout.h"
+#include "read-request.h"
 
 // if actual body size is larger than contentLength, remainder is stored in buffer
 int readByContentLength(Client &client, std::string& bodyStr, const size_t bufferSize, const size_t maxSize)
