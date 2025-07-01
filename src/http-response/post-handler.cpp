@@ -5,8 +5,11 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-static void validateUploadPath(const std::string& path) {
+static void validateUploadPath(const std::string& path, bool uploadAllowed) {
     struct stat info;
+
+    if (uploadAllowed == false)
+        throw HttpException(FORBIDDEN, "File upload not allowed in this location");
     if (stat(path.c_str(), &info) != 0)
         throw HttpException(FORBIDDEN, "Upload path does not exist");
     if (!S_ISDIR(info.st_mode))
@@ -78,7 +81,7 @@ void HttpResponse::handlePostRequest(const HttpRequest& request, const Connectio
     if (pos == std::string::npos)
         throw HttpException(BAD_REQUEST, "Missing boundary in Content-Type");
 
-    validateUploadPath(connection.locationPath);
+    validateUploadPath(connection.locationPath, connection.location.getAllowUpload());
 
     const std::string& body = request.getBody();
     std::string boundary = "--" + contentType.substr(pos + 9);

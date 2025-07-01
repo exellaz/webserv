@@ -70,6 +70,10 @@ void resolveLocationPath(const std::string& uri, Connection &connection)
         std::cout << "Root found\n"; ////debug
         validateRelativeUri(uri, connection, location.getRoot());
     }
+    else {
+        std::cout << "No root or alias\n";
+        connection.locationPath = connection.server.getRoot() + uri + "/";
+    }
 }
 
 ///**
