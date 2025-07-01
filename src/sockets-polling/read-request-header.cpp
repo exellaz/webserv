@@ -1,4 +1,5 @@
 #include "../../include/sockets-polling.h"
+#include "../include/timeout.h"
 
 int readRequestHeader(Client &client, std::string& headerStr, const size_t bufferSize)
 {

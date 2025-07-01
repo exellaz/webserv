@@ -53,8 +53,8 @@ void setupListeningSocket(std::vector<struct pollfd>& pfds, std::vector<int>& li
 
 bool isListener(std::vector<int>& listeners, int fd);
 Client* findClientByFd(std::vector<Client>& clients, int fd);
-void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Client>& clients, int listener);
 
+void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Client>& clients, int listener);
 // handle poll events
 void handlePollIn(std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers,
                     struct pollfd& pfd, Client& client);
@@ -68,11 +68,6 @@ int readRequestHeader(Client &client, std::string& headerStr, const size_t buffe
 int readRequestBody(Client &client, std::string& bodyStr, const size_t bufferSize, const size_t maxSize);
 int receiveClientRequest(Client &client, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers);
 int readByChunkedEncoding(Client &client, std::string& bodyStr, const size_t bufferSize, const size_t maxSize);
-
-// Timeout
-time_t getNowInSeconds();
-int getNearestUpcomingTimeout(std::vector<Client>& clients, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers);
-void disconnectTimedOutClients(std::vector<Client>& clients, std::vector<struct pollfd>& pfds, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers);
 
 // Utils
 int  setNonBlocking(int fd);

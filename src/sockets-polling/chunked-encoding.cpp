@@ -1,4 +1,5 @@
 #include "../../include/sockets-polling.h"
+#include "../include/timeout.h"
 
 static bool doesLineHaveCRLF(const std::string& buffer)
 {

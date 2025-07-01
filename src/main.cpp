@@ -2,6 +2,7 @@
 #include "../include/Configuration.hpp"
 #include "../include/http-request.h"
 #include "../include/http-response.h"
+#include "../include/timeout.h"
 #include <algorithm>
 #include <map>
 
