@@ -1,136 +1,122 @@
 #include "../../include/sockets-polling.h"
 
-//std::string resolveAliasPath(const std::string &url, const Location &location)
-//{
-//    std::string pathInLocation;
-//    std::string fullAliasPath;
-//    std::string locationPath = location.locationPath;
-//    std::string alias = location.alias;
-
-//    //if locationPath is empty
-//    if (url.find(locationPath) == 0)
-//        pathInLocation = url.substr(locationPath.length());
-//    else
-//        pathInLocation = "";
-//    //check if alias is empty && if pathInLocation is empty
-//    if (!pathInLocation.empty() && pathInLocation[0] != '/')
-//        pathInLocation = "/" + pathInLocation;
-//    //if location is empty or pathLocation ends with '/'
-//    if (pathInLocation.empty() || pathInLocation[pathInLocation.size() - 1] == '/')
-//        pathInLocation += location.index;
-//    //if alias is not empty && alias end with '/' && pathInLocation starts with '/'
-//    if (!alias.empty() && alias[alias.size() - 1] == '/' && pathInLocation[0] == '/')
-//        fullAliasPath = alias.substr(0, alias.size() - 1) + pathInLocation;
-//    //if alias end is not '/' && pathInLocation does not start with '/'
-//    else if (alias[alias.size() - 1] != '/' && pathInLocation[0] != '/')
-//        fullAliasPath = alias + "/" + pathInLocation;
-//    else
-//        fullAliasPath = alias + pathInLocation;
-//    return fullAliasPath;
-//}
-
 /**
  * @brief normalize the multiple "/" in the relative uri to one "/"
 */
-std::string normalizeSlash(const std::string &relativeUri)
+static std::string trimMultipleSlash(const std::string &relativeUri)
 {
-    for(size_t i = 0; i < relativeUri.size(); ++i)
+    std::string result;
+    bool lastSlash = false;
+    for (size_t i = 0; i < relativeUri.size(); ++i)
     {
-        if (relativeUri[i] != '/')
-            return relativeUri; // Contains something else, return as is
+        if (relativeUri[i] == '/') {
+            if (lastSlash == false)
+            {
+                result += '/';
+                lastSlash = true;
+            }
+        }
+        else
+        {
+            result += relativeUri[i];
+            lastSlash = false;
+        }
     }
-    return relativeUri.empty() ? "" : "/"; // Only slashes (and not empty)
+    return result;
 }
 
 /**
- * @brief get full path from the uri
+ * @brief Validate the relative URI and set the location path
+ * @note 1. relativeUri is to identify is there extra value after trim the location path
+ * @note 2. check for "/" for prevent multiple slashes in the path to identify as a directory
 */
-std::string resolveHttpPath(const std::string& uri, Server &server)
+static void validateRelativeUri(const std::string &relativeUri, Connection &connection, const std::string &locationType)
 {
-    const Location location = server.getLocationPath(uri);
-
-    if (!location.alias.empty())
+    std::string getRelativeUri = relativeUri.substr(connection.location.getLocaPath().length());
+    std::string result = trimMultipleSlash(getRelativeUri);
+    std::cout << "Relative path: " << result << "\n"; ////debug
+    if (result.empty() || result == "/")
     {
-        std::cout << "Alias found\n"; ////debug"
-        std::string getRelativeUri = uri.substr(location.locationPath.length());
-        std::string relativeUri = normalizeSlash(getRelativeUri);
-        std::cout << "Relative path: " << relativeUri << "\n"; ////debug
-        if ((!location.index.empty()) && (relativeUri.empty() || relativeUri == "/"))
-        {
-            std::cout << "Alias path with index: " << getFullPath(location.alias + relativeUri + "/" + location.index) << "\n"; ////debug
-            return getFullPath(location.alias + relativeUri + "/" + location.index);
-        }
+        std::cout << GREEN "Alias/Root path: " << getFullPath(locationType + result) << "\n" RESET; ////debug
+        if (connection.server.getRoot().empty())
+            connection.locationPath = getFullPath(locationType + result);
         else
-        {
-            std::cout << "Alias path without index: " << getFullPath(location.alias + relativeUri) << "\n"; ////debug
-            return getFullPath(location.alias + relativeUri);
-        }
+            connection.locationPath = connection.server.getRoot() + locationType + result;
     }
-    else if (!location.root.empty())
+    else
     {
-        std::cout << "Root found\n"; ////debug
-        std::string getRelativeUri = uri.substr(location.locationPath.length());
-        std::string relativeUri = normalizeSlash(getRelativeUri);
-        if ((!location.index.empty()) && (relativeUri.empty() || relativeUri == "/"))
-        {
-            std::cout << "Root path with index: " << getFullPath(location.root + uri + "/" + location.index) << "\n"; ////debug
-            return getFullPath(location.root + uri + "/" + location.index);
-        }
+        std::cout << GREEN "Alias/Root path extra value: " << getFullPath(locationType + result) << "\n" RESET; ////debug
+        if (connection.server.getRoot().empty())
+            connection.locationPath = getFullPath(locationType + result);
         else
-        {
-            std::cout << "Root path without index: " << getFullPath(location.root + relativeUri) << "\n"; ////debug
-            return getFullPath(location.root + relativeUri);
-        }
+            connection.locationPath = connection.server.getRoot() + locationType + result;
     }
-    return "";
 }
 
-//bool serveStaticFile(const std::string &httpPath, int clientFd)
-//{
-//    std::cout << "html file found\n"; ////debug
-//    std::ifstream htmlFile(httpPath.c_str());
-//    if (!htmlFile)
-//        return false;
-//    std::string html = readFileToString(htmlFile);
-//    std::ostringstream httpSize;
-//    httpSize << html.size();
-//    std::string httpRes = "HTTP/1.1 200 OK\r\n" //? handle by response
-//        "Content-Type: text/html\r\n"
-//        "Content-Length: " + httpSize.str() + "\r\n"
-//        "\r\n" + html;
-//    send(clientFd, httpRes.c_str(), httpRes.size(), 0);
-//    return true;
-//}
 
-//bool serveAutoIndex(const std::string &httpPath, const std::string &url, int clientFd)
+/**
+ * @brief Get the full path from the alias or root
+*/
+void resolveLocationPath(const std::string& uri, Connection &connection)
+{
+    const Location location = connection.server.getLocationPath(uri);
+    if (!location.getAlias().empty())
+    {
+        std::cout << "Alias found\n"; ////debug"
+        validateRelativeUri(uri, connection, location.getAlias());
+    }
+    else if (!location.getRoot().empty())
+    {
+        std::cout << "Root found\n"; ////debug
+        validateRelativeUri(uri, connection, location.getRoot());
+    }
+    else {
+        std::cout << "No root or alias\n";
+        connection.locationPath = connection.server.getRoot() + uri + "/";
+    }
+}
+
+///**
+// * @brief get full path from the uri
+//*/
+//std::string resolveHttpPath(const std::string& uri, Server &server)
 //{
-//    std::cout << "file list found\n"; ////debug
-//    std::stringstream htmlOutput;
-//    htmlOutput << "<html><head><title>Index of " << url << "</title></head><body>";
-//    htmlOutput << "<h1>Index of " << url << "</h1><hr><ul>";
-//    DIR* dir = opendir(httpPath.c_str());
-//    if (!dir)
-//        return false;
-//    struct dirent* entry;
-//    while ((entry = readdir(dir)) != NULL) {
-//        std::string name = entry->d_name;
-//        if (name == ".") continue;
-//        std::string slash = (entry->d_type == DT_DIR) ? "/" : "";
-//        std::string url_base = url;
-//        if (url_base.empty() || url_base[url_base.size() - 1] != '/')
-//            url_base += '/';
-//        htmlOutput << "<li><a href=\"" << url_base << name << slash << "\">" << name << slash << "</a></li>";
+//    const Location location = server.getLocationPath(uri);
+
+//    if (!location.getAlias().empty())
+//    {
+//        std::cout << "Alias found\n"; ////debug"
+//        std::string getRelativeUri = uri.substr(location.getLocaPath().length());
+//        std::string relativeUri = normalizeSlash(getRelativeUri);
+//        std::cout << "Relative path: " << relativeUri << "\n"; ////debug
+//        if ((!location.getIndex().empty()) && (relativeUri.empty() || relativeUri == "/"))
+//        {
+//            std::cout << "Alias path with index: " << getFullPath(location.getAlias() + relativeUri + "/" + location.getIndex()) << "\n"; ////debug
+//            return getFullPath(location.getAlias() + relativeUri + "/" + location.getIndex());
+//        }
+//        else
+//        {
+//            std::cout << "Alias path without index: " << getFullPath(location.getAlias() + relativeUri) << "\n"; ////debug
+//            return getFullPath(location.getAlias() + relativeUri);
+//        }
 //    }
-//    closedir(dir);
-//    htmlOutput << "</ul><hr></body></html>";
-//    std::ostringstream httpSize;
-//    httpSize << htmlOutput.str().size();
-//    std::string httpRes = "HTTP/1.1 200 OK\r\n" //? handle by response
-//        "Content-Type: text/html\r\n"
-//        "Content-Length: " + httpSize.str() + "\r\n"
-//        "\r\n" + htmlOutput.str();
-//    send(clientFd, httpRes.c_str(), httpRes.size(), 0);
-//    return true;
+//    else if (!location.getRoot().empty())
+//    {
+//        std::cout << "Root found\n"; ////debug
+//        std::string getRelativeUri = uri.substr(location.getLocaPath().length());
+//        std::string relativeUri = normalizeSlash(getRelativeUri);
+//        if ((!location.getIndex().empty()) && (relativeUri.empty() || relativeUri == "/"))
+//        {
+//            std::cout << "Root path with index: " << getFullPath(location.getRoot() + uri + "/" + location.getIndex()) << "\n"; ////debug
+//            return getFullPath(location.getRoot() + uri + "/" + location.getIndex());
+//        }
+//        else
+//        {
+//            std::cout << "Root path without index: " << getFullPath(location.getRoot() + relativeUri) << "\n"; ////debug
+//            return getFullPath(location.getRoot() + relativeUri);
+//        }
+//    }
+//    return "";
 //}
 
 /**
@@ -147,9 +133,10 @@ std::string readDirectorytoString(const std::string &directoryPath, const std::s
     struct dirent* entry;
     while ((entry = readdir(dir)) != NULL) {
         std::string name = entry->d_name;
-        if (name == ".") continue;
+        if (name == ".")
+            continue;
         std::string slash = (entry->d_type == DT_DIR) ? "/" : "";
-        std::string url_base = uri;;
+        std::string url_base = uri;
         if (url_base.empty() || url_base[url_base.size() - 1] != '/')
             url_base += '/';
         htmlOutput << "<li><a href=\"" << url_base << name << slash << "\">" << name << slash << "</a></li>";
@@ -158,24 +145,6 @@ std::string readDirectorytoString(const std::string &directoryPath, const std::s
     htmlOutput << "</ul><hr></body></html>";
     return htmlOutput.str();
 }
-
-/**
- * @brief Get the port number of the socket
- * @note 1. getSockName() retrieves the local address of the socket
- * @note 2. ntohs() converts the port number from network byte order to host byte ( mean from big-endian to 16-bit number)
- * @note 3. sockaddr is used to store the address of the socket
- * @note 4. sockaddr_in is used to store the address of the socket in IPv4 format
-*/
-// std::string getSocketPortNumber(int fd)
-// {
-//     std::stringstream intToString;
-//     struct sockaddr_storage remoteAddr;
-//     socklen_t addrLen = sizeof(remoteAddr);
-//     getsockname(fd, (struct sockaddr *)&remoteAddr, &addrLen);
-//     int localPort = ntohs(((struct sockaddr_in*)&remoteAddr)->sin_port);
-//     intToString << localPort;
-//     return (intToString.str());
-// }
 
 /**
  * @note 1. getSockName() retrieves the local address of the socket
@@ -212,5 +181,5 @@ Server& getDefaultServerBlockByIpPort(std::pair<std::string, std::string> ipPort
             return *(it->second.begin());
     }
     // if cannot match with `ipPort` // ? will this ever happen?
-    return *(servers.begin()->second.begin()); 
+    return *(servers.begin()->second.begin());
 }

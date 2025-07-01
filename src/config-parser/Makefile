@@ -11,7 +11,10 @@ CFLAGS = -Wall -Wextra -Werror -std=c++98 -g3
 INC = -I ../../include
 
 SRC = main.cpp \
-	  Configuration.cpp \
+	  configuration.cpp \
+	  utils.cpp \
+	  location.cpp \
+	  ../utils/utils.cpp \
 
 OBJ = $(SRC:.cpp=.o)
 

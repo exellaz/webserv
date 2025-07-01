@@ -25,11 +25,15 @@ SRCS_FIL = \
 		sockets-polling/chunked-encoding.cpp \
 		sockets-polling/print.cpp \
 		\
-		config-parser/Configuration.cpp \
+		config-parser/configuration.cpp \
+		config-parser/location.cpp \
+		config-parser/utils.cpp \
 		http-request/http-request.cpp \
 		http-request/utils.cpp \
 		sockets-polling/utils2.cpp \
 		http-response/http-response.cpp \
+		http-response/utils.cpp \
+		http-response/get-handler.cpp \
 		http-response/post-handler.cpp \
 		cgi-handler/cgi-handle.cpp \
 		cgi-handler/cgi-response.cpp \

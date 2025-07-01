@@ -65,6 +65,8 @@ public:
 	Server server;
 	Location location;
 
+	std::string locationPath;
+
 	// Buffer methods
 	void appendToBuffer(const char *str, size_t n);
 	const std::string& getBuffer() const;

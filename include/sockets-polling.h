@@ -19,7 +19,7 @@
 #include <dirent.h> //for opendir, readdir, closedir
 #include <sys/stat.h> // for stat
 #include <algorithm> // for find
-#include "./Configuration.hpp"
+#include "Configuration.hpp"
 #include "http-request.h"
 #include "./Buffer.h"
 #include "Client.h"
@@ -27,7 +27,6 @@
 #include <algorithm>
 #include <cctype>
 #include "Cgi.hpp"
-
 
 #define RESET "\033[0m"
 #define BOLD "\033[1m"
@@ -84,13 +83,9 @@ int readFromSocket(Client &client, int bufferSize);
 void clearDisconnectedClients(std::vector<Client>& clients, std::vector<struct pollfd>& pfds);
 
 // utils2
-//std::string resolveAliasPath(const std::string &url, const Location &location);
-//std::string readFileToString (std::ifstream &file);
-std::string resolveHttpPath(const std::string& uri, Server &server);
-//bool serveStaticFile(const std::string &httpPath, int clientFd);
-//bool serveAutoIndex(const std::string &httpPath, const std::string &url, int clientFd);
+void resolveLocationPath(const std::string& uri, Connection &connection);
+//std::string resolveHttpPath(const std::string& uri, Server &server);
 std::string readDirectorytoString(const std::string &directoryPath, const std::string& uri);
-// std::string getSocketPortNumber(int fd);
 std::pair<std::string, std::string> getIpAndPortFromSocketFd(int fd);
 Server& getDefaultServerBlockByIpPort(std::pair<std::string, std::string> ipPort, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers);
 

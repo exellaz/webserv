@@ -25,6 +25,7 @@ void handlePollIn(std::map< std::pair<std::string, std::string> , std::vector<Se
         return;
     else if (res != REQUEST_ERR) {
         try {
+            resolveLocationPath(client.request.getURI(), client);
             dispatchRequest(client);
         }
         catch (const HttpException& e) {
