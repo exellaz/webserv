@@ -24,7 +24,7 @@ Client::Client(const Client& other) :
 
 Client& Client::operator=(const Client& other)
 {
-	std::cout << "Client:: Copy Assignment Operator Called" << std::endl;
+	// std::cout << "Client:: Copy Assignment Operator Called" << std::endl;
 
 	if (this == &other)
 		return *this;

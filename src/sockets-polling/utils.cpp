@@ -94,5 +94,17 @@ Client* findClientByFd(std::vector<Client>& clients, int fd)
         if (it->fd == fd)
             return &(*it);
     }
+    std::cout << "findClientByFd: fd is not found among clients\n";
     return NULL;
+}
+
+void clearDisconnectedClients(std::vector<Client>& clients, std::vector<struct pollfd>& pfds)
+{
+    std::vector<Client>::iterator clientIt = clients.begin();
+    for(; clientIt != clients.end();) {
+        if (clientIt->connState == DISCONNECTED)
+            clientIt = disconnectClient(clients, clientIt, pfds);
+        else
+            ++clientIt;
+    }
 }

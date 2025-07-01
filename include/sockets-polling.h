@@ -81,6 +81,7 @@ void addToPfds(std::vector<struct pollfd>& pfds, int newFd);
 std::vector<Client>::iterator disconnectClient(std::vector<Client>& clients, std::vector<Client>::iterator &clientIt, std::vector<struct pollfd>& pfds);
 time_t getNowInSeconds();
 int readFromSocket(Client &client, int bufferSize);
+void clearDisconnectedClients(std::vector<Client>& clients, std::vector<struct pollfd>& pfds);
 
 // utils2
 //std::string resolveAliasPath(const std::string &url, const Location &location);

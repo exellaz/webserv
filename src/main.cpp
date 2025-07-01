@@ -24,7 +24,6 @@ int main(int argc, char **argv)
 
     try {
         std::map< std::pair<std::string, std::string> , std::vector<Server> > servers = parseAllServers(configFile);
-
         std::vector<struct pollfd> pfds;
         std::vector<int> listeners;
         std::vector<Client> clients;
@@ -47,7 +46,6 @@ int main(int argc, char **argv)
 
             disconnectTimedOutClients(clients, pfds, servers);
 
-            // Run through the existing clients looking for data to read
             for(size_t i = 0; i < pfds.size(); i++) {
                 if (pfds[i].revents == 0)
                     continue;
@@ -56,10 +54,6 @@ int main(int argc, char **argv)
                     continue;
                 }
                 Client *client = findClientByFd(clients, pfds[i].fd);
-                if (client == NULL) {
-                    std::cout << "CLIENT IS NULL\n";
-                    continue;
-                }
                 if (pfds[i].revents & POLLIN)
                     handlePollIn(servers, pfds[i], *client);
                 else if (pfds[i].revents & POLLOUT)
@@ -70,14 +64,7 @@ int main(int argc, char **argv)
                     handlePollErr(*client);
 
             }
-            // erase DISCONNECTED client from `pfds` & `Connections`
-            std::vector<Client>::iterator clientIt = clients.begin();
-            for(; clientIt != clients.end();) {
-                if (clientIt->connState == DISCONNECTED)
-                    clientIt = disconnectClient(clients, clientIt, pfds);
-                else
-                    ++clientIt;
-            }
+            clearDisconnectedClients(clients, pfds);
         }
 
     }
