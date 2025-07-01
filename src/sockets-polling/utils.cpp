@@ -31,20 +31,11 @@ void addToPfds(std::vector<struct pollfd>& pfds, int newFd)
     pfds.push_back(pfd);
 }
 
-// void disconnectClient(std::vector<Client>& clients, std::vector<struct pollfd>& pfds, int index)
-// {
-//     std::cout << RED << "server: disconnected client socket " << clients[index].fd << "\n" << RESET << '\n';
-//     close(clients[index].fd);
-
-//     clients.erase(clients.begin() + index);
-//     pfds.erase(pfds.begin() + index);
-// }
-
-
-void disconnectClient(std::vector<Client>& clients, std::vector<Client>::iterator clientIt, std::vector<struct pollfd>& pfds)
+std::vector<Client>::iterator disconnectClient(std::vector<Client>& clients, std::vector<Client>::iterator &clientIt, std::vector<struct pollfd>& pfds)
 {
     std::cout << RED << "server: disconnected client socket " << clientIt->fd << "\n" << RESET << '\n';
 
+    // find corresponding pfd element based on fd
     std::vector<struct pollfd>::iterator pfdIt = pfds.begin();
     for (; pfdIt != pfds.end(); ++pfdIt) {
         if (pfdIt->fd == clientIt->fd)
@@ -52,8 +43,10 @@ void disconnectClient(std::vector<Client>& clients, std::vector<Client>::iterato
     }
 
     close(clientIt->fd);
-    clients.erase(clientIt);
-    pfds.erase(pfdIt); // ! SEG FAULT when timeout
+    pfds.erase(pfdIt);
+    std::vector<Client>::iterator nextClientIt = clients.erase(clientIt);
+
+    return nextClientIt;
 }
 
 

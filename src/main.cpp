@@ -56,9 +56,10 @@ int main(int argc, char **argv)
                     continue;
                 }
                 Client *client = findClientByFd(clients, pfds[i].fd);
-                if (client == NULL)
+                if (client == NULL) {
                     std::cout << "CLIENT IS NULL\n";
-
+                    continue;
+                }
                 if (pfds[i].revents & POLLIN)
                     handlePollIn(servers, pfds[i], *client);
                 else if (pfds[i].revents & POLLOUT)
@@ -70,12 +71,12 @@ int main(int argc, char **argv)
 
             }
             // erase DISCONNECTED client from `pfds` & `Connections`
-            std::vector<Client>::iterator it = clients.begin();
-            for(; it != clients.end();) {
-                if (it->connState == DISCONNECTED)
-                    disconnectClient(clients, it, pfds);
+            std::vector<Client>::iterator clientIt = clients.begin();
+            for(; clientIt != clients.end();) {
+                if (clientIt->connState == DISCONNECTED)
+                    clientIt = disconnectClient(clients, clientIt, pfds);
                 else
-                    ++it;
+                    ++clientIt;
             }
         }
 

@@ -36,17 +36,15 @@ void disconnectTimedOutClients(std::vector<Client>& clients, std::vector<struct 
     if (clients.empty())
         return;
 
-    // for (size_t i = 0; i < clients.size(); ++i) {
     std::vector<Client>::iterator clientIt = clients.begin();
-    for(; clientIt != clients.end();) {
+    while (clientIt != clients.end()) {
         time_t clientTimeout = getTimeoutBySocketFd(clientIt->fd, servers);
 
         if (getNowInSeconds() - clientIt->startTime >= clientTimeout) {
             std::cout << "server: TIMEOUT for client socket " << clientIt->fd << '\n';
             //TODO: send response "408 Request Timeout"
 
-            disconnectClient(clients, clientIt, pfds);
-            continue;
+            clientIt = disconnectClient(clients, clientIt, pfds);
         }
         else 
             ++clientIt;

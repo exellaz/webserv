@@ -44,7 +44,7 @@ public:
 	// Destructor
 	~Client();
 
-	const int fd;
+	int fd;
 	enum ConnState connState;
 	time_t startTime; // Timeout
 

@@ -78,7 +78,7 @@ void disconnectTimedOutClients(std::vector<Client>& clients, std::vector<struct 
 void *getInAddr(struct sockaddr *sa);
 int  set_nonblocking(int fd);
 void addToPfds(std::vector<struct pollfd>& pfds, int newFd);
-void disconnectClient(std::vector<Client>& clients, std::vector<Client>::iterator clientIt, std::vector<struct pollfd>& pfds);
+std::vector<Client>::iterator disconnectClient(std::vector<Client>& clients, std::vector<Client>::iterator &clientIt, std::vector<struct pollfd>& pfds);
 time_t getNowInSeconds();
 int readFromSocket(Client &client, int bufferSize);
 
@@ -93,6 +93,11 @@ std::string readDirectorytoString(const std::string &directoryPath, const std::s
 std::pair<std::string, std::string> getIpAndPortFromSocketFd(int fd);
 Server& getDefaultServerBlockByIpPort(std::pair<std::string, std::string> ipPort, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers);
 
+// PRINT
+void printListeners(std::vector<int>& vec);
+void printClients(std::vector<Client>& vec);
+void printPfds(std::vector<struct pollfd>& vec);
+
 class PollErrorException : public std::exception {
 public:
     // 'throw()' specifies that func won't throw any exceptions
@@ -101,6 +106,5 @@ public:
     }
 
 };
-
 
 #endif
