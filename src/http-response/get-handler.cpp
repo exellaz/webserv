@@ -63,9 +63,9 @@ std::string validateIndex(const std::string& locationPath, const Location &locat
     }
 }
 
-void HttpResponse::handleGetRequest(const Location& location, const Connection &connection)
+void HttpResponse::handleGetRequest(const Location& location, const Client &client)
 {
-    std::string fullPath = validateIndex(connection.locationPath, location);
+    std::string fullPath = validateIndex(client.locationPath, location);
 
     struct stat info;
     if (stat(fullPath.c_str(), &info) < 0)
@@ -73,7 +73,7 @@ void HttpResponse::handleGetRequest(const Location& location, const Connection &
 
     if (S_ISDIR(info.st_mode)) {
         std::cout << GREEN "AutoIndex found\n" RESET; //// debug
-        std::string directoryContent = readDirectorytoString(fullPath, connection.request.getURI());
+        std::string directoryContent = readDirectorytoString(fullPath, client.request.getURI());
         setStatus(OK);
         setHeader("Content-Type", "text/html");
         setBody(directoryContent);

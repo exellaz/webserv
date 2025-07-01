@@ -83,7 +83,7 @@ int readFromSocket(Client &client, int bufferSize);
 void clearDisconnectedClients(std::vector<Client>& clients, std::vector<struct pollfd>& pfds);
 
 // utils2
-void resolveLocationPath(const std::string& uri, Connection &connection);
+void resolveLocationPath(const std::string& uri, Client &client);
 //std::string resolveHttpPath(const std::string& uri, Server &server);
 std::string readDirectorytoString(const std::string &directoryPath, const std::string& uri);
 std::pair<std::string, std::string> getIpAndPortFromSocketFd(int fd);

@@ -21,7 +21,7 @@ void dispatchRequest(Client& client)
     if (request.getHeader("Connection") == "close")
         client.connType = CLOSE;
 
-    if (!connection.location.getCgiPath().empty()) {
+    if (!client.location.getCgiPath().empty()) {
         std::cout << GREEN "CGI found\n" RESET;
         Cgi cgi;
 
@@ -40,12 +40,12 @@ void dispatchRequest(Client& client)
         if (request.getMethod() == "GET")
         {
             std::cout << GREEN "GET request\n" RESET;
-            response.handleGetRequest(connection.location, connection);
+            response.handleGetRequest(client.location, client);
         }
         else if (request.getMethod() == "POST")
         {
             std::cout << GREEN "POST request\n" RESET;
-            response.handlePostRequest(request, connection);
+            response.handlePostRequest(request, client);
         }
         else if (request.getMethod() == "DELETE")
             throw HttpException(METHOD_NOT_ALLOWED, "Delete without CGI not allowed");
@@ -120,9 +120,9 @@ int receiveClientRequest(Client &client, std::map< std::pair<std::string, std::s
             request.parseRequestLine(headerStr);
             request.parseHeaderLines(headerStr);
 
-            connection.assignServerByServerName(servers, ipPort, defaultServer);
-            connection.location = connection.server.getLocationPath(request.getURI());
-            std::cout << "Connection Location Path: " << connection.location.getLocaPath() << "\n";
+            client.assignServerByServerName(servers, ipPort, defaultServer);
+            client.location = client.server.getLocationPath(request.getURI());
+            std::cout << "Connection Location Path: " << client.location.getLocaPath() << "\n";
 			// if (connection.location.getLocaPath().empty())
 			// {
 			// 	//validate if the request URI is a valid file or directory
@@ -133,8 +133,8 @@ int receiveClientRequest(Client &client, std::map< std::pair<std::string, std::s
 			// 		connection.location.setAllowMethod(defaultServer.getAllowMethods());
 			// 	}
 			// }
-            std::cout << "METHOD SIZE: " << connection.location.getAllowMethods().size() << "\n"; //// debug
-            validateMethod(request.getMethod(), connection.location.getAllowMethods());
+            std::cout << "METHOD SIZE: " << client.location.getAllowMethods().size() << "\n"; //// debug
+            validateMethod(request.getMethod(), client.location.getAllowMethods());
         }
         catch (const HttpException& e) {
             return handleParsingError(e, response, client);

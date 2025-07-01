@@ -1,7 +1,7 @@
 #include "http-response.h"
 #include "http-request.h"
 #include "http-exception.h"
-#include "Connection.h"
+#include "Client.h"
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -71,7 +71,7 @@ static std::string saveUploadedFile(const std::string& locationPath, const std::
     return path;
 }
 
-void HttpResponse::handlePostRequest(const HttpRequest& request, const Connection &connection)
+void HttpResponse::handlePostRequest(const HttpRequest& request, const Client &client)
 {
     std::string contentType = request.getHeader("Content-Type");
     if (contentType.find("multipart/form-data") == std::string::npos)
@@ -81,7 +81,7 @@ void HttpResponse::handlePostRequest(const HttpRequest& request, const Connectio
     if (pos == std::string::npos)
         throw HttpException(BAD_REQUEST, "Missing boundary in Content-Type");
 
-    validateUploadPath(connection.locationPath, connection.location.getAllowUpload());
+    validateUploadPath(client.locationPath, client.location.getAllowUpload());
 
     const std::string& body = request.getBody();
     std::string boundary = "--" + contentType.substr(pos + 9);
@@ -99,7 +99,7 @@ void HttpResponse::handlePostRequest(const HttpRequest& request, const Connectio
         if (fileContent.empty())
             continue;
 
-        std::string outputPath = saveUploadedFile(connection.locationPath, filename, fileContent);
+        std::string outputPath = saveUploadedFile(client.locationPath, filename, fileContent);
         if (first) {
             setStatus(CREATED);
             setBody("File uploaded successfully to: " + outputPath);
