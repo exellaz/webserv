@@ -31,15 +31,23 @@ void addToPfds(std::vector<struct pollfd>& pfds, int newFd)
     pfds.push_back(pfd);
 }
 
-void disconnectClient(std::vector<Connection>& connections, std::vector<struct pollfd>& pfds, int index)
+std::vector<Client>::iterator disconnectClient(std::vector<Client>& clients, std::vector<Client>::iterator &clientIt, std::vector<struct pollfd>& pfds)
 {
-    std::cout << RED << "server: disconnected client socket " << connections[index].fd << "\n" << RESET << '\n';
-    close(connections[index].fd);
+    std::cout << RED << "server: disconnected client socket " << clientIt->fd << "\n" << RESET << '\n';
 
-    connections.erase(connections.begin() + index);
-    pfds.erase(pfds.begin() + index);
+    // find corresponding pfd element based on fd
+    std::vector<struct pollfd>::iterator pfdIt = pfds.begin();
+    for (; pfdIt != pfds.end(); ++pfdIt) {
+        if (pfdIt->fd == clientIt->fd)
+            break;
+    }
+
+    close(clientIt->fd);
+    pfds.erase(pfdIt);
+    std::vector<Client>::iterator nextClientIt = clients.erase(clientIt);
+
+    return nextClientIt;
 }
-
 
 
 time_t getNowInSeconds() {
@@ -48,12 +56,12 @@ time_t getNowInSeconds() {
     return tv.tv_sec;
 }
 
-int readFromSocket(Connection &connection, int bufferSize)
+int readFromSocket(Client& client, int bufferSize)
 {
     // char buf[bufferSize + 1];
     char* buf = new char[bufferSize + 1];
 
-    ssize_t n = recv(connection.fd, buf, bufferSize, 0);
+    ssize_t n = recv(client.fd, buf, bufferSize, 0);
     std::cout << "n: " << n << '\n';
 
     if (n == 0) {
@@ -65,8 +73,37 @@ int readFromSocket(Connection &connection, int bufferSize)
         return RECV_AGAIN;
     }
     buf[n] = '\0';
-    connection.appendToBuffer(buf, n);
+    client.appendToBuffer(buf, n);
     delete[] buf;
 
     return n;
+}
+
+
+bool isListener(std::vector<int>& listeners, int fd)
+{
+    if (find(listeners.begin(), listeners.end(), fd) != listeners.end())
+        return true;
+    return false;
+}
+
+Client& findClientByFd(std::vector<Client>& clients, int fd)
+{
+    std::vector<Client>::iterator it = clients.begin();
+    for (; it != clients.end(); ++it) {
+        if (it->fd == fd)
+            return (*it);
+    }
+    throw std::runtime_error("Client not found for given fd");
+    }
+
+void clearDisconnectedClients(std::vector<Client>& clients, std::vector<struct pollfd>& pfds)
+{
+    std::vector<Client>::iterator clientIt = clients.begin();
+    for(; clientIt != clients.end();) {
+        if (clientIt->connState == DISCONNECTED)
+            clientIt = disconnectClient(clients, clientIt, pfds);
+        else
+            ++clientIt;
+    }
 }

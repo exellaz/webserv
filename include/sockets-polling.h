@@ -22,7 +22,7 @@
 #include "Configuration.hpp"
 #include "http-request.h"
 #include "./Buffer.h"
-#include "Connection.h"
+#include "Client.h"
 #include "http-response.h"
 #include <algorithm>
 #include <cctype>
@@ -49,41 +49,50 @@ enum readReturnVal {
 };
 
 // Setup Listening Socket
-int setupListeningSocket(std::vector<struct pollfd>& pfds, std::vector<Connection>& connections, Server& server);
+void setupListeningSocket(std::vector<struct pollfd>& pfds, std::vector<int>& listeners, Server& server);
+
+// LISTENER
+bool isListener(std::vector<int>& listeners, int fd);
+
 // CONNECTIONS
+Client& findClientByFd(std::vector<Client>& clients, int fd);
+
 void handlePollIn(std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers,
-                    std::vector<struct pollfd>& pfds, std::vector<Connection>& connections,
-                    std::vector<int>& listeners, int i);
-void handlePollOut(std::vector<struct pollfd>& pfds, std::vector<Connection>& connections, int i);
-void handlePollHup(std::vector<Connection>& connections, int i);
-void handlePollErr(std::vector<Connection>& connections, int i);
-void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Connection>& connections, int listener);
+                    struct pollfd& pfd, Client& client);
+void handlePollOut(struct pollfd& pfd, Client& client);
+void handlePollHup(Client& client);
+void handlePollErr(Client& client);
+void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Client>& clients, int listener);
 
 // Read Request Utils
-int readRequestHeader(Connection &conn, std::string& headerStr, const size_t bufferSize);
-int readRequestBody(Connection &conn, std::string& bodyStr, const size_t bufferSize, const size_t maxSize);
-// int receiveClientRequest(Connection &connection, std::map<int, std::vector<Server> >& servers);
-int receiveClientRequest(Connection &connection, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers);
-int readByChunkedEncoding(Connection &conn, std::string& bodyStr, const size_t bufferSize, const size_t maxSize);
+int readRequestHeader(Client& client, std::string& headerStr, const size_t bufferSize);
+int readRequestBody(Client& client, std::string& bodyStr, const size_t bufferSize, const size_t maxSize);
+int receiveClientRequest(Client& client, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers);
+int readByChunkedEncoding(Client& client, std::string& bodyStr, const size_t bufferSize, const size_t maxSize);
 
 // Timeout
-int getNearestUpcomingTimeout(std::vector<Connection>& connections, size_t listenerCount, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers);
-void disconnectTimedOutClients(std::vector<Connection>& connections, std::vector<struct pollfd>& pfds, size_t listenerCount, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers);
+int getNearestUpcomingTimeout(std::vector<Client>& clients, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers);
+void disconnectTimedOutClients(std::vector<Client>& clients, std::vector<struct pollfd>& pfds, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers);
 // Utils
 void *getInAddr(struct sockaddr *sa);
 int  set_nonblocking(int fd);
 void addToPfds(std::vector<struct pollfd>& pfds, int newFd);
-//void delFromPfds(std::vector<struct pollfd>& pfds, int i);
-void disconnectClient(std::vector<Connection>& connections, std::vector<struct pollfd>& pfds, int index);
+std::vector<Client>::iterator disconnectClient(std::vector<Client>& clients, std::vector<Client>::iterator &clientIt, std::vector<struct pollfd>& pfds);
 time_t getNowInSeconds();
-int readFromSocket(Connection &connection, int bufferSize);
+int readFromSocket(Client& client, int bufferSize);
+void clearDisconnectedClients(std::vector<Client>& clients, std::vector<struct pollfd>& pfds);
 
 // utils2
-void resolveLocationPath(const std::string& uri, Connection &connection);
+void resolveLocationPath(const std::string& uri, Client& client);
 //std::string resolveHttpPath(const std::string& uri, Server &server);
 std::string readDirectorytoString(const std::string &directoryPath, const std::string& uri);
 std::pair<std::string, std::string> getIpAndPortFromSocketFd(int fd);
 Server& getDefaultServerBlockByIpPort(std::pair<std::string, std::string> ipPort, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers);
+
+// PRINT
+void printListeners(std::vector<int>& vec);
+void printClients(std::vector<Client>& vec);
+void printPfds(std::vector<struct pollfd>& vec);
 
 class PollErrorException : public std::exception {
 public:
@@ -93,6 +102,5 @@ public:
     }
 
 };
-
 
 #endif

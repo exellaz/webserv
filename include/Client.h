@@ -1,6 +1,6 @@
 
-#ifndef CONNECTION_H
-#define CONNECTION_H
+#ifndef CLIENT_H
+#define CLIENT_H
 
 #include <string>
 #include "http-request.h"
@@ -33,18 +33,18 @@ enum readChunkedRequestStatus {
 	DONE
 };
 
-class Connection {
+class Client {
 public:
 	// Constructor
-	Connection(int fd, time_t startTime);
+	Client(int fd, time_t startTime);
 	// Copy Constructor
-	Connection(const Connection& other);
+	Client(const Client& other);
 	// Copy Assignment Operator
-	Connection& operator=(const Connection& other);
+	Client& operator=(const Client& other);
 	// Destructor
-	~Connection();
+	~Client();
 
-	const int fd;
+	int fd;
 	enum ConnState connState;
 	time_t startTime; // Timeout
 
@@ -86,9 +86,9 @@ private:
 	std::string _buffer;
 };
 
-std::ostream & operator<<( std::ostream & o, Connection const & connection );
-void dispatchRequest(Connection& connection);
-int handleParsingError(const HttpException& e, HttpResponse& response, Connection& connection);
+std::ostream & operator<<( std::ostream & o, Client const & client );
+void dispatchRequest(Client& client);
+int handleParsingError(const HttpException& e, HttpResponse& response, Client& client);
 
 
 #endif

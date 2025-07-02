@@ -1,40 +1,41 @@
 #include "../include/sockets-polling.h"
 
-// return true
-void handlePollIn(std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers,
-                    std::vector<struct pollfd>& pfds, std::vector<Connection>& connections,
-                    std::vector<int>& listeners, int i)
-{
-    std::cout << "POLLIN: socket " << connections[i].fd << '\n';
+static void setPfdTrackPollOutOnly(struct pollfd& pfd) {
+    pfd.events &= ~POLLIN;
+    pfd.events |= POLLOUT;
+}
 
-    if (find(listeners.begin(), listeners.end(), pfds[i].fd) != listeners.end())
-        acceptClient(pfds, connections, pfds[i].fd);
-    else { // if not a listener socket, then it's a client socket
-        int res = receiveClientRequest(connections[i], servers);
-        if (res == RECV_CLOSED) {
-            std::cout << "server: socket " << pfds[i].fd << " hung up\n";
-            connections[i].connState = DISCONNECTED;
-            return;
-        }
-        else if (res == RECV_AGAIN)
-            return;
-        else if (res != REQUEST_ERR) {
-            try {
-                resolveLocationPath(connections[i].request.getURI(), connections[i]);
-                std::cout << "Only path: " << connections[i].locationPath << "\n"; ////debug
-                dispatchRequest(connections[i]);
-            }
-            catch (const HttpException& e) {
-                handleParsingError(e, connections[i].response, connections[i]);
-            }
-        }
-        std::cout << "Res: " << res << "\n";
-        std::cout << "Response ready\n";
-        connections[i].isResponseReady = true;
-        connections[i].clearBuffer();
-        pfds[i].events &= ~POLLIN;
-        pfds[i].events |= POLLOUT;
+static void setPfdTrackPollInOnly(struct pollfd& pfd) {
+    pfd.events &= ~POLLOUT;
+    pfd.events |= POLLIN;
+}
+
+void handlePollIn(std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers,
+                    struct pollfd& pfd, Client& client)
+{
+    std::cout << "POLLIN: socket " << pfd.fd << '\n';
+
+    int res = receiveClientRequest(client, servers);
+    if (res == RECV_CLOSED) {
+        std::cout << "server: socket " << pfd.fd << " hung up\n";
+        client.connState = DISCONNECTED;
+        return;
     }
+    else if (res == RECV_AGAIN)
+        return;
+    else if (res != REQUEST_ERR) {
+        try {
+            resolveLocationPath(client.request.getURI(), client);
+            dispatchRequest(client);
+        }
+        catch (const HttpException& e) {
+            handleParsingError(e, client.response, client);
+        }
+    }
+    std::cout << "Response ready\n";
+    client.isResponseReady = true;
+    client.clearBuffer();
+    setPfdTrackPollOutOnly(pfd);
 }
 
 static void sendResponseToClient(int fd, HttpResponse& response)
@@ -43,31 +44,30 @@ static void sendResponseToClient(int fd, HttpResponse& response)
     std::cout << "server: Response sent to client.\n";
 }
 
-void handlePollOut(std::vector<struct pollfd>& pfds, std::vector<Connection>& connections, int i)
+void handlePollOut(struct pollfd& pfd, Client& client)
 {
-    std::cout << "POLLOUT: socket " << connections[i].fd << '\n';
+    std::cout << "POLLOUT: socket " << client.fd << '\n';
 
-    sendResponseToClient(connections[i].fd, connections[i].response);
-    connections[i].isResponseReady = false;
-    connections[i].request.clearRequest();
-    connections[i].response.clearResponse();
+    sendResponseToClient(client.fd, client.response);
+    client.isResponseReady = false;
+    client.request.clearRequest();
+    client.response.clearResponse();
 
-    if (connections[i].connType == CLOSE) {
-        connections[i].connState = DISCONNECTED;
+    if (client.connType == CLOSE) {
+        client.connState = DISCONNECTED;
         return;
     }
-    pfds[i].events &= ~POLLOUT;
-    pfds[i].events |= POLLIN;
+    setPfdTrackPollInOnly(pfd);
 }
 
-void handlePollHup(std::vector<Connection>& connections, int i)
+void handlePollHup(Client& client)
 {
-    std::cout << "POLLHUP: socket " << connections[i].fd << '\n';
-    connections[i].connState = DISCONNECTED;
+    std::cout << "POLLHUP: socket " << client.fd << '\n';
+    client.connState = DISCONNECTED;
 }
 
-void handlePollErr(std::vector<Connection>& connections, int i)
+void handlePollErr(Client& client)
 {
-    std::cout << "POLLERR: socket " << connections[i].fd << '\n';
-    connections[i].connState = DISCONNECTED;
+    std::cout << "POLLERR: socket " << client.fd << '\n';
+    client.connState = DISCONNECTED;
 }
