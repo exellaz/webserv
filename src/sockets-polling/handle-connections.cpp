@@ -1,44 +1,44 @@
 #include "../../include/sockets-polling.h"
 #include "../../include/http-request.h"
 
-int handleParsingError(const HttpException& e, HttpResponse& response, Connection& connection)
+int handleParsingError(const HttpException& e, HttpResponse& response, Client& client)
 {
     std::cerr << "HTTP Error: " << e.getStatusCode() << " - " << e.what() << "\n";
     response.setStatus(e.getStatusCode());
     // Set body here being the respective error page
     response.setHeader("Connection", "close");
-    connection.connType = CLOSE;
-    connection.isResponseReady = true;
+    client.connType = CLOSE;
+    client.isResponseReady = true;
     return REQUEST_ERR;
 }
 
-void dispatchRequest(Connection& connection)
+void dispatchRequest(Client& client)
 {
-    HttpRequest& request = connection.request;
-    HttpResponse& response = connection.response;
+    HttpRequest& request = client.request;
+    HttpResponse& response = client.response;
 
     response.setHeader("Connection", request.getHeader("Connection"));
     if (request.getHeader("Connection") == "close")
-        connection.connType = CLOSE;
-    if (!connection.location.getReturnPath().empty())
+        client.connType = CLOSE;
+    if (!client.location.getReturnPath().empty())
     {
-        int statusCode = connection.location.getReturnPath().begin()->first;
-        std::string returnPath = connection.location.getReturnPath().begin()->second;
+        int statusCode = client.location.getReturnPath().begin()->first;
+        std::string returnPath = client.location.getReturnPath().begin()->second;
         if (statusCode == MOVED_PERMANENTLY || statusCode == FOUND)
         {
-            connection.response.setStatus(static_cast<HttpCodes::StatusCode>(statusCode));
-            connection.response.setHeader("Location", returnPath);
-            connection.response.setBody("");
+            client.response.setStatus(static_cast<HttpCodes::StatusCode>(statusCode));
+            client.response.setHeader("Location", returnPath);
+            client.response.setBody("");
         }
         else if (statusCode == OK)
         {
-            connection.response.setStatus(static_cast<HttpCodes::StatusCode>(statusCode));
-            connection.response.setHeader("Content-Type", "text/plain");
-            connection.response.setBody(returnPath);
+            client.response.setStatus(static_cast<HttpCodes::StatusCode>(statusCode));
+            client.response.setHeader("Content-Type", "text/plain");
+            client.response.setBody(returnPath);
 
         }
     }
-    else if (connection.location.getCgiPath() == true)
+    else if (client.location.getCgiPath() == true)
     {
         std::cout << GREEN "CGI found\n" RESET;
         Cgi cgi;
@@ -58,21 +58,23 @@ void dispatchRequest(Connection& connection)
         if (request.getMethod() == "GET")
         {
             std::cout << GREEN "GET request\n" RESET;
-            response.handleGetRequest(connection.location, connection);
+            response.handleGetRequest(client.location, client);
         }
         else if (request.getMethod() == "POST")
         {
             std::cout << GREEN "POST request\n" RESET;
-            response.handlePostRequest(request, connection);
+            response.handlePostRequest(request, client);
         }
         else if (request.getMethod() == "DELETE")
             throw HttpException(METHOD_NOT_ALLOWED, "Delete without CGI not allowed");
     }
 }
 
-void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Connection>& connections, int listener)
+void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Client>& clients, int listener)
 {
-    // If listener is ready to read, handle new connection
+    std::cout << "POLLIN: socket " << listener << '\n';
+
+    // If listener is ready to read, handle new client
     struct sockaddr_storage remoteAddr; // Client address
     socklen_t addrLen = sizeof remoteAddr;
     int newFd = accept(listener, (struct sockaddr *)&remoteAddr, &addrLen);
@@ -87,10 +89,10 @@ void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Connection>& con
     }
 
     addToPfds(pfds, newFd);
-    connections.push_back(Connection(newFd, getNowInSeconds()));
+    clients.push_back(Client(newFd, getNowInSeconds()));
 
     char remoteIp[INET6_ADDRSTRLEN];
-    printf("server: new connection from %s on "
+    printf("server: new client from %s on "
         "socket %d\n", inet_ntop(remoteAddr.ss_family,
             getInAddr((struct sockaddr*)&remoteAddr),
             remoteIp, INET6_ADDRSTRLEN),
@@ -115,13 +117,14 @@ NOTE:
 - if recv(HEADER_BUFFER_SIZE) reads till the 'body' section, that section of 'body' will remain in buffers after `readHeader()` is called
 
 */
-int receiveClientRequest(Connection &connection, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers)
+int receiveClientRequest(Client& client, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers)
 {
-    HttpRequest& request = connection.request;
-    HttpResponse& response = connection.response;
+    HttpRequest& request = client.request;
+    HttpResponse& response = client.response;
 
     // IP:PORT pair from fd
-    std::pair<std::string, std::string> ipPort = getIpAndPortFromSocketFd(connection.fd);
+    std::cout << "NULLL\n";
+    std::pair<std::string, std::string> ipPort = getIpAndPortFromSocketFd(client.fd);
 
     // get default block by IP:PORT pair
     Server& defaultServer = getDefaultServerBlockByIpPort(ipPort, servers);
@@ -129,50 +132,51 @@ int receiveClientRequest(Connection &connection, std::map< std::pair<std::string
     if (!request.isHeaderParsed()) {
         try {
             std::string headerStr;
-            int ret = readRequestHeader(connection, headerStr, defaultServer.getClientHeaderBufferSize());
+            int ret = readRequestHeader(client, headerStr, defaultServer.getClientHeaderBufferSize());
             if (ret < 0)
                 return ret;
             request.parseRequestLine(headerStr);
             request.parseHeaderLines(headerStr);
 
-            connection.assignServerByServerName(servers, ipPort, defaultServer);
-            connection.location = connection.server.getLocationPath(request.getURI());
-            std::cout << "METHOD SIZE: " << connection.location.getAllowMethods().size() << "\n"; //// debug
-            validateMethod(request.getMethod(), connection.location.getAllowMethods());
+            client.assignServerByServerName(servers, ipPort, defaultServer);
+            client.location = client.server.getLocationPath(request.getURI());
+            std::cout << "Connection Location Path: " << client.location.getLocaPath() << "\n";
+            std::cout << "METHOD SIZE: " << client.location.getAllowMethods().size() << "\n"; //// debug
+            validateMethod(request.getMethod(), client.location.getAllowMethods());
         }
         catch (const HttpException& e) {
-            return handleParsingError(e, response, connection);
+            return handleParsingError(e, response, client);
         }
     }
 
     // Refactor later
     response.setHeader("Connection", request.getHeader("Connection"));
     if (request.getHeader("Connection") == "close")
-        connection.connType = CLOSE;
+        client.connType = CLOSE;
 
     // Initialise `readBodyMethod`
     if (request.hasHeader("Content-Length"))
-        connection.readBodyMethod = CONTENT_LENGTH;
+        client.readBodyMethod = CONTENT_LENGTH;
     else if (request.hasHeader("Transfer-Encoding"))
-        connection.readBodyMethod = CHUNKED_ENCODING;
+        client.readBodyMethod = CHUNKED_ENCODING;
     else
-        connection.readBodyMethod = NO_BODY;
+        client.readBodyMethod = NO_BODY;
 
-    if (connection.readBodyMethod != NO_BODY) {
+    if (client.readBodyMethod != NO_BODY) {
         try {
             std::string bodyStr;
 
-            int ret2 = readRequestBody(connection, bodyStr, defaultServer.getClientBodyBufferSize(), defaultServer.getClientMaxSize());
+            int ret2 = readRequestBody(client, bodyStr, defaultServer.getClientBodyBufferSize(), defaultServer.getClientMaxSize());
             if (ret2 < 0)
                 return ret2;
             request.setBody(bodyStr);
         }
         catch (const HttpException& e) {
-            return handleParsingError(e, response, connection);
+            return handleParsingError(e, response, client);
         }
     }
 
-    std::cout << request;
+    // std::cout << request;
     return RECV_OK;
 }
 

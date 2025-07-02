@@ -30,26 +30,26 @@ static std::string trimMultipleSlash(const std::string &relativeUri)
  * @note 1. relativeUri is to identify is there extra value after trim the location path
  * @note 2. check for "/" for prevent multiple slashes in the path to identify as a directory
 */
-static void validateRelativeUri(const std::string &relativeUri, Connection &connection, const std::string &locationType)
+static void validateRelativeUri(const std::string &relativeUri, Client& client, const std::string &locationType)
 {
-    std::string getRelativeUri = relativeUri.substr(connection.location.getLocaPath().length());
+    std::string getRelativeUri = relativeUri.substr(client.location.getLocaPath().length());
     std::string result = trimMultipleSlash(getRelativeUri);
     std::cout << "Relative path: " << result << "\n"; ////debug
     if (result.empty() || result == "/")
     {
         std::cout << GREEN "Alias/Root path: " << getFullPath(locationType + result) << "\n" RESET; ////debug
-        if (connection.server.getRoot().empty())
-            connection.locationPath = getFullPath(locationType + result);
+        if (client.server.getRoot().empty())
+            client.locationPath = getFullPath(locationType + result);
         else
-            connection.locationPath = connection.server.getRoot() + locationType + result;
+            client.locationPath = client.server.getRoot() + locationType + result;
     }
     else
     {
         std::cout << GREEN "Alias/Root path extra value: " << getFullPath(locationType + result) << "\n" RESET; ////debug
-        if (connection.server.getRoot().empty())
-            connection.locationPath = getFullPath(locationType + result);
+        if (client.server.getRoot().empty())
+            client.locationPath = getFullPath(locationType + result);
         else
-            connection.locationPath = connection.server.getRoot() + locationType + result;
+            client.locationPath = client.server.getRoot() + locationType + result;
     }
 }
 
@@ -57,26 +57,26 @@ static void validateRelativeUri(const std::string &relativeUri, Connection &conn
 /**
  * @brief Get the full path from the alias or root
 */
-void resolveLocationPath(const std::string& uri, Connection &connection)
+void resolveLocationPath(const std::string& uri, Client& client)
 {
-    const Location location = connection.server.getLocationPath(uri);
+    const Location location = client.server.getLocationPath(uri);
     if (!location.getAlias().empty())
     {
         std::cout << "Alias found\n"; ////debug"
-        validateRelativeUri(uri, connection, location.getAlias());
+        validateRelativeUri(uri, client, location.getAlias());
     }
     else if (!location.getRoot().empty())
     {
         std::cout << "Root found\n"; ////debug
-        validateRelativeUri(uri, connection, location.getRoot());
+        validateRelativeUri(uri, client, location.getRoot());
     }
     else
     {
         std::cout << RED "No alias or root found for the location path: " << uri << "\n" RESET; ////debug
-        if (connection.server.getRoot().empty())
-            connection.locationPath = getFullPath(uri + "/");
+        if (client.server.getRoot().empty())
+            client.locationPath = getFullPath(uri + "/");
         else
-            connection.locationPath = connection.server.getRoot() + uri + "/";
+            client.locationPath = client.server.getRoot() + uri + "/";
     }
 }
 

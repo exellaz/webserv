@@ -1,34 +1,35 @@
-#include "../../include/Connection.h"
+#include "../../include/Client.h"
 
-Connection::Connection(int fd, time_t startTime) :
+Client::Client(int fd, time_t startTime) :
 	fd(fd), connState(ACTIVE), startTime(startTime), connType(KEEP_ALIVE),
 	readBodyMethod(CONTENT_LENGTH), contentLength(0),
 	readChunkedRequestStatus(READ_CHUNK_SIZE), chunkSize(0),
 	chunkReqBuf(""), isFirstTimeReadingBody(true), isResponseReady(false),
 	_buffer("")
 {
-	// std::cout << "Connection:: Constructor Called (name: " << index << ")" << std::endl;
+	// std::cout << "Client:: Constructor Called (name: " << index << ")" << std::endl;
 
 
 }
 
-Connection::Connection(const Connection& other) :
+Client::Client(const Client& other) :
 	fd(other.fd), connState(other.connState),startTime(other.startTime), connType(other.connType),
 	readBodyMethod(other.readBodyMethod), contentLength(other.contentLength),
 	readChunkedRequestStatus(other.readChunkedRequestStatus), chunkSize(other.chunkSize),
 	chunkReqBuf(other.chunkReqBuf), isFirstTimeReadingBody(other.isFirstTimeReadingBody),
 	isResponseReady(other.isResponseReady), _buffer(other._buffer)
 {
-	// std::cout << "Connection:: Copy Constructor Called" << std::endl;
+	// std::cout << "Client:: Copy Constructor Called" << std::endl;
 }
 
-Connection& Connection::operator=(const Connection& other)
+Client& Client::operator=(const Client& other)
 {
-	// std::cout << "Connection:: Copy Assignment Operator Called" << std::endl;
+	// std::cout << "Client:: Copy Assignment Operator Called" << std::endl;
 
 	if (this == &other)
 		return *this;
 
+	fd						 = other.fd;
 	connState 				 = other.connState;
 	startTime 				 = other.startTime;
 	connType 				 = other.connType;
@@ -44,55 +45,55 @@ Connection& Connection::operator=(const Connection& other)
 	return *this;
 }
 
-Connection::~Connection()
+Client::~Client()
 {
-	// std::cout << "Connection:: Destructor Called (name: " << index << ")" << std::endl;
+	// std::cout << "Client:: Destructor Called (name: " << index << ")" << std::endl;
 }
 
 
-void Connection::appendToBuffer(const char *str, size_t n)
+void Client::appendToBuffer(const char *str, size_t n)
 {
 	_buffer.append(str, n);
 }
 
-const std::string& Connection::getBuffer() const
+const std::string& Client::getBuffer() const
 {
 	return _buffer;
 }
 
-void Connection::setBuffer(std::string str)
+void Client::setBuffer(std::string str)
 {
 	_buffer = str;
 }
 
-void Connection::clearBuffer()
+void Client::clearBuffer()
 {
 	_buffer.clear();
 }
 
-void Connection::eraseBufferFromStart(size_t n)
+void Client::eraseBufferFromStart(size_t n)
 {
 	_buffer.erase(0, n);
 }
 
-size_t Connection::bufferSize() const
+size_t Client::bufferSize() const
 {
 	return _buffer.size();
 }
 
-bool Connection::compareBuffer(const std::string str)
+bool Client::compareBuffer(const std::string str)
 {
 	if (_buffer == str)
 		return true;
 	return false;
 }
 
-size_t Connection::findInBuffer(const std::string str, size_t pos)
+size_t Client::findInBuffer(const std::string str, size_t pos)
 {
 	return _buffer.find(str, pos);
 }
 
-void Connection::assignServerByServerName(std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers,
+void Client::assignServerByServerName(std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers,
 											std::pair<std::string, std::string> ipPort, Server& defaultServer)
 {
 	const std::string& hostStr = request.getHeader("Host");
@@ -119,10 +120,10 @@ void Connection::assignServerByServerName(std::map< std::pair<std::string, std::
 	this->server = defaultServer;
 }
 
-std::ostream & operator<<( std::ostream & o, Connection const & connection )
+std::ostream & operator<<( std::ostream & o, Client const & client )
 {
-	o << "\nConnection: \n"
-		<< "fd    : " << connection.fd << '\n'
-		<< "buffer: "<< connection.getBuffer() << '\n';
+	o << "\nClient: \n"
+		<< "fd    : " << client.fd << '\n'
+		<< "buffer: "<< client.getBuffer() << '\n';
 	return o;
 }
