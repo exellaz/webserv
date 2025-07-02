@@ -22,6 +22,7 @@ SRCS_FIL = \
 		sockets-polling/timeout.cpp \
 		sockets-polling/print.cpp \
 		sockets-polling/setup-listening-socket.cpp \
+		sockets-polling/poll-loop.cpp \
 		\
 		read-request/receive-client-request.cpp \
 		read-request/read-request-header.cpp \
