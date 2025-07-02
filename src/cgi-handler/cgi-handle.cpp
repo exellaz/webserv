@@ -80,7 +80,7 @@ static std::map<std::string, std::string> initEnv(HttpRequest &request)
 
 	//assign method, url, version, headers and body to env
 	env_vars["REQUEST_METHOD"] = request.getMethod(); //request method (GET, POST, DELETE, etc.)
-	env_vars["QUERY_STRING"] = "";
+	env_vars["QUERY_STRING"] = request.getQueryString();
 	env_vars["CONTENT_TYPE"] = request.getHeader("Content-Type"); // script body type
 	env_vars["CONTENT_LENGTH"] = request.getHeader("Content-Length"); // script body length
 	env_vars["REQUEST_URI"] = request.getURI(); //request url (location url)

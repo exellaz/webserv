@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python3.12
 
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning) # Ignore deprecation warnings for CGI usage
