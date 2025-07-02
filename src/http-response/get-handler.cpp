@@ -63,7 +63,7 @@ std::string validateIndex(const std::string& locationPath, const Location &locat
     }
 }
 
-void HttpResponse::handleGetRequest(const Location& location, const Client &client)
+void HttpResponse::handleGetRequest(const Location& location, const Client& client)
 {
     std::string fullPath = validateIndex(client.locationPath, location);
 

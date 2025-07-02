@@ -71,7 +71,7 @@ static std::string saveUploadedFile(const std::string& locationPath, const std::
     return path;
 }
 
-void HttpResponse::handlePostRequest(const HttpRequest& request, const Client &client)
+void HttpResponse::handlePostRequest(const HttpRequest& request, const Client& client)
 {
     std::string contentType = request.getHeader("Content-Type");
     if (contentType.find("multipart/form-data") == std::string::npos)

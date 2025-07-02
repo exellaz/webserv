@@ -55,10 +55,10 @@ void handlePollErr(Client& client);
 
 
 // // Read Request Utils
-// int readRequestHeader(Client &client, std::string& headerStr, const size_t bufferSize);
-// int readRequestBody(Client &client, std::string& bodyStr, const size_t bufferSize, const size_t maxSize);
-// int receiveClientRequest(Client &client, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers);
-// int readByChunkedEncoding(Client &client, std::string& bodyStr, const size_t bufferSize, const size_t maxSize);
+// int readRequestHeader(Client& client, std::string& headerStr, const size_t bufferSize);
+// int readRequestBody(Client& client, std::string& bodyStr, const size_t bufferSize, const size_t maxSize);
+// int receiveClientRequest(Client& client, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers);
+// int readByChunkedEncoding(Client& client, std::string& bodyStr, const size_t bufferSize, const size_t maxSize);
 
 // Utils
 int  setNonBlocking(int fd);
@@ -66,7 +66,7 @@ std::vector<Client>::iterator disconnectClient(std::vector<Client>& clients, std
 void clearDisconnectedClients(std::vector<Client>& clients, std::vector<struct pollfd>& pfds);
 
 // utils2
-void resolveLocationPath(const std::string& uri, Client &client);
+void resolveLocationPath(const std::string& uri, Client& client);
 //std::string resolveHttpPath(const std::string& uri, Server &server);
 std::string readDirectorytoString(const std::string &directoryPath, const std::string& uri);
 std::pair<std::string, std::string> getIpAndPortFromSocketFd(int fd);

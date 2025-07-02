@@ -2,7 +2,7 @@
 #include "read-request.h"
 
 // if actual body size is larger than contentLength, remainder is stored in buffer
-int readByContentLength(Client &client, std::string& bodyStr, const size_t bufferSize, const size_t maxSize)
+int readByContentLength(Client& client, std::string& bodyStr, const size_t bufferSize, const size_t maxSize)
 {
 
     size_t bytesRead = client.getBuffer().size();
@@ -32,7 +32,7 @@ int readByContentLength(Client &client, std::string& bodyStr, const size_t buffe
     }
     return ret;
 }
-int readRequestBody(Client &client, std::string& bodyStr, const size_t bufferSize, const size_t maxSize)
+int readRequestBody(Client& client, std::string& bodyStr, const size_t bufferSize, const size_t maxSize)
 {
     std::cout << GREY << "===== readRequestBody =====" << RESET << '\n';
     int ret = RECV_OK;

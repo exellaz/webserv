@@ -1,6 +1,6 @@
 #include "read-request.h"
 
-int readFromSocket(Client &client, int bufferSize)
+int readFromSocket(Client& client, int bufferSize)
 {
     // char buf[bufferSize + 1];
     char* buf = new char[bufferSize + 1];
