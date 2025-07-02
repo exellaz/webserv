@@ -34,13 +34,11 @@ void dispatchRequest(Connection& connection)
         {
             connection.response.setStatus(static_cast<HttpCodes::StatusCode>(statusCode));
             connection.response.setHeader("Content-Type", "text/plain");
-           if (returnPath[0] == '"' && returnPath[returnPath.size() - 1] == '"')
-                returnPath = returnPath.substr(1, returnPath.size() - 2);
             connection.response.setBody(returnPath);
 
         }
     }
-    if (connection.location.getCgiPath() == true)
+    else if (connection.location.getCgiPath() == true)
     {
         std::cout << GREEN "CGI found\n" RESET;
         Cgi cgi;

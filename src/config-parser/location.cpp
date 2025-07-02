@@ -68,6 +68,8 @@ Location::Location(std::istream &conf, const std::string &locName, const std::ve
                 {
                     int errorCode = checkNumber(returnPath.substr(0, space));
                     std::string path = ft_trim(returnPath.substr(space + 1));
+                    if (path[0] == '"' && path[path.size() - 1] == '"')
+                        path = path.substr(1, path.size() - 2); // remove quotes
                     this->_returnPath[errorCode] = path;
                 }
                 break;
