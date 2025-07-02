@@ -81,7 +81,7 @@ class Location
         std::map<int, std::string>  _returnPath;     // path to redirect to for return responses
         int                         _clientMaxSize;  // maximum client request size
         bool                        _autoIndex;      // auto generate a directory list if no index file is found
-        bool                 _cgi_path;       // cgi path for this location
+        bool                        _cgi_path;       // cgi path for this location
         bool                        _allowUpload;
 
     public:
@@ -94,7 +94,7 @@ class Location
         const std::map<int, std::string> &getReturnPath() const;
         int                         getClientMaxSize() const;
         bool                        getAutoIndex() const;
-        bool           getCgiPath() const;
+        bool                        getCgiPath() const;
         bool                        getAllowUpload() const;
 
         Location(std::istream &conf, const std::string &locName, const std::vector<std::string> & defaultMethods);
