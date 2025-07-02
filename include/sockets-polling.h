@@ -65,10 +65,10 @@ void handlePollErr(Client& client);
 void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Client>& clients, int listener);
 
 // Read Request Utils
-int readRequestHeader(Client &client, std::string& headerStr, const size_t bufferSize);
-int readRequestBody(Client &client, std::string& bodyStr, const size_t bufferSize, const size_t maxSize);
-int receiveClientRequest(Client &client, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers);
-int readByChunkedEncoding(Client &client, std::string& bodyStr, const size_t bufferSize, const size_t maxSize);
+int readRequestHeader(Client& client, std::string& headerStr, const size_t bufferSize);
+int readRequestBody(Client& client, std::string& bodyStr, const size_t bufferSize, const size_t maxSize);
+int receiveClientRequest(Client& client, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers);
+int readByChunkedEncoding(Client& client, std::string& bodyStr, const size_t bufferSize, const size_t maxSize);
 
 // Timeout
 int getNearestUpcomingTimeout(std::vector<Client>& clients, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers);
@@ -79,11 +79,11 @@ int  set_nonblocking(int fd);
 void addToPfds(std::vector<struct pollfd>& pfds, int newFd);
 std::vector<Client>::iterator disconnectClient(std::vector<Client>& clients, std::vector<Client>::iterator &clientIt, std::vector<struct pollfd>& pfds);
 time_t getNowInSeconds();
-int readFromSocket(Client &client, int bufferSize);
+int readFromSocket(Client& client, int bufferSize);
 void clearDisconnectedClients(std::vector<Client>& clients, std::vector<struct pollfd>& pfds);
 
 // utils2
-void resolveLocationPath(const std::string& uri, Client &client);
+void resolveLocationPath(const std::string& uri, Client& client);
 //std::string resolveHttpPath(const std::string& uri, Server &server);
 std::string readDirectorytoString(const std::string &directoryPath, const std::string& uri);
 std::pair<std::string, std::string> getIpAndPortFromSocketFd(int fd);

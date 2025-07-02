@@ -99,7 +99,7 @@ NOTE:
 - if recv(HEADER_BUFFER_SIZE) reads till the 'body' section, that section of 'body' will remain in buffers after `readHeader()` is called
 
 */
-int receiveClientRequest(Client &client, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers)
+int receiveClientRequest(Client& client, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers)
 {
     HttpRequest& request = client.request;
     HttpResponse& response = client.response;

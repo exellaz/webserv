@@ -47,8 +47,8 @@ class HttpResponse
         std::string buildStatusLine();
         void printResponseHeaders();
         void appendToBody(const std::string& bodyData);
-        void handleGetRequest(const Location& location, const Client &client);
-        void handlePostRequest(const HttpRequest& request, const Client &client);
+        void handleGetRequest(const Location& location, const Client& client);
+        void handlePostRequest(const HttpRequest& request, const Client& client);
         void clearResponse();
 
         std::string getHttpDate();

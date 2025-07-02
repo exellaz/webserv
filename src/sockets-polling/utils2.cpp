@@ -30,7 +30,7 @@ static std::string trimMultipleSlash(const std::string &relativeUri)
  * @note 1. relativeUri is to identify is there extra value after trim the location path
  * @note 2. check for "/" for prevent multiple slashes in the path to identify as a directory
 */
-static void validateRelativeUri(const std::string &relativeUri, Client &client, const std::string &locationType)
+static void validateRelativeUri(const std::string &relativeUri, Client& client, const std::string &locationType)
 {
     std::string getRelativeUri = relativeUri.substr(client.location.getLocaPath().length());
     std::string result = trimMultipleSlash(getRelativeUri);
@@ -57,7 +57,7 @@ static void validateRelativeUri(const std::string &relativeUri, Client &client, 
 /**
  * @brief Get the full path from the alias or root
 */
-void resolveLocationPath(const std::string& uri, Client &client)
+void resolveLocationPath(const std::string& uri, Client& client)
 {
     const Location location = client.server.getLocationPath(uri);
     if (!location.getAlias().empty())

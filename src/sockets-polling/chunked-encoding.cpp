@@ -56,7 +56,7 @@ static std::string extractChunkData(const std::string& buffer, size_t chunkSize)
     return dataStr;
 }
 
-static void resetChunkEnodingVariables(Client &client)
+static void resetChunkEnodingVariables(Client& client)
 {
     // RESET chunkEncoding
     client.readChunkedRequestStatus = READ_CHUNK_SIZE;
@@ -65,7 +65,7 @@ static void resetChunkEnodingVariables(Client &client)
 	client.isFirstTimeReadingBody = true;
 }
 
-int readByChunkedEncoding(Client &client, std::string& bodyStr, const size_t bufferSize, const size_t maxSize)
+int readByChunkedEncoding(Client& client, std::string& bodyStr, const size_t bufferSize, const size_t maxSize)
 {
     int ret = RECV_OK;
     enum readChunkedRequestStatus& status = client.readChunkedRequestStatus;
