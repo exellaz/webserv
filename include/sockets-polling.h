@@ -103,13 +103,4 @@ public:
 
 };
 
-class ClientNotFoundIn : public std::exception {
-public:
-    // 'throw()' specifies that func won't throw any exceptions
-    const char* what() const throw() {
-        return "Poll error";
-    }
-
-};
-
 #endif
