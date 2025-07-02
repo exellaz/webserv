@@ -56,11 +56,6 @@ void clearDisconnectedClients(std::vector<Client>& clients, std::vector<struct p
 std::pair<std::string, std::string> getIpAndPortFromSocketFd(int fd); 
 Server& getDefaultServerBlockByIpPort(std::pair<std::string, std::string> ipPort, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers);
 
-// PRINT
-void printListeners(std::vector<int>& vec);
-void printClients(std::vector<Client>& vec);
-void printPfds(std::vector<struct pollfd>& vec);
-
 class PollErrorException : public std::exception {
 public:
     // 'throw()' specifies that func won't throw any exceptions

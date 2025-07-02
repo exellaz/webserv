@@ -14,34 +14,43 @@ NAME = webserv
 SRCDIR = src/
 SRCS_FIL = \
 		main.cpp \
-		sockets-polling/accept-client.cpp \
-		sockets-polling/poll.cpp \
-		sockets-polling/dispatch-request.cpp \
-		sockets-polling/utils.cpp \
-		sockets-polling/Client.cpp \
-		sockets-polling/timeout.cpp \
-		sockets-polling/print.cpp \
-		sockets-polling/setup-listening-socket.cpp \
-		sockets-polling/poll-loop.cpp \
+		\
+		cgi-handler/cgi-handle.cpp \
+		cgi-handler/cgi-response.cpp \
+		\
+		config-parser/configuration.cpp \
+		config-parser/location.cpp \
+		config-parser/utils.cpp \
+		\
+		http-request/http-request.cpp \
+		http-request/utils.cpp \
+		\
+		http-response/http-response.cpp \
+		http-response/utils.cpp \
+		http-response/get-handler.cpp \
+		http-response/post-handler.cpp \
+		\
+		listeners/setup-listeners.cpp \
+		\
+		poll-loop/handle-poll-events.cpp \
+		poll-loop/poll-loop.cpp \
+		poll-loop/poll-loop-utils.cpp \
+		poll-loop/dispatch-request.cpp \
 		\
 		read-request/receive-client-request.cpp \
 		read-request/read-request-header.cpp \
 		read-request/read-request-body.cpp \
 		read-request/read-from-socket.cpp \
 		read-request/chunked-encoding.cpp \
+		read-request/read-request-utils.cpp \
 		\
-		config-parser/configuration.cpp \
-		config-parser/location.cpp \
-		config-parser/utils.cpp \
-		http-request/http-request.cpp \
-		http-request/utils.cpp \
-		sockets-polling/utils2.cpp \
-		http-response/http-response.cpp \
-		http-response/utils.cpp \
-		http-response/get-handler.cpp \
-		http-response/post-handler.cpp \
-		cgi-handler/cgi-handle.cpp \
-		cgi-handler/cgi-response.cpp \
+		handle-clients/accept-client.cpp \
+		handle-clients/disconnect-client.cpp \
+		handle-clients/utils.cpp \
+		handle-clients/Client.cpp \
+		\
+		timeout/handle-timeout.cpp \
+		\
 		utils/utils.cpp
 
 SRCS = $(addprefix $(SRCDIR), $(SRCS_FIL))
