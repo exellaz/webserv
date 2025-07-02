@@ -1,4 +1,5 @@
 #include "../../include/sockets-polling.h"
+#include <string.h> // memset
 
 // Return a listening socket
 int getListenerSocket(Server& server)

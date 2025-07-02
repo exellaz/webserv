@@ -1,10 +1,6 @@
-#include "../include/sockets-polling.h"
-#include "../include/Configuration.hpp"
-#include "../include/http-request.h"
-#include "../include/http-response.h"
-#include "../include/timeout.h"
-#include <algorithm>
-#include <map>
+#include "sockets-polling.h"
+#include "Configuration.hpp"
+#include "timeout.h"
 
 int main(int argc, char **argv)
 {

@@ -1,4 +1,5 @@
-#include "../../include/sockets-polling.h"
+#include "timeout.h"
+#include "sockets-polling.h"
 
 time_t getNowInSeconds() {
     struct timeval tv;

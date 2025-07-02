@@ -1,5 +1,6 @@
-#include "../../include/sockets-polling.h"
-#include "../include/timeout.h"
+#include "sockets-polling.h"
+#include "timeout.h"
+#include <arpa/inet.h> // inet_top
 
 
 // Get sockaddr, IPv4 or IPv6:

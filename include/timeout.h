@@ -2,12 +2,6 @@
 # define TIMEOUT_H
 
 #include <sys/time.h> // gettimeofday, struct timeval
-#include <time.h> 
-#include <vector>    
-#include <map>   
-#include <utility> // std::pair
-#include <iostream>
-#include <poll.h>
 
 #include "Configuration.hpp"
 #include "Client.h"
