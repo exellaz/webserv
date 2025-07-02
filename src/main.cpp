@@ -53,15 +53,15 @@ int main(int argc, char **argv)
                     acceptClient(pfds, clients, pfds[i].fd);
                     continue;
                 }
-                Client *client = findClientByFd(clients, pfds[i].fd);
+                Client& client = findClientByFd(clients, pfds[i].fd);
                 if (pfds[i].revents & POLLIN)
-                    handlePollIn(servers, pfds[i], *client);
+                    handlePollIn(servers, pfds[i], client);
                 else if (pfds[i].revents & POLLOUT)
-                    handlePollOut(pfds[i], *client);
+                    handlePollOut(pfds[i], client);
                 else if (pfds[i].revents & POLLHUP)
-                    handlePollHup(*client);
+                    handlePollHup(client);
                 else if (pfds[i].revents & POLLERR)
-                    handlePollErr(*client);
+                    handlePollErr(client);
 
             }
             clearDisconnectedClients(clients, pfds);

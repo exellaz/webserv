@@ -87,16 +87,15 @@ bool isListener(std::vector<int>& listeners, int fd)
     return false;
 }
 
-Client* findClientByFd(std::vector<Client>& clients, int fd)
+Client& findClientByFd(std::vector<Client>& clients, int fd)
 {
     std::vector<Client>::iterator it = clients.begin();
     for (; it != clients.end(); ++it) {
         if (it->fd == fd)
-            return &(*it);
+            return (*it);
     }
-    std::cout << "findClientByFd: fd is not found among clients\n";
-    return NULL;
-}
+    throw std::runtime_error("Client not found for given fd");
+    }
 
 void clearDisconnectedClients(std::vector<Client>& clients, std::vector<struct pollfd>& pfds)
 {

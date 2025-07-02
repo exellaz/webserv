@@ -55,7 +55,7 @@ void setupListeningSocket(std::vector<struct pollfd>& pfds, std::vector<int>& li
 bool isListener(std::vector<int>& listeners, int fd);
 
 // CONNECTIONS
-Client* findClientByFd(std::vector<Client>& clients, int fd);
+Client& findClientByFd(std::vector<Client>& clients, int fd);
 
 void handlePollIn(std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers,
                     struct pollfd& pfd, Client& client);
@@ -95,6 +95,15 @@ void printClients(std::vector<Client>& vec);
 void printPfds(std::vector<struct pollfd>& vec);
 
 class PollErrorException : public std::exception {
+public:
+    // 'throw()' specifies that func won't throw any exceptions
+    const char* what() const throw() {
+        return "Poll error";
+    }
+
+};
+
+class ClientNotFoundIn : public std::exception {
 public:
     // 'throw()' specifies that func won't throw any exceptions
     const char* what() const throw() {
