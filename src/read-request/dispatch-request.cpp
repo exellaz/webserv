@@ -1,5 +1,6 @@
-#include "../../include/sockets-polling.h"
-#include "../../include/http-request.h"
+#include "http-request.h"
+#include "Cgi.hpp"
+#include "read-request.h"
 
 void dispatchRequest(Client& client)
 {

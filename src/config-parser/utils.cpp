@@ -315,3 +315,14 @@ std::ostream &operator<<(std::ostream &cout, const Server &server)
     }
     return cout;
 }
+
+Server& getDefaultServerBlockByIpPort(std::pair<std::string, std::string> ipPort, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers)
+{
+    for (std::map<std::pair<std::string, std::string>, std::vector<Server> >::iterator it = servers.begin(); it != servers.end(); ++it)
+    {
+        if (it->first == ipPort)
+            return *(it->second.begin());
+    }
+    // if cannot match with `ipPort` // ? will this ever happen?
+    return *(servers.begin()->second.begin());
+}

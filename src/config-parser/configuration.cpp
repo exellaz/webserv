@@ -1,8 +1,6 @@
 #include "Configuration.hpp"
 #include "http-exception.h"
-
-#define RED "\033[31m"
-#define RESET "\033[0m"
+#include "color.h"
 
 Server::Server(std::istream &conf)
     : _port(""),

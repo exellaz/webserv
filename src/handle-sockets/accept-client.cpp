@@ -1,7 +1,6 @@
-#include "sockets-polling.h"
 #include "timeout.h"
 #include <arpa/inet.h> // inet_top
-
+#include "handle-sockets.h"
 
 // Get sockaddr, IPv4 or IPv6:
 static void *getInAddr(struct sockaddr *sa)

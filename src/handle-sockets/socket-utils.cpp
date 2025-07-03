@@ -1,4 +1,14 @@
-#include "../../include/sockets-polling.h"
+#include <fcntl.h>
+#include "handle-sockets.h"
+
+// Helper: set a file descriptor to non-blocking mode
+int setNonBlocking(int fd) {
+    int flags = fcntl(fd, F_GETFL, 0);
+    if (flags == -1)
+        return -1;
+    // set file status with existing flags + Non-blocking flag
+    return fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+}
 
 /**
  * @note 1. getSockName() retrieves the local address of the socket
@@ -24,16 +34,4 @@ std::pair<std::string, std::string> getIpAndPortFromSocketFd(int fd)
                 << (ip & 0xFF);
 
     return std::make_pair(ipStream.str(), portStream.str());
-}
-
-
-Server& getDefaultServerBlockByIpPort(std::pair<std::string, std::string> ipPort, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers)
-{
-    for (std::map<std::pair<std::string, std::string>, std::vector<Server> >::iterator it = servers.begin(); it != servers.end(); ++it)
-    {
-        if (it->first == ipPort)
-            return *(it->second.begin());
-    }
-    // if cannot match with `ipPort` // ? will this ever happen?
-    return *(servers.begin()->second.begin());
 }

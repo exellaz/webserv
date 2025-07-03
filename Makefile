@@ -30,28 +30,26 @@ SRCS_FIL = \
 		http-response/get-handler.cpp \
 		http-response/post-handler.cpp \
 		\
-		listeners/setup-listeners.cpp \
-		\
 		poll-loop/handle-poll-events.cpp \
 		poll-loop/poll-loop.cpp \
 		poll-loop/poll-loop-utils.cpp \
-		poll-loop/dispatch-request.cpp \
 		\
 		read-request/receive-client-request.cpp \
 		read-request/read-request-header.cpp \
 		read-request/read-request-body.cpp \
 		read-request/read-from-socket.cpp \
 		read-request/chunked-encoding.cpp \
-		read-request/read-request-utils.cpp \
+		read-request/dispatch-request.cpp \
 		\
-		handle-clients/accept-client.cpp \
-		handle-clients/disconnect-client.cpp \
-		handle-clients/utils.cpp \
-		handle-clients/Client.cpp \
+		handle-sockets/setup-listeners.cpp \
+		handle-sockets/accept-client.cpp \
+		handle-sockets/disconnect-client.cpp \
+		handle-sockets/socket-utils.cpp \
+		handle-sockets/Client.cpp \
 		\
 		timeout/handle-timeout.cpp \
 		\
-		utils/utils.cpp
+		utils/utils.cpp \
 
 SRCS = $(addprefix $(SRCDIR), $(SRCS_FIL))
 

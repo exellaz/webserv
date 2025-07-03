@@ -1,6 +1,5 @@
-#include "../../include/sockets-polling.h"
+#include "poll-loop.h"
 #include "timeout.h"
-
 
 void pollLoop(std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers,
               std::vector<struct pollfd>& pfds,
@@ -13,7 +12,7 @@ void pollLoop(std::map< std::pair<std::string, std::string> , std::vector<Server
         int nearestTimeout = getNearestUpcomingTimeout(clients, servers);
         int pollCount = poll(&pfds[0], pfds.size(), nearestTimeout);
         if (pollCount == -1)
-            throw PollErrorException();
+            throw std::runtime_error("poll error");
 
         disconnectTimedOutClients(clients, pfds, servers);
 

@@ -116,5 +116,7 @@ std::string checkPort(std::string port);
 int checkNumber(std::string number);
 Directive getKey(const std::string &line);
 void checkValidDirective(const std::string &line, Directive directiveType);
+Server& getDefaultServerBlockByIpPort(std::pair<std::string, std::string> ipPort, 
+                                      std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers);
 
 #endif

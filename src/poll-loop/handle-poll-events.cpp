@@ -1,5 +1,6 @@
-#include "../include/sockets-polling.h"
-#include "../include/read-request.h"
+#include "read-request.h"
+#include "poll-loop.h"
+#include "Cgi.hpp"
 
 static void setPfdTrackPollOutOnly(struct pollfd& pfd);
 static void setPfdTrackPollInOnly(struct pollfd& pfd);
