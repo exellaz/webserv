@@ -67,7 +67,5 @@ class HttpRequest
 };
 
 std::ostream& operator<<(std::ostream &stream, const HttpRequest& src);
-std::string toLower(const std::string& str);
-bool isDigitsOnly(const std::string& str);
 
 #endif

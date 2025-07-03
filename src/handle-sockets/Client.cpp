@@ -1,4 +1,4 @@
-#include "../../include/Client.h"
+#include "Client.h"
 
 Client::Client(int fd, time_t startTime) :
 	fd(fd), connState(ACTIVE), startTime(startTime), connType(KEEP_ALIVE),

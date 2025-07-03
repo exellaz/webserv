@@ -1,11 +1,10 @@
-#include "../include/sockets-polling.h"
-#include "../include/Configuration.hpp"
-#include "../include/http-request.h"
-#include "../include/http-response.h"
-#include <algorithm>
+#include "Configuration.hpp"
+#include "timeout.h"
+#include "handle-sockets.h"
+#include "poll-loop.h"
 #include <map>
 
-int main(int argc, char **argv)
+std::string getConfigFileString(int argc, char **argv)
 {
     std::string configFile;
 
@@ -14,65 +13,31 @@ int main(int argc, char **argv)
         (void)argv;
         configFile = "./conf/default.conf";
     }
-    else if (argc > 2) {
-        std::cout << "Error: Expected 1 config file only.\n";
-        return 1;
-    }
-    else {
+    else if (argc > 2)
+        throw std::runtime_error("Expected 1 config file only");
+    else
         configFile = argv[1];
-    }
 
+    return configFile;
+}
+
+int main(int argc, char **argv)
+{
     try {
+        std::string configFile = getConfigFileString(argc, argv);
         std::map< std::pair<std::string, std::string> , std::vector<Server> > servers = parseAllServers(configFile);
         std::vector<struct pollfd> pfds;
         std::vector<int> listeners;
         std::vector<Client> clients;
-
-        for (std::map<std::pair<std::string, std::string>, std::vector<Server> >::iterator it = servers.begin(); it != servers.end(); ++it)
-        {
-            Server &curServer = *(it->second.begin());
-            setupListeningSocket(pfds, listeners, curServer);
-        }
-        for (std::vector<int>::iterator it = listeners.begin(); it != listeners.end(); ++it) ////debug
-            std::cout << "Listener socket fd: " << *it << "\n";
-
-        while(true) {
-            std::cout << CYAN << "\n+++++++ Waiting for POLL event ++++++++" << RESET << "\n\n";
-
-            int nearestTimeout = getNearestUpcomingTimeout(clients, servers);
-            int pollCount = poll(&pfds[0], pfds.size(), nearestTimeout);
-            if (pollCount == -1)
-                throw PollErrorException();
-
-            disconnectTimedOutClients(clients, pfds, servers);
-
-            for(size_t i = 0; i < pfds.size(); i++) {
-                if (pfds[i].revents == 0)
-                    continue;
-                if (isListener(listeners, pfds[i].fd) && pfds[i].revents & POLLIN) {
-                    acceptClient(pfds, clients, pfds[i].fd);
-                    continue;
-                }
-                Client& client = findClientByFd(clients, pfds[i].fd);
-                if (pfds[i].revents & POLLIN)
-                    handlePollIn(servers, pfds[i], client);
-                else if (pfds[i].revents & POLLOUT)
-                    handlePollOut(pfds[i], client);
-                else if (pfds[i].revents & POLLHUP)
-                    handlePollHup(client);
-                else if (pfds[i].revents & POLLERR)
-                    handlePollErr(client);
-
-            }
-            clearDisconnectedClients(clients, pfds);
-        }
-
+        
+        setupAllListenerSockets(servers, pfds, listeners);
+        pollLoop(servers, pfds, listeners, clients);
     }
     catch (const std::exception &e)
     {
         std::cerr << RED << "Error: " << RESET << e.what() << "\n";
+        return 1;
     }
-
 
     return 0;
 }

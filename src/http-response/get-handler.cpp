@@ -1,6 +1,12 @@
+#include <sys/stat.h>
+#include <dirent.h> //for opendir, readdir, closedir
+#include <fcntl.h>
+#include <unistd.h>
 #include "http-response.h"
 #include "http-exception.h"
-#include "sockets-polling.h"
+#include "Client.h"
+
+static std::string readDirectorytoString(const std::string &directoryPath, const std::string& uri);
 
 // Reads the entire file at filepath into a std::string.
 // Returns empty string if any error occurs.
@@ -90,4 +96,31 @@ void HttpResponse::handleGetRequest(const Location& location, const Client& clie
         setBody(fileContents);
         return ;
     }
+}
+
+/**
+ * @brief Reads the contents of a directory and generates an HTML index page
+*/
+static std::string readDirectorytoString(const std::string &directoryPath, const std::string& uri)
+{
+    std::stringstream htmlOutput;
+    htmlOutput << "<html><head><title>Index of " << uri << "</title></head><body>";
+    htmlOutput << "<h1>Index of " << uri << "</h1><hr><ul>";
+    DIR* dir = opendir(directoryPath.c_str());
+    if (!dir)
+        return "";
+    struct dirent* entry;
+    while ((entry = readdir(dir)) != NULL) {
+        std::string name = entry->d_name;
+        if (name == ".")
+            continue;
+        std::string slash = (entry->d_type == DT_DIR) ? "/" : "";
+        std::string url_base = uri;
+        if (url_base.empty() || url_base[url_base.size() - 1] != '/')
+            url_base += '/';
+        htmlOutput << "<li><a href=\"" << url_base << name << slash << "\">" << name << slash << "</a></li>";
+    }
+    closedir(dir);
+    htmlOutput << "</ul><hr></body></html>";
+    return htmlOutput.str();
 }

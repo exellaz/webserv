@@ -1,5 +1,12 @@
-#include "../../include/sockets-polling.h"
+#include "timeout.h"
+#include "read-request.h"
+#include "handle-sockets.h"
 
+time_t getNowInSeconds() {
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    return tv.tv_sec;
+}
 
 static time_t getTimeoutBySocketFd(int fd, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers)
 {
