@@ -53,16 +53,6 @@ int receiveClientRequest(Client& client, std::map< std::pair<std::string, std::s
             client.assignServerByServerName(servers, ipPort, defaultServer);
             client.location = client.server.getLocationPath(request.getURI());
             std::cout << "Connection Location Path: " << client.location.getLocaPath() << "\n";
-			// if (connection.location.getLocaPath().empty())
-			// {
-			// 	//validate if the request URI is a valid file or directory
-			// 	struct stat info;
-			// 	if (stat(request.getURI().c_str(), &info) == 0 && (S_ISDIR(info.st_mode) || S_ISREG(info.st_mode)))
-			// 	{
-			// 		connection.locationPath = request.getURI();
-			// 		connection.location.setAllowMethod(defaultServer.getAllowMethods());
-			// 	}
-			// }
             std::cout << "METHOD SIZE: " << client.location.getAllowMethods().size() << "\n"; //// debug
             validateMethod(request.getMethod(), client.location.getAllowMethods());
         }
@@ -101,4 +91,3 @@ int receiveClientRequest(Client& client, std::map< std::pair<std::string, std::s
     // std::cout << request;
     return RECV_OK;
 }
-

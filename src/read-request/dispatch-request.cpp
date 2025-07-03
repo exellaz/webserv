@@ -10,8 +10,26 @@ void dispatchRequest(Client& client)
     response.setHeader("Connection", request.getHeader("Connection"));
     if (request.getHeader("Connection") == "close")
         client.connType = CLOSE;
+    if (!client.location.getReturnPath().empty())
+    {
+        int statusCode = client.location.getReturnPath().begin()->first;
+        std::string returnPath = client.location.getReturnPath().begin()->second;
+        if (statusCode == MOVED_PERMANENTLY || statusCode == FOUND)
+        {
+            client.response.setStatus(static_cast<HttpCodes::StatusCode>(statusCode));
+            client.response.setHeader("Location", returnPath);
+            client.response.setBody("");
+        }
+        else if (statusCode == OK)
+        {
+            client.response.setStatus(static_cast<HttpCodes::StatusCode>(statusCode));
+            client.response.setHeader("Content-Type", "text/plain");
+            client.response.setBody(returnPath);
 
-    if (!client.location.getCgiPath().empty()) {
+        }
+    }
+    else if (client.location.getCgiPath() == true)
+    {
         std::cout << GREEN "CGI found\n" RESET;
         Cgi cgi;
 
