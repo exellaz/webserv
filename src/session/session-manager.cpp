@@ -7,24 +7,7 @@ SessionManager::SessionManager()
     std::srand(std::time(0));
 }
 
-void SessionManager::handleSession(Client& client)
-{
-    static SessionManager sessionMgr;
-    HttpRequest& request = client.request;
-    HttpResponse& response = client.response;
-
-    std::string cookieHeader = request.getHeader("Cookie");
-    std::string sessionId = sessionMgr.getSessionIdFromCookie(cookieHeader);
-    if (!sessionMgr.sessionExists(sessionId)) {
-        sessionId = generateSessionId();
-        response.setHeader("Set-Cookie", buildSetCookieHeader(sessionId));
-        sessionMgr._sessions[sessionId] = "default";
-    }
-    client.setSessionId(sessionId);
-    client.setSessionData(sessionMgr.getSessionData(sessionId));
-}
-
-std::string SessionManager::generateSessionId()
+static std::string generateSessionId()
 {
     static const std::string& alphaNum =
         "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -34,7 +17,7 @@ std::string SessionManager::generateSessionId()
     return sessionId;
 }
 
-std::string SessionManager::getSessionIdFromCookie(const std::string& cookieHeader)
+static std::string getSessionIdFromCookie(const std::string& cookieHeader)
 {
     std::string key = "session_id=";
     std::size_t start = cookieHeader.find(key);
@@ -43,6 +26,27 @@ std::string SessionManager::getSessionIdFromCookie(const std::string& cookieHead
     start += key.length();
     std::size_t end = cookieHeader.find(';', start);
     return cookieHeader.substr(start, end - start);
+}
+
+static std::string buildSetCookieHeader(const std::string& sessionId)
+{
+    return "session_id=" + sessionId + "; Path=/; HttpOnly";
+}
+
+void SessionManager::handleSession(Client& client)
+{
+    static SessionManager sessionMgr;
+    HttpRequest& request = client.request;
+    HttpResponse& response = client.response;
+    std::string cookieHeader = request.getHeader("Cookie");
+    std::string sessionId = getSessionIdFromCookie(cookieHeader);
+    if (!sessionMgr._sessionExists(sessionId)) {
+        sessionId = generateSessionId();
+        response.setHeader("Set-Cookie", buildSetCookieHeader(sessionId));
+        sessionMgr._sessions[sessionId] = "default";
+    }
+    client.setSessionId(sessionId);
+    client.setSessionData(sessionMgr.getSessionData(sessionId));
 }
 
 // sessionData can be a struct instead to hold all necessary data of the session
@@ -56,12 +60,7 @@ const std::string& SessionManager::getSessionData(const std::string& sessionId)
     return _sessions[sessionId];
 }
 
-std::string SessionManager::buildSetCookieHeader(const std::string& sessionId)
-{
-    return "session_id=" + sessionId + "; Path=/; HttpOnly";
-}
-
-bool SessionManager::sessionExists(const std::string& sessionId) const
+bool SessionManager::_sessionExists(const std::string& sessionId) const
 {
     return _sessions.find(sessionId) != _sessions.end();
 }

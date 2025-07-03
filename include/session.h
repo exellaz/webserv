@@ -9,17 +9,15 @@ class SessionManager
 {
     public:
         SessionManager();
-        static std::string getSessionIdFromCookie(const std::string& cookieHeader);
-        static std::string generateSessionId();
-        const std::string& getSessionData(const std::string& sessionId);
-        static std::string buildSetCookieHeader(const std::string& sessionId);
         static void handleSession(Client& client);
-        void setSession(const std::string& sessionId, const std::string& sessionData);
 
-        bool sessionExists(const std::string& sessionId) const;
+        const std::string& getSessionData(const std::string& sessionId);
+
+        void setSession(const std::string& sessionId, const std::string& sessionData);
 
     private:
         std::map<std::string, std::string> _sessions;
+        bool _sessionExists(const std::string& sessionId) const;
 };
 
 #endif

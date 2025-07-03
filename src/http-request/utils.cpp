@@ -55,11 +55,6 @@ const std::string& HttpRequest::getBody() const
     return _body;
 }
 
-const std::string& HttpRequest::getSessionId() const
-{
-    return _sessionId;
-}
-
 void HttpRequest::setMethod(const std::string& method)
 {
     _method = method;
@@ -88,9 +83,4 @@ void HttpRequest::setBody(const std::string& body)
 void HttpRequest::setQueryString(const std::string& str)
 {
     _queryString = str;
-}
-
-void HttpRequest::setSessionId(const std::string& id)
-{
-    _sessionId = id;
 }
