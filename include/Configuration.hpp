@@ -81,11 +81,11 @@ class Location
         std::map<int, std::string>  _returnPath;     // path to redirect to for return responses
         int                         _clientMaxSize;  // maximum client request size
         bool                        _autoIndex;      // auto generate a directory list if no index file is found
-        std::string                 _cgi_path;       // cgi path for this location
+        bool                        _cgi_path;       // cgi path for this location
         bool                        _allowUpload;
 
     public:
-		void setAllowMethod(const std::vector<std::string> &methods);
+        void setAllowMethod(const std::vector<std::string> &methods);
         const std::string           &getLocaPath() const;
         const std::string           &getIndex() const;
         const std::string           &getRoot() const;
@@ -94,14 +94,14 @@ class Location
         const std::map<int, std::string> &getReturnPath() const;
         int                         getClientMaxSize() const;
         bool                        getAutoIndex() const;
-        const std::string           &getCgiPath() const;
+        bool                        getCgiPath() const;
         bool                        getAllowUpload() const;
 
         Location(std::istream &conf, const std::string &locName, const std::vector<std::string> & defaultMethods);
         Location() {};
         ~Location() {};
 
-		void clearLocationBlock();
+        void clearLocationBlock();
 };
 
 // std::map<int, std::vector<Server> > parseAllServers(const std::string &filename);

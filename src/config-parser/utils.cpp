@@ -5,7 +5,6 @@
 
 std::map< std::pair<std::string, std::string> , std::vector<Server> > parseAllServers(const std::string &filename)
 {
-    // std::map<int, std::vector<Server> > listServers;
     std::map< std::pair<std::string, std::string> , std::vector<Server> > listServers;
     std::ifstream conf(filename.c_str());
     std::stringstream serverBlock;
@@ -19,9 +18,12 @@ std::map< std::pair<std::string, std::string> , std::vector<Server> > parseAllSe
         {
             serverBlock << line << "\n";
             int braceCount = 1; //look for the next "}"
-            while (braceCount != 0 && std::getline(conf, line)) {
-                if (line.find('{') != std::string::npos) braceCount++;
-                if (line.find('}') != std::string::npos) braceCount--;
+            while (braceCount != 0 && std::getline(conf, line))
+            {
+                if (line.find('{') != std::string::npos)
+                    braceCount++;
+                if (line.find('}') != std::string::npos)
+                    braceCount--;
                 serverBlock << line << "\n"; // if not keep parse the line
             }
             Server server(serverBlock);
@@ -76,6 +78,9 @@ std::string	extractLine(const std::string &line)
     return ft_trim(path);
 }
 
+/**
+ * @brief check the method is valid
+*/
 std::vector<std::string> checkMethod(std::string allowMethod)
 {
     std::vector<std::string> methods;
@@ -95,6 +100,9 @@ std::vector<std::string> checkMethod(std::string allowMethod)
     return methods;
 }
 
+/**
+ * @brief check the port number
+*/
 std::string checkPort(std::string port)
 {
     if (port.empty())
@@ -107,6 +115,9 @@ std::string checkPort(std::string port)
     return port;
 }
 
+/**
+ * @brief check if the number
+*/
 int checkNumber(std::string number)
 {
     if (number.empty())
@@ -116,6 +127,9 @@ int checkNumber(std::string number)
     return (std::strtol(number.c_str(), NULL, 10));
 }
 
+/**
+ * @brief get the directive type
+*/
 Directive getKey(const std::string &line)
 {
     std::istringstream iss(line);
@@ -159,6 +173,10 @@ Directive getKey(const std::string &line)
         return UNKNOWN;
 }
 
+/**
+ * @brief check if the directive is valid
+ * @note 1. getline(iss, rest, ';') => read theiss output and store to rest until ';' is found
+*/
 void checkValidDirective(const std::string &line, Directive directiveType)
 {
     std::string rest;
@@ -184,17 +202,29 @@ void checkValidDirective(const std::string &line, Directive directiveType)
     {
         int statusCode;
         std::string value;
-        size_t open_quote, close_quote;
         if (!(rest_iss >> statusCode))
             throw std::runtime_error(RED "missing status code in return directive: [" + line + "]" RESET);
         std::getline(rest_iss, value);
         value = ft_trim(value);
-        if (value.empty() || value[0] != '"' || value[value.size() - 1] != '"')
-            throw std::runtime_error(RED "missing quote or extra value in return directive: [" + line + "]" RESET);
-        open_quote = value.find('"');
-        close_quote = value.rfind('"');
-        if (open_quote != 0 || close_quote != value.size() - 1 || value.find('"', 1) != close_quote)
-            throw std::runtime_error(RED "extra value found in return directive: [" + line + "]" RESET);
+        if (value.empty())
+            throw std::runtime_error(RED "missing value in return directive: [" + line + "]" RESET);
+        if (value[0] == '"')
+        {
+            if (value[value.size() - 1] != '"')
+                throw std::runtime_error(RED "missing closing quote in return directive: [" + line + "]" RESET);
+            size_t open_quote = value.find('"');
+            size_t close_quote = value.rfind('"');
+            if (open_quote != 0 || close_quote != value.size() - 1 || value.find('"', 1) != close_quote)
+                throw std::runtime_error(RED "extra value found in return directive: [" + line + "]" RESET);
+        }
+        else
+        {
+            std::stringstream iss(value);
+            std::string str, extra_str;
+            iss >> str;
+            if (iss >> extra_str)
+                throw std::runtime_error(RED "extra value found in unquoted return directive: [" + line + "]" RESET);
+        }
         return;
     }
     if (getKey(key) == ALLOWED_METHOD)
@@ -202,6 +232,15 @@ void checkValidDirective(const std::string &line, Directive directiveType)
         std::string value;
         if (!(rest_iss >> value))
             throw std::runtime_error(RED "missing allowed method in allowed_method directive: [" + line + "]" RESET);
+        return ;
+    }
+    if (getKey(key) == AUTO_INDEX || getKey(key) == ALLOW_UPLOAD || getKey(key) == CGI_PATH)
+    {
+        std::string value;
+        if (!(rest_iss >> value))
+            throw std::runtime_error(RED "missing directive value: [" + line + "]" RESET);
+        if (value != "on" && value != "off")
+            throw std::runtime_error(RED "invalid directive value, must be 'on' or 'off': [" + line + "]" RESET);
         return ;
     }
     if (getKey(key) == LOCATION)
@@ -307,8 +346,8 @@ std::ostream &operator<<(std::ostream &cout, const Server &server)
             cout << "client_max_size : [" << loc.getClientMaxSize() << "]\n";
         if (loc.getAutoIndex() == true)
             cout << "list_directory  : [on]\n";
-        if (!loc.getCgiPath().empty())
-            cout << "cgi_path        : [" << loc.getCgiPath() << "]\n";
+        if (loc.getCgiPath() == true)
+            cout << "cgi_path        : [on]\n";
         if (loc.getAllowUpload() == true)
             cout << "allow_upload    : [on]\n";
         std::cout << "\n";

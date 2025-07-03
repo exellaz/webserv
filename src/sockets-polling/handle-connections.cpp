@@ -20,8 +20,26 @@ void dispatchRequest(Client& client)
     response.setHeader("Connection", request.getHeader("Connection"));
     if (request.getHeader("Connection") == "close")
         client.connType = CLOSE;
+    if (!client.location.getReturnPath().empty())
+    {
+        int statusCode = client.location.getReturnPath().begin()->first;
+        std::string returnPath = client.location.getReturnPath().begin()->second;
+        if (statusCode == MOVED_PERMANENTLY || statusCode == FOUND)
+        {
+            client.response.setStatus(static_cast<HttpCodes::StatusCode>(statusCode));
+            client.response.setHeader("Location", returnPath);
+            client.response.setBody("");
+        }
+        else if (statusCode == OK)
+        {
+            client.response.setStatus(static_cast<HttpCodes::StatusCode>(statusCode));
+            client.response.setHeader("Content-Type", "text/plain");
+            client.response.setBody(returnPath);
 
-    if (!client.location.getCgiPath().empty()) {
+        }
+    }
+    else if (client.location.getCgiPath() == true)
+    {
         std::cout << GREEN "CGI found\n" RESET;
         Cgi cgi;
 
@@ -123,16 +141,6 @@ int receiveClientRequest(Client& client, std::map< std::pair<std::string, std::s
             client.assignServerByServerName(servers, ipPort, defaultServer);
             client.location = client.server.getLocationPath(request.getURI());
             std::cout << "Connection Location Path: " << client.location.getLocaPath() << "\n";
-			// if (connection.location.getLocaPath().empty())
-			// {
-			// 	//validate if the request URI is a valid file or directory
-			// 	struct stat info;
-			// 	if (stat(request.getURI().c_str(), &info) == 0 && (S_ISDIR(info.st_mode) || S_ISREG(info.st_mode)))
-			// 	{
-			// 		connection.locationPath = request.getURI();
-			// 		connection.location.setAllowMethod(defaultServer.getAllowMethods());
-			// 	}
-			// }
             std::cout << "METHOD SIZE: " << client.location.getAllowMethods().size() << "\n"; //// debug
             validateMethod(request.getMethod(), client.location.getAllowMethods());
         }
