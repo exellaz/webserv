@@ -7,11 +7,16 @@
 class SessionManager
 {
     public:
+        SessionManager();
         std::string getSessionIdFromCookie(const std::string& cookieHeader);
         std::string generateSessionId();
+        const std::string& getOrCreateSession(const std::string& sessionId);
+
+        bool sessionExists(const std::string& sessionId) const;
+
 
     private:
-        std::map<std::string, std::string> sessions;
+        std::map<std::string, std::string> _sessions;
 };
 
 #endif
