@@ -38,6 +38,11 @@ const std::string& SessionManager::getOrCreateSession(const std::string& session
     return _sessions[sessionId];
 }
 
+std::string SessionManager::buildSetCookieHeader(const std::string& sessionId) const
+{
+    return "Set-Cookie: session_id=" + sessionId + "; Path=/; HttpOnly";
+}
+
 bool SessionManager::sessionExists(const std::string& sessionId) const
 {
     return _sessions.find(sessionId) != _sessions.end();
