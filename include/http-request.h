@@ -46,6 +46,7 @@ class HttpRequest
         const std::string& getHeader(const std::string& name) const;
         const std::string& getBody() const;
         const std::string& getQueryString() const;
+        const std::string& getSessionId() const;
 
         void setMethod(const std::string& method);
         void setURI(const std::string& uri);
@@ -53,6 +54,7 @@ class HttpRequest
         void setHeader(const std::string& name, const std::string& value);
         void setBody(const std::string& body);
         void setQueryString(const std::string& str);
+        void setSessionId(const std::string& id);
 
     private:
         bool _headerParsed;
@@ -63,7 +65,7 @@ class HttpRequest
         std::map<std::string, std::string> _headers;
         std::string _body;
         std::string _queryString;
-
+        std::string _sessionId;
 };
 
 std::ostream& operator<<(std::ostream &stream, const HttpRequest& src);

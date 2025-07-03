@@ -50,6 +50,8 @@ SRCS_FIL = \
 		timeout/handle-timeout.cpp \
 		\
 		utils/utils.cpp \
+		\
+		session/session-manager.cpp
 
 SRCS = $(addprefix $(SRCDIR), $(SRCS_FIL))
 

@@ -7,6 +7,23 @@ SessionManager::SessionManager()
     std::srand(std::time(0));
 }
 
+void SessionManager::handleSession(Client& client)
+{
+    static SessionManager sessionMgr;
+    HttpRequest& request = client.request;
+    HttpResponse& response = client.response;
+
+    std::string cookieHeader = request.getHeader("Cookie");
+    std::string sessionId = sessionMgr.getSessionIdFromCookie(cookieHeader);
+    if (!sessionMgr.sessionExists(sessionId)) {
+        sessionId = generateSessionId();
+        response.setHeader("Set-Cookie", buildSetCookieHeader(sessionId));
+        sessionMgr._sessions[sessionId] = "default";
+    }
+    client.setSessionId(sessionId);
+    client.setSessionData(sessionMgr.getSessionData(sessionId));
+}
+
 std::string SessionManager::generateSessionId()
 {
     static const std::string& alphaNum =
@@ -28,19 +45,20 @@ std::string SessionManager::getSessionIdFromCookie(const std::string& cookieHead
     return cookieHeader.substr(start, end - start);
 }
 
-const std::string& SessionManager::getOrCreateSession(const std::string& sessionId)
+// sessionData can be a struct instead to hold all necessary data of the session
+void SessionManager::setSession(const std::string& sessionId, const std::string& sessionData)
 {
-    if (sessionId.empty() || !sessionExists(sessionId)) {
-        std::string newId = generateSessionId();
-        _sessions[newId] = "guest"; // default
-        return _sessions[newId];
-    }
+    _sessions[sessionId] = sessionData;
+}
+
+const std::string& SessionManager::getSessionData(const std::string& sessionId)
+{
     return _sessions[sessionId];
 }
 
-std::string SessionManager::buildSetCookieHeader(const std::string& sessionId) const
+std::string SessionManager::buildSetCookieHeader(const std::string& sessionId)
 {
-    return "Set-Cookie: session_id=" + sessionId + "; Path=/; HttpOnly";
+    return "session_id=" + sessionId + "; Path=/; HttpOnly";
 }
 
 bool SessionManager::sessionExists(const std::string& sessionId) const

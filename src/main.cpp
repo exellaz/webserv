@@ -2,6 +2,7 @@
 #include "timeout.h"
 #include "handle-sockets.h"
 #include "poll-loop.h"
+#include "session.h"
 #include <map>
 
 std::string getConfigFileString(int argc, char **argv)
@@ -29,7 +30,8 @@ int main(int argc, char **argv)
         std::vector<struct pollfd> pfds;
         std::vector<int> listeners;
         std::vector<Client> clients;
-        
+        SessionManager sessionMgr;
+
         setupAllListenerSockets(servers, pfds, listeners);
         pollLoop(servers, pfds, listeners, clients);
     }
