@@ -1,4 +1,5 @@
 #include "http-request.h"
+#include "utils.h"
 
 bool HttpRequest::isHeaderParsed() const
 {

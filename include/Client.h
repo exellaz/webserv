@@ -1,4 +1,3 @@
-
 #ifndef CLIENT_H
 #define CLIENT_H
 
@@ -9,6 +8,7 @@
 #include "Configuration.hpp"
 #include <iostream>
 #include <sys/time.h>
+#include "color.h"
 
 enum ConnState {
 	ACTIVE,
@@ -87,8 +87,5 @@ private:
 };
 
 std::ostream & operator<<( std::ostream & o, Client const & client );
-void dispatchRequest(Client& client);
-int handleParsingError(const HttpException& e, HttpResponse& response, Client& client);
-
 
 #endif

@@ -1,4 +1,79 @@
-#include "../../include/sockets-polling.h"
+#include "read-request.h"
+#include "poll-loop.h"
+#include "Cgi.hpp"
+
+static void setPfdTrackPollOutOnly(struct pollfd& pfd);
+static void setPfdTrackPollInOnly(struct pollfd& pfd);
+static void resolveLocationPath(const std::string& uri, Client& client);
+static void sendResponseToClient(int fd, HttpResponse& response);
+
+void handlePollIn(std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers,
+                    struct pollfd& pfd, Client& client)
+{
+    std::cout << "POLLIN: socket " << pfd.fd << '\n';
+
+    int res = receiveClientRequest(client, servers);
+    if (res == RECV_CLOSED) {
+        std::cout << "server: socket " << pfd.fd << " hung up\n";
+        client.connState = DISCONNECTED;
+        return;
+    }
+    else if (res == RECV_AGAIN)
+        return;
+    else if (res != REQUEST_ERR) {
+        try {
+            resolveLocationPath(client.request.getURI(), client);
+            dispatchRequest(client);
+        }
+        catch (const HttpException& e) {
+            handleParsingError(e, client.response, client);
+        }
+    }
+    std::cout << "Response ready\n";
+    client.isResponseReady = true;
+    client.clearBuffer();
+    setPfdTrackPollOutOnly(pfd);
+}
+
+void handlePollOut(struct pollfd& pfd, Client& client)
+{
+    std::cout << "POLLOUT: socket " << client.fd << '\n';
+
+    sendResponseToClient(client.fd, client.response);
+    client.isResponseReady = false;
+    client.request.clearRequest();
+    client.response.clearResponse();
+
+    if (client.connType == CLOSE) {
+        client.connState = DISCONNECTED;
+        return;
+    }
+    setPfdTrackPollInOnly(pfd);
+}
+
+void handlePollHup(Client& client)
+{
+    std::cout << "POLLHUP: socket " << client.fd << '\n';
+    client.connState = DISCONNECTED;
+}
+
+void handlePollErr(Client& client)
+{
+    std::cout << "POLLERR: socket " << client.fd << '\n';
+    client.connState = DISCONNECTED;
+}
+
+static void setPfdTrackPollOutOnly(struct pollfd& pfd) 
+{
+    pfd.events &= ~POLLIN;
+    pfd.events |= POLLOUT;
+}
+
+static void setPfdTrackPollInOnly(struct pollfd& pfd) 
+{
+    pfd.events &= ~POLLOUT;
+    pfd.events |= POLLIN;
+}
 
 /**
  * @brief normalize the multiple "/" in the relative uri to one "/"
@@ -53,7 +128,6 @@ static void validateRelativeUri(const std::string &relativeUri, Client& client, 
     }
 }
 
-
 /**
  * @brief Get the full path from the alias or root
 */
@@ -80,67 +154,8 @@ void resolveLocationPath(const std::string& uri, Client& client)
     }
 }
 
-/**
- * @brief Reads the contents of a directory and generates an HTML index page
-*/
-std::string readDirectorytoString(const std::string &directoryPath, const std::string& uri)
+static void sendResponseToClient(int fd, HttpResponse& response)
 {
-    std::stringstream htmlOutput;
-    htmlOutput << "<html><head><title>Index of " << uri << "</title></head><body>";
-    htmlOutput << "<h1>Index of " << uri << "</h1><hr><ul>";
-    DIR* dir = opendir(directoryPath.c_str());
-    if (!dir)
-        return "";
-    struct dirent* entry;
-    while ((entry = readdir(dir)) != NULL) {
-        std::string name = entry->d_name;
-        if (name == ".")
-            continue;
-        std::string slash = (entry->d_type == DT_DIR) ? "/" : "";
-        std::string url_base = uri;
-        if (url_base.empty() || url_base[url_base.size() - 1] != '/')
-            url_base += '/';
-        htmlOutput << "<li><a href=\"" << url_base << name << slash << "\">" << name << slash << "</a></li>";
-    }
-    closedir(dir);
-    htmlOutput << "</ul><hr></body></html>";
-    return htmlOutput.str();
-}
-
-/**
- * @note 1. getSockName() retrieves the local address of the socket
- * @note 2. ntohs() converts the port number from network byte order to host byte ( mean from big-endian to 16-bit number)
- * @note 3. sockaddr is used to store the address of the socket
- * @note 4. sockaddr_in is used to store the address of the socket in IPv4 format
-*/
-std::pair<std::string, std::string> getIpAndPortFromSocketFd(int fd)
-{
-    struct sockaddr_storage remoteAddr;
-    socklen_t addrLen = sizeof(remoteAddr);
-    getsockname(fd, (struct sockaddr *)&remoteAddr, &addrLen);
-
-    int port = ntohs(((struct sockaddr_in*)&remoteAddr)->sin_port);
-    std::stringstream portStream;
-    portStream << port;
-
-    int ip = ntohl(((struct sockaddr_in*)&remoteAddr)->sin_addr.s_addr);
-    std::ostringstream ipStream;
-    ipStream << ((ip >> 24) & 0xFF) << "."
-                << ((ip >> 16) & 0xFF) << "."
-                << ((ip >> 8)  & 0xFF) << "."
-                << (ip & 0xFF);
-
-    return std::make_pair(ipStream.str(), portStream.str());
-}
-
-
-Server& getDefaultServerBlockByIpPort(std::pair<std::string, std::string> ipPort, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers)
-{
-    for (std::map<std::pair<std::string, std::string>, std::vector<Server> >::iterator it = servers.begin(); it != servers.end(); ++it)
-    {
-        if (it->first == ipPort)
-            return *(it->second.begin());
-    }
-    // if cannot match with `ipPort` // ? will this ever happen?
-    return *(servers.begin()->second.begin());
+    send(fd, response.toString().c_str(), response.toString().size(), 0);
+    std::cout << "server: Response sent to client.\n";
 }

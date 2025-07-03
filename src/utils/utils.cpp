@@ -16,3 +16,4 @@ bool isDigitsOnly(const std::string& str)
     }
     return true;
 }
+

@@ -1,7 +1,8 @@
-#include "../../include/sockets-polling.h"
+#include <string.h> // memset
+#include "handle-sockets.h"
 
 // Return a listening socket
-int getListenerSocket(Server& server)
+static int getListenerSocket(const std::string& host, const std::string& port)
 {
     int listener;     // Listening socket descriptor
     int rv;
@@ -16,7 +17,7 @@ int getListenerSocket(Server& server)
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE;
 
-    if ((rv = getaddrinfo(server.getHost().c_str(), server.getPort().c_str(), &hints, &res)) != 0) {
+    if ((rv = getaddrinfo(host.c_str(), port.c_str(), &hints, &res)) != 0) {
         fprintf(stderr, "pollserver: %s\n", gai_strerror(rv));
         exit(1);
     }
@@ -53,16 +54,16 @@ int getListenerSocket(Server& server)
 }
 
 // returns listening socket fd
-void setupListeningSocket(std::vector<struct pollfd>& pfds, std::vector<int>& listeners, Server& server) {
+void setupListenerSocket(std::vector<struct pollfd>& pfds, std::vector<int>& listeners, Server& server) {
 
-    int listenerFd = getListenerSocket(server);
+    int listenerFd = getListenerSocket(server.getHost(), server.getPort());
     if (listenerFd == -1) {
 		std::cerr << "Error: error getting listening socket\n";
         exit(1); // TODO: throw exception
     }
 
-    if (set_nonblocking(listenerFd) == -1) {
-        perror("set_nonblocking");
+    if (setNonBlocking(listenerFd) == -1) {
+        perror("setNonBlocking");
         close(listenerFd);
         exit(4); // TODO: throw exception
     }
@@ -75,3 +76,19 @@ void setupListeningSocket(std::vector<struct pollfd>& pfds, std::vector<int>& li
 
 	listeners.push_back(listenerFd);
 }
+
+
+void setupAllListenerSockets(std::map< std::pair<std::string, std::string> , std::vector<Server> > servers,
+                             std::vector<struct pollfd>& pfds, 
+                             std::vector<int>& listeners)
+{
+    std::map<std::pair<std::string, std::string>, std::vector<Server> >::iterator it = servers.begin();
+    for (; it != servers.end(); ++it)
+    {
+        Server &curServer = *(it->second.begin());
+        setupListenerSocket(pfds, listeners, curServer);
+    }
+    for (std::vector<int>::iterator it = listeners.begin(); it != listeners.end(); ++it) ////debug
+        std::cout << "Listener socket fd: " << *it << "\n";
+}
+
