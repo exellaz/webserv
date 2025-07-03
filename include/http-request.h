@@ -27,9 +27,11 @@ class HttpRequest
         void parseRequestLine(const std::string& headerStr);
         void parseHeaderLines(const std::string& line);
         void extractQueryString();
+        std::string generateSessionId();
+        std::string getSessionIdFromCookie(const std::string& cookieHeader);
+
 
         void clearRequest();
-
         bool hasHeader(const std::string& name) const;
         bool isValidToken(const std::string& token) const;
         bool isTChar(char c) const;
