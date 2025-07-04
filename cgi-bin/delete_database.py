@@ -6,7 +6,7 @@ import json
 import sys
 
 def signal_handler(signum, frame):
-    os._exit(0)
+    os._exit(1)
 
 signal.signal(signal.SIGINT, signal_handler)
 signal.signal(signal.SIGTERM, signal_handler)
