@@ -10,10 +10,13 @@ int readFromSocket(Client& client, int bufferSize)
 
     if (n == 0) {
         std::cout << "RECV_CLOSED\n";
+        delete[] buf;
+
         return RECV_CLOSED;
     }
     else if (n == -1) {
         std::cout << "RECV_AGAIN: No data available yet, will try again next iteration.\n";
+        delete[] buf;
         return RECV_AGAIN;
     }
     buf[n] = '\0';
