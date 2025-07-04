@@ -1,10 +1,17 @@
 #!/usr/bin/python3
 
+import signal
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning) # Ignore deprecation warnings for CGI usage
 import cgi
 import os
 import sys
+
+def signal_handler(signum, frame):
+    os._exit(0)
+
+signal.signal(signal.SIGINT, signal_handler)
+signal.signal(signal.SIGTERM, signal_handler)
 
 print("Content-Type: text/plain\r\n")
 print()

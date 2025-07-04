@@ -1,9 +1,16 @@
 #!/usr/bin/python3
 
+import signal
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning) # Ignore deprecation warnings for CGI usage
 import cgi  # this library available in Python 3.12 (to handle CGI form data)
 import os
+
+def signal_handler(signum, frame):
+    os._exit(0)
+
+signal.signal(signal.SIGINT, signal_handler)
+signal.signal(signal.SIGTERM, signal_handler)
 
 # Parse query parameters
 form = cgi.FieldStorage()  # Create an instance of FieldStorage to handle form data

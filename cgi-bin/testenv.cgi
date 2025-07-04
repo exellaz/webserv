@@ -1,6 +1,13 @@
 #!/usr/bin/python3
 
+import signal
 import os
+
+def signal_handler(signum, frame):
+    os._exit(0)
+
+signal.signal(signal.SIGINT, signal_handler)
+signal.signal(signal.SIGTERM, signal_handler)
 
 print("Content-Type: text/plain\r\n")
 print("\r\n")

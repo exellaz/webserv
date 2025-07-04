@@ -1,7 +1,15 @@
 #!/usr/bin/python3
+
+import signal
 import os
 import json
 import sys
+
+def signal_handler(signum, frame):
+    os._exit(0)
+
+signal.signal(signal.SIGINT, signal_handler)
+signal.signal(signal.SIGTERM, signal_handler)
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 json_file = os.path.join(SCRIPT_DIR, "data.json")
