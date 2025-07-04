@@ -1,18 +1,22 @@
 #include "poll-loop.h"
 #include "timeout.h"
+#include "signal-handler.h"
 
 void pollLoop(std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers,
               std::vector<struct pollfd>& pfds,
               std::vector<int>& listeners,
               std::vector<Client>& clients)
 {
-    while(true) {
+    while(!g_signalCaught) {
         std::cout << CYAN << "\n+++++++ Waiting for POLL event ++++++++" << RESET << "\n\n";
 
         int nearestTimeout = getNearestUpcomingTimeout(clients, servers);
         int pollCount = poll(&pfds[0], pfds.size(), nearestTimeout);
-        if (pollCount == -1)
+        if (pollCount == -1) {
+            if (errno == EINTR) // signal detected
+                continue;
             throw std::runtime_error("poll error");
+        }
 
         disconnectTimedOutClients(clients, pfds, servers);
 

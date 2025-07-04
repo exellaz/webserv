@@ -1,5 +1,6 @@
 #include "timeout.h"
 #include "read-request.h"
+#include "signal-handler.h"
 
 // if actual body size is larger than contentLength, remainder is stored in buffer
 int readByContentLength(Client& client, std::string& bodyStr, const size_t bufferSize, const size_t maxSize)
@@ -14,6 +15,8 @@ int readByContentLength(Client& client, std::string& bodyStr, const size_t buffe
 		throw HttpException(PAYLOAD_TOO_LARGE, "Request Body Too Large");
 
     while (bytesRead < client.contentLength) {
+        if (g_signalCaught)
+            return RECV_AGAIN;
         ret = readFromSocket(client, bufferSize);
         if (ret <= 0)
 			return ret; // RECV_AGAIN or RECV_CLOSED
