@@ -30,7 +30,6 @@ int main(int argc, char **argv)
         std::vector<struct pollfd> pfds;
         std::vector<int> listeners;
         std::vector<Client> clients;
-        SessionManager sessionMgr;
 
         setupAllListenerSockets(servers, pfds, listeners);
         pollLoop(servers, pfds, listeners, clients);

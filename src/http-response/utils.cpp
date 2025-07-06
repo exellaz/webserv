@@ -7,7 +7,11 @@ StatusCode HttpResponse::getStatus()
 
 std::string HttpResponse::getHeader(const std::string& name)
 {
-    return _headers[name];
+    static const std::string empty;
+    std::map<std::string, std::string>::const_iterator it = _headers.find(toLower(name));
+    if (it != _headers.end())
+        return it->second;
+    return empty;
 }
 
 std::string HttpResponse::getBody()

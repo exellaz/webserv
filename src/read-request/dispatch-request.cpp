@@ -1,6 +1,7 @@
 #include "http-request.h"
 #include "Cgi.hpp"
 #include "read-request.h"
+#include "session.h"
 
 void dispatchRequest(Client& client)
 {
@@ -42,6 +43,10 @@ void dispatchRequest(Client& client)
         else {
             handleCgiRequest(cgiOutput, response);
             std::cout << "---------- CGI Output ----------\n" << BLUE << response.toString() << RESET << "\n";
+            if (!response.getHeader("X-Session-Update").empty()) {
+                SessionManager& session = SessionManager::getInstance();
+                session.setSession(client.getSessionId(), response.getHeader("X-Session-Update"));
+            }
         }
     }
     else {

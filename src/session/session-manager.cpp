@@ -8,7 +8,7 @@ static std::string buildSetCookieHeader(const std::string& sessionId);
 
 void SessionManager::handleSession(Client& client)
 {
-    static SessionManager sessionMgr;
+    SessionManager& sessionMgr = getInstance();
     HttpRequest& request = client.request;
     HttpResponse& response = client.response;
     std::string cookieHeader = request.getHeader("Cookie");
@@ -20,11 +20,19 @@ void SessionManager::handleSession(Client& client)
     }
     client.setSessionId(sessionId);
     client.setSessionData(sessionMgr.getSessionData(sessionId));
+    request.setSessionId(sessionId);
+    std::cout << "Session data: " << sessionMgr._sessions[sessionId] << "\n";
 }
 
 SessionManager::SessionManager()
 {
     std::srand(std::time(0));
+}
+
+SessionManager& SessionManager::getInstance()
+{
+    static SessionManager _instance;
+    return _instance;
 }
 
 static std::string generateSessionId()

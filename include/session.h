@@ -9,6 +9,7 @@ class SessionManager
 {
     public:
         SessionManager();
+        static SessionManager& getInstance();
         static void handleSession(Client& client);
 
         const std::string& getSessionData(const std::string& sessionId);
