@@ -34,10 +34,51 @@ def main():
     for header in headers:
         print(header)
     print()  # End of headers
-    print("<html><body>")
-    print(body)
-    print("<a href=\"/cgi-bin/form.cgi\">Go back</a>")
-    print("</body></html>")
+
+    print(f"""<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Session Action</title>
+        <style>
+            body {{
+                font-family: Arial, sans-serif;
+                background-color: #f9f9f9;
+                color: #333;
+                padding: 40px;
+                max-width: 600px;
+                margin: auto;
+                background: #fff;
+                border-radius: 8px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            }}
+            h1 {{
+                font-size: 24px;
+                color: #007BFF;
+            }}
+            p {{
+                font-size: 16px;
+            }}
+            .back-link {{
+                display: inline-block;
+                margin-top: 20px;
+                text-decoration: none;
+                background-color: #007BFF;
+                color: white;
+                padding: 10px 16px;
+                border-radius: 5px;
+            }}
+            .back-link:hover {{
+                background-color: #0056b3;
+            }}
+        </style>
+    </head>
+    <body>
+        <h1>Session Status</h1>
+        <p>{body}</p>
+        <a class="back-link" href="/cgi-bin/form.cgi">⟵ Go back</a>
+    </body>
+    </html>""")
 
 if __name__ == "__main__":
     main()
