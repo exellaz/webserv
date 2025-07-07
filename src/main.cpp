@@ -1,9 +1,12 @@
+#include <map>
 #include "Configuration.hpp"
 #include "timeout.h"
 #include "handle-sockets.h"
 #include "poll-loop.h"
+#include "signal-handler.h"
 #include "session.h"
-#include <map>
+
+volatile sig_atomic_t g_signalCaught = false;
 
 std::string getConfigFileString(int argc, char **argv)
 {
@@ -24,6 +27,8 @@ std::string getConfigFileString(int argc, char **argv)
 
 int main(int argc, char **argv)
 {
+    signal(SIGINT, signalHandler);
+    signal(SIGTERM, signalHandler);
     try {
         std::string configFile = getConfigFileString(argc, argv);
         std::map< std::pair<std::string, std::string> , std::vector<Server> > servers = parseAllServers(configFile);
