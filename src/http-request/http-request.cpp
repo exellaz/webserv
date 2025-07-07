@@ -1,6 +1,10 @@
 #include "http-request.h"
 #include "http-exception.h"
 
+static bool isTChar(char c);
+static bool isValidToken(const std::string& token);
+static bool isValidHeaderValue(const std::string& value);
+
 void HttpRequest::parseRequestLine(const std::string& headerStr)
 {
     std::istringstream stream(headerStr);
@@ -12,9 +16,8 @@ void HttpRequest::parseRequestLine(const std::string& headerStr)
             line.erase(line.size() - 1);
 
         if (line.empty())
-            continue; // Skip empty prelude lines
+            continue;
 
-        // Now this is the actual request line
         std::string extra;
         std::istringstream lineStream(line);
         if (!(lineStream >> _method >> _uri >> _version))
@@ -36,7 +39,6 @@ void HttpRequest::parseRequestLine(const std::string& headerStr)
         return ;
     }
 
-    // If we never found a non-empty line
     throw HttpException(BAD_REQUEST, "Missing request line");
 }
 
@@ -50,7 +52,7 @@ void HttpRequest::parseHeaderLines(const std::string& str)
         if (!line.empty() && line[line.size() - 1] == '\r')
             line.erase(line.size() - 1);
         if (line.empty())
-            continue; // Skip empty prelude lines
+            continue;
 
         size_t colon = line.find(':');
         if (colon != std::string::npos) {
@@ -85,34 +87,8 @@ void HttpRequest::parseHeaderLines(const std::string& str)
     _headerParsed = true;
 }
 
-bool HttpRequest::isTChar(char c) const
+void HttpRequest::extractQueryString()
 {
-    const std::string tcharSymbols = "!#$%&'*+-.^_`|~";
-    return std::isalnum(static_cast<unsigned char>(c)) || tcharSymbols.find(c) != std::string::npos;
-}
-
-bool HttpRequest::isValidToken(const std::string& token) const
-{
-    for (std::string::const_iterator It = token.begin(); It != token.end(); ++It) {
-        if (!isTChar(*It))
-            return false;
-    }
-    return !token.empty();
-}
-
-bool HttpRequest::isValidHeaderValue(const std::string& value) const
-{
-    for (std::string::const_iterator It = value.begin(); It != value.end(); ++It) {
-        unsigned char c = static_cast<unsigned char>(*It);
-        if (c == 9 || (c >= 32 && c <= 126) || c >= 128)
-            continue;
-
-        return false;
-    }
-    return true;
-}
-
-void HttpRequest::extractQueryString() {
     size_t qpos = _uri.find('?');
     if (qpos != std::string::npos) {
         _queryString = _uri.substr(qpos + 1);
@@ -121,58 +97,6 @@ void HttpRequest::extractQueryString() {
     else
         _queryString.clear();
 }
-
-void HttpRequest::clearRequest()
-{
-    _headerParsed = false;
-    _bodyParsed = false;
-    _method.clear();
-    _uri.clear();
-    _version.clear();
-    _headers.clear();
-    _body.clear();
-    _queryString.clear();
-}
-
-HttpRequest::HttpRequest()
-    : _headerParsed(false),
-    _bodyParsed(false),
-    _method(),
-    _uri(),
-    _version(),
-    _headers(),
-    _body(),
-    _queryString()
-{}
-
-HttpRequest::HttpRequest(const HttpRequest& other)
-    : _headerParsed(other._headerParsed),
-    _bodyParsed(other._bodyParsed),
-    _method(other._method),
-    _uri(other._uri),
-    _version(other._version),
-    _headers(other._headers),
-    _body(other._body),
-    _queryString(other._queryString)
-{}
-
-HttpRequest& HttpRequest::operator=(const HttpRequest& other)
-{
-    if (this != &other) {
-        _headerParsed = other._headerParsed;
-        _bodyParsed = other._bodyParsed;
-        _method = other._method;
-        _uri = other._uri;
-        _version = other._version;
-        _headers = other._headers;
-        _body = other._body;
-        _queryString = other._queryString;
-    }
-    return *this;
-}
-
-HttpRequest::~HttpRequest()
-{}
 
 std::ostream& operator<<(std::ostream &stream, const HttpRequest& src)
 {
@@ -185,4 +109,31 @@ std::ostream& operator<<(std::ostream &stream, const HttpRequest& src)
         stream << It->first << ": " << It->second << "\n";
     stream << "\nBody\n" << src.getBody() << "\n";
     return stream;
+}
+
+static bool isTChar(char c)
+{
+    const std::string tcharSymbols = "!#$%&'*+-.^_`|~";
+    return std::isalnum(static_cast<unsigned char>(c)) || tcharSymbols.find(c) != std::string::npos;
+}
+
+static bool isValidToken(const std::string& token)
+{
+    for (std::string::const_iterator It = token.begin(); It != token.end(); ++It) {
+        if (!isTChar(*It))
+            return false;
+    }
+    return !token.empty();
+}
+
+static bool isValidHeaderValue(const std::string& value)
+{
+    for (std::string::const_iterator It = value.begin(); It != value.end(); ++It) {
+        unsigned char c = static_cast<unsigned char>(*It);
+        if (c == 9 || (c >= 32 && c <= 126) || c >= 128)
+            continue;
+
+        return false;
+    }
+    return true;
 }

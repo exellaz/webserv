@@ -6,16 +6,6 @@
 # include <map>
 # include <cstdlib>
 
-namespace HttpConstants
-{
-    // Supported Methods
-    const std::string GET = "GET";
-    const std::string POST = "POST";
-    const std::string DELETE = "DELETE";
-
-    const std::string HTTP_1_1 = "HTTP/1.1";
-}
-
 class HttpRequest
 {
     public:
@@ -27,15 +17,9 @@ class HttpRequest
         void parseRequestLine(const std::string& headerStr);
         void parseHeaderLines(const std::string& line);
         void extractQueryString();
-        std::string generateSessionId();
-        std::string getSessionIdFromCookie(const std::string& cookieHeader);
-
 
         void clearRequest();
         bool hasHeader(const std::string& name) const;
-        bool isValidToken(const std::string& token) const;
-        bool isTChar(char c) const;
-        bool isValidHeaderValue(const std::string& value) const;
         bool isHeaderParsed() const;
         bool isBodyParsed() const;
 
