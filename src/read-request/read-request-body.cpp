@@ -3,49 +3,70 @@
 #include "signal-handler.h"
 
 // if actual body size is larger than contentLength, remainder is stored in buffer
-int readByContentLength(Client& client, std::string& bodyStr, const size_t bufferSize, const size_t maxSize)
+int Client::readByContentLength(std::string& bodyStr, const size_t bufferSize, const size_t maxSize)
 {
 
-    size_t bytesRead = client.getBuffer().size();
+    size_t bytesRead = _buffer.size();
     int ret = RECV_OK;
 
-    client.setContentLength(std::strtol(client.request.getHeader("Content-Length").c_str(), NULL, 10));
+    _contentLength = std::strtol(request.getHeader("Content-Length").c_str(), NULL, 10);
 
-    if (client.getContentLength() > maxSize)
+    if (_contentLength > maxSize)
         throw HttpException(PAYLOAD_TOO_LARGE, "Request Body Too Large");
 
-    while (bytesRead < client.getContentLength()) {
+    while (bytesRead < _contentLength) {
         if (g_signalCaught)
             return RECV_AGAIN;
-        ret = readFromSocket(client, bufferSize);
+        ret = readFromSocket(bufferSize);
         if (ret <= 0)
             return ret; // RECV_AGAIN or RECV_CLOSED
 
-        client.setStartTime(getNowInSeconds()); // reset timer
+        _startTime = getNowInSeconds(); // reset timer
         bytesRead += ret;
     }
 
-    if (bytesRead == client.getContentLength()) {
-        bodyStr = client.getBuffer();
-        client.clearBuffer();
+    if (bytesRead == _contentLength) {
+        bodyStr = _buffer;
+        clearBuffer();
     }
-    else { // bytesRead > client.getContentLength()
-        bodyStr = client.getBuffer().substr(0, client.getContentLength());
-        client.setBuffer(client.getBuffer().substr(client.getContentLength()));
+    else { // bytesRead > _contentLength
+        bodyStr = _buffer.substr(0, _contentLength);
+        setBuffer(_buffer.substr(_contentLength));
     }
     return ret;
 }
-int readRequestBody(Client& client, std::string& bodyStr, const size_t bufferSize, const size_t maxSize)
+// int readRequestBody(Client& client, std::string& bodyStr, const size_t bufferSize, const size_t maxSize)
+// {
+//     std::cout << GREY << "===== readRequestBody =====" << RESET << '\n';
+//     int ret = RECV_OK;
+//     if (client.getReadBodyMethod() == CONTENT_LENGTH) {
+//         std::cout << "CONTENT_LENGTH\n";
+//         ret = readByContentLength(client, bodyStr, bufferSize, maxSize);
+//     }
+//     else if (client.getReadBodyMethod() == CHUNKED_ENCODING) {
+//         std::cout << "CHUNKED ENCODING\n";
+//         ret = readByChunkedEncoding(client, bodyStr, bufferSize, maxSize);
+//     }
+//     else {// NO_BODY
+//         std::cout << "NO BODY\n";
+//         return RECV_OK;
+//     }
+
+//     return ret;
+// }
+
+
+int Client::readRequestBody(std::string& bodyStr, const size_t bufferSize, const size_t maxSize)
 {
     std::cout << GREY << "===== readRequestBody =====" << RESET << '\n';
     int ret = RECV_OK;
-    if (client.getReadBodyMethod() == CONTENT_LENGTH) {
+    if (_readBodyMethod == CONTENT_LENGTH) {
         std::cout << "CONTENT_LENGTH\n";
-        ret = readByContentLength(client, bodyStr, bufferSize, maxSize);
+        ret = readByContentLength(bodyStr, bufferSize, maxSize);
     }
-    else if (client.getReadBodyMethod() == CHUNKED_ENCODING) {
+    else if (_readBodyMethod == CHUNKED_ENCODING) {
         std::cout << "CHUNKED ENCODING\n";
-        ret = readByChunkedEncoding(client, bodyStr, bufferSize, maxSize);
+        ret = readByChunkedEncoding(bodyStr, bufferSize, maxSize);
     }
     else {// NO_BODY
         std::cout << "NO BODY\n";
@@ -54,5 +75,3 @@ int readRequestBody(Client& client, std::string& bodyStr, const size_t bufferSiz
 
     return ret;
 }
-
-

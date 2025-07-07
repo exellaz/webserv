@@ -13,7 +13,7 @@ void handlePollIn(std::map< std::pair<std::string, std::string> , std::vector<Se
 {
     std::cout << "POLLIN: socket " << pfd.fd << '\n';
 
-    int res = receiveClientRequest(client, servers);
+    int res = client.receiveClientRequest(servers);
     if (res == RECV_CLOSED) {
         std::cout << "server: socket " << pfd.fd << " hung up\n";
         client.setConnState(DISCONNECTED);
@@ -25,7 +25,7 @@ void handlePollIn(std::map< std::pair<std::string, std::string> , std::vector<Se
         try {
             resolveLocationPath(client.request.getURI(), client);
             SessionManager::handleSession(client);
-            dispatchRequest(client);
+            client.dispatchRequest();
         }
         catch (const HttpException& e) {
             handleParsingError(e, client.response, client);

@@ -3,33 +3,33 @@
 #include "read-request.h"
 #include "session.h"
 
-void dispatchRequest(Client& client)
+void Client::dispatchRequest()
 {
-    HttpRequest& request = client.request;
-    HttpResponse& response = client.response;
+    // HttpRequest& request = client.request;
+    // HttpResponse& response = client.response;
 
     response.setHeader("Connection", request.getHeader("Connection"));
     if (request.getHeader("Connection") == "close")
-        client.setConnType(CLOSE);
-    if (!client.location.getReturnPath().empty())
+        _connType = CLOSE;
+    if (!location.getReturnPath().empty())
     {
-        int statusCode = client.location.getReturnPath().begin()->first;
-        std::string returnPath = client.location.getReturnPath().begin()->second;
+        int statusCode = location.getReturnPath().begin()->first;
+        std::string returnPath = location.getReturnPath().begin()->second;
         if (statusCode == MOVED_PERMANENTLY || statusCode == FOUND)
         {
-            client.response.setStatus(static_cast<HttpCodes::StatusCode>(statusCode));
-            client.response.setHeader("Location", returnPath);
-            client.response.setBody("");
+            response.setStatus(static_cast<HttpCodes::StatusCode>(statusCode));
+            response.setHeader("Location", returnPath);
+            response.setBody("");
         }
         else if (statusCode == OK)
         {
-            client.response.setStatus(static_cast<HttpCodes::StatusCode>(statusCode));
-            client.response.setHeader("Content-Type", "text/plain");
-            client.response.setBody(returnPath);
+            response.setStatus(static_cast<HttpCodes::StatusCode>(statusCode));
+            response.setHeader("Content-Type", "text/plain");
+            response.setBody(returnPath);
 
         }
     }
-    else if (client.location.getCgiPath() == true)
+    else if (location.getCgiPath() == true)
     {
         std::cout << GREEN "CGI found\n" RESET;
         Cgi cgi;
@@ -44,9 +44,9 @@ void dispatchRequest(Client& client)
             SessionManager& session = SessionManager::getInstance();
             handleCgiRequest(cgiOutput, response);
             if (!response.getHeader("X-Session-Update").empty())
-                session.setSession(client.getSessionId(), response.getHeader("X-Session-Update"));
+                session.setSession(getSessionId(), response.getHeader("X-Session-Update"));
             if (response.getHeader("X-Session-Delete") == "yes")
-                session.clearSessionById(client.getSessionId());
+                session.clearSessionById(getSessionId());
             std::cout << "---------- CGI Output ----------\n" << BLUE << response.toString() << RESET << "\n";
         }
     }
@@ -54,12 +54,12 @@ void dispatchRequest(Client& client)
         if (request.getMethod() == "GET")
         {
             std::cout << GREEN "GET request\n" RESET;
-            response.handleGetRequest(client.location, client);
+            response.handleGetRequest(location, *this);
         }
         else if (request.getMethod() == "POST")
         {
             std::cout << GREEN "POST request\n" RESET;
-            response.handlePostRequest(request, client);
+            response.handlePostRequest(request, *this);
         }
         else if (request.getMethod() == "DELETE")
             throw HttpException(METHOD_NOT_ALLOWED, "Delete without CGI not allowed");

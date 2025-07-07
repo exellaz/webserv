@@ -23,19 +23,81 @@ static void validateMethod(const std::string& method, const std::vector<std::str
     throw HttpException(METHOD_NOT_ALLOWED, "Method not allowed");
 }
 
+// /*
+// NOTE:
+// - `readHeader` will remove the 'header' section from `buffers`
+// - if recv(HEADER_BUFFER_SIZE) reads till the 'body' section, that section of 'body' will remain in buffers after `readHeader()` is called
+
+// */
+// int receiveClientRequest(Client& client, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers)
+// {
+//     HttpRequest& request = client.request;
+//     HttpResponse& response = client.response;
+
+//     // IP:PORT pair from fd
+//     std::pair<std::string, std::string> ipPort = getIpAndPortFromSocketFd(client.getFd());
+
+//     // get default block by IP:PORT pair
+//     Server& defaultServer = getDefaultServerBlockByIpPort(ipPort, servers);
+
+//     if (!request.isHeaderParsed()) {
+//         try {
+//             std::string headerStr;
+//             int ret = readRequestHeader(client, headerStr, defaultServer.getClientHeaderBufferSize());
+//             if (ret < 0)
+//                 return ret;
+//             request.parseRequestLine(headerStr);
+//             request.parseHeaderLines(headerStr);
+//             client.assignServerByServerName(servers, ipPort, defaultServer);
+//             client.location = client.server.getLocationPath(request.getURI());
+//             std::cout << "Connection Location Path: " << client.location.getLocaPath() << "\n";
+//             std::cout << "METHOD SIZE: " << client.location.getAllowMethods().size() << "\n"; //// debug
+//             validateMethod(request.getMethod(), client.location.getAllowMethods());
+//         }
+//         catch (const HttpException& e) {
+//             return handleParsingError(e, response, client);
+//         }
+//     }
+
+//     // Initialise `readBodyMethod`
+//     if (request.hasHeader("Content-Length"))
+//         client.setReadBodyMethod(CONTENT_LENGTH);
+//     else if (request.hasHeader("Transfer-Encoding"))
+//         client.setReadBodyMethod(CHUNKED_ENCODING);
+//     else
+//         client.setReadBodyMethod(NO_BODY);
+
+//     if (client.getReadBodyMethod() != NO_BODY) {
+//         try {
+//             std::string bodyStr;
+
+//             int ret2 = readRequestBody(client, bodyStr, defaultServer.getClientBodyBufferSize(), defaultServer.getClientMaxSize());
+//             if (ret2 < 0)
+//                 return ret2;
+//             request.setBody(bodyStr);
+//         }
+//         catch (const HttpException& e) {
+//             return handleParsingError(e, response, client);
+//         }
+//     }
+
+//     // std::cout << request;
+//     return RECV_OK;
+// }
+
 /*
 NOTE:
 - `readHeader` will remove the 'header' section from `buffers`
 - if recv(HEADER_BUFFER_SIZE) reads till the 'body' section, that section of 'body' will remain in buffers after `readHeader()` is called
 
 */
-int receiveClientRequest(Client& client, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers)
+int Client::receiveClientRequest(std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers)
 {
-    HttpRequest& request = client.request;
-    HttpResponse& response = client.response;
+    // HttpRequest& request = client.request;
+    // HttpResponse& response = client.response;
 
     // IP:PORT pair from fd
-    std::pair<std::string, std::string> ipPort = getIpAndPortFromSocketFd(client.getFd());
+    std::pair<std::string, std::string> ipPort = getIpAndPortFromSocketFd(_fd);
 
     // get default block by IP:PORT pair
     Server& defaultServer = getDefaultServerBlockByIpPort(ipPort, servers);
@@ -43,41 +105,39 @@ int receiveClientRequest(Client& client, std::map< std::pair<std::string, std::s
     if (!request.isHeaderParsed()) {
         try {
             std::string headerStr;
-            int ret = readRequestHeader(client, headerStr, defaultServer.getClientHeaderBufferSize());
+            int ret = readRequestHeader(headerStr, defaultServer.getClientHeaderBufferSize());
             if (ret < 0)
                 return ret;
             request.parseRequestLine(headerStr);
             request.parseHeaderLines(headerStr);
-            client.assignServerByServerName(servers, ipPort, defaultServer);
-            client.location = client.server.getLocationPath(request.getURI());
-            std::cout << "Connection Location Path: " << client.location.getLocaPath() << "\n";
-            std::cout << "METHOD SIZE: " << client.location.getAllowMethods().size() << "\n"; //// debug
-            validateMethod(request.getMethod(), client.location.getAllowMethods());
+            assignServerByServerName(servers, ipPort, defaultServer);
+            location = server.getLocationPath(request.getURI());
+            validateMethod(request.getMethod(), location.getAllowMethods());
         }
         catch (const HttpException& e) {
-            return handleParsingError(e, response, client);
+            return handleParsingError(e, response, *this);
         }
     }
 
     // Initialise `readBodyMethod`
     if (request.hasHeader("Content-Length"))
-        client.setReadBodyMethod(CONTENT_LENGTH);
+        _readBodyMethod = CONTENT_LENGTH;
     else if (request.hasHeader("Transfer-Encoding"))
-        client.setReadBodyMethod(CHUNKED_ENCODING);
+        _readBodyMethod = CHUNKED_ENCODING;
     else
-        client.setReadBodyMethod(NO_BODY);
+        _readBodyMethod = NO_BODY;
 
-    if (client.getReadBodyMethod() != NO_BODY) {
+    if (_readBodyMethod != NO_BODY) {
         try {
             std::string bodyStr;
 
-            int ret2 = readRequestBody(client, bodyStr, defaultServer.getClientBodyBufferSize(), defaultServer.getClientMaxSize());
+            int ret2 = readRequestBody(bodyStr, defaultServer.getClientBodyBufferSize(), defaultServer.getClientMaxSize());
             if (ret2 < 0)
                 return ret2;
             request.setBody(bodyStr);
         }
         catch (const HttpException& e) {
-            return handleParsingError(e, response, client);
+            return handleParsingError(e, response, *this);
         }
     }
 
