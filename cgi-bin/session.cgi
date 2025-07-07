@@ -25,7 +25,7 @@ def main():
 
     # Example: Delete session
     elif "delete" in form:
-        headers.append("X-Session-Delete: 1")
+        headers.append("X-Session-Delete: yes")
         body = "<p>Session deleted.</p>"
 
     # Output CGI response
@@ -36,7 +36,7 @@ def main():
     print()  # End of headers
     print("<html><body>")
     print(body)
-    print("<a href=\"/session\">Go back</a>")
+    print("<a href=\"/cgi-bin/form.cgi\">Go back</a>")
     print("</body></html>")
 
 if __name__ == "__main__":

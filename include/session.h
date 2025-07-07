@@ -11,6 +11,7 @@ class SessionManager
         SessionManager();
         static SessionManager& getInstance();
         static void handleSession(Client& client);
+        void clearSessionById(const std::string& sessionId);
 
         const std::string& getSessionData(const std::string& sessionId);
 

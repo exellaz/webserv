@@ -35,6 +35,28 @@ SessionManager& SessionManager::getInstance()
     return _instance;
 }
 
+void SessionManager::clearSessionById(const std::string& sessionId)
+{
+    _sessions[sessionId].clear();
+}
+
+// sessionData can be a struct instead to hold all necessary data of the session
+void SessionManager::setSession(const std::string& sessionId, const std::string& sessionData)
+{
+    _sessions[sessionId] = sessionData;
+}
+
+const std::string& SessionManager::getSessionData(const std::string& sessionId)
+{
+    return _sessions[sessionId];
+}
+
+bool SessionManager::_sessionExists(const std::string& sessionId) const
+{
+    return _sessions.find(sessionId) != _sessions.end();
+}
+
+
 static std::string generateSessionId()
 {
     static const std::string& alphaNum =
@@ -59,20 +81,4 @@ static std::string getSessionIdFromCookie(const std::string& cookieHeader)
 static std::string buildSetCookieHeader(const std::string& sessionId)
 {
     return "session_id=" + sessionId + "; Path=/; HttpOnly";
-}
-
-// sessionData can be a struct instead to hold all necessary data of the session
-void SessionManager::setSession(const std::string& sessionId, const std::string& sessionData)
-{
-    _sessions[sessionId] = sessionData;
-}
-
-const std::string& SessionManager::getSessionData(const std::string& sessionId)
-{
-    return _sessions[sessionId];
-}
-
-bool SessionManager::_sessionExists(const std::string& sessionId) const
-{
-    return _sessions.find(sessionId) != _sessions.end();
 }

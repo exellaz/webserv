@@ -1,4 +1,5 @@
 #include "../../include/Cgi.hpp"
+#include "session.h"
 
 static std::map<std::string, std::string> initEnv(HttpRequest &request);
 static std::string readFromFd(int fd);
@@ -77,6 +78,7 @@ std::string Cgi::executeCgi(HttpRequest &request, HttpResponse &response)
 static std::map<std::string, std::string> initEnv(HttpRequest &request)
 {
 	std::map<std::string, std::string> env_vars;
+	SessionManager& session = SessionManager::getInstance();
 
 	//assign method, url, version, headers and body to env
 	env_vars["REQUEST_METHOD"] = request.getMethod(); //request method (GET, POST, DELETE, etc.)
@@ -87,6 +89,7 @@ static std::map<std::string, std::string> initEnv(HttpRequest &request)
 	env_vars["SCRIPT_NAME"] = request.getURI(); //script name (location url)
 	env_vars["SCRIPT_FILENAME"] = getFullPath(request.getURI()); //full path of the script (sript full path)
 	env_vars["HTTP_VERSION"] = request.getVersion(); //HTTP version (HTTP/1.1, HTTP/2, etc.)
+	env_vars["SESSION_DATA"] = session.getSessionData(request.getSessionId());
 
 	return env_vars;
 }

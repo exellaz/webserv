@@ -41,11 +41,12 @@ void dispatchRequest(Client& client)
         if (cgiOutput.empty())
             throw HttpException(INTERNAL_ERROR, "CGI script execution failed");
         else {
+            SessionManager& session = SessionManager::getInstance();
             handleCgiRequest(cgiOutput, response);
-            if (!response.getHeader("X-Session-Update").empty()) {
-                SessionManager& session = SessionManager::getInstance();
+            if (!response.getHeader("X-Session-Update").empty())
                 session.setSession(client.getSessionId(), response.getHeader("X-Session-Update"));
-            }
+            if (response.getHeader("X-Session-Delete") == "yes")
+                session.clearSessionById(client.getSessionId());
             std::cout << "---------- CGI Output ----------\n" << BLUE << response.toString() << RESET << "\n";
         }
     }
