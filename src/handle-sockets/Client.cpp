@@ -95,7 +95,7 @@ size_t Client::getChunkSize() const
     return _chunkSize;
 }
 
-std::string Client::getLocationPath() const
+const std::string& Client::getLocationPath() const
 {
     return _locationPath;
 }

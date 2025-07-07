@@ -46,8 +46,8 @@ public:
 
 	HttpRequest request;
 	HttpResponse response;
-	Server server;
-	Location location;
+	Server& server;
+	Location& location;
 
 	// getters
 	int getFd() const;
@@ -58,7 +58,7 @@ public:
 	size_t getContentLength() const;
 	enum readChunkedRequestStatus getReadChunkedRequestStatus() const;
 	size_t getChunkSize() const;
-	std::string getLocationPath() const;
+	const std::string& getLocationPath() const;
 	bool isFirstTimeReadingBody() const;
 	bool isResponseReady() const;
 
