@@ -26,7 +26,7 @@ void HttpResponse::setStatus(StatusCode code)
 
 void HttpResponse::setHeader(const std::string& name, const std::string& value)
 {
-    _headers[name] = value;
+    _headers[toLower(name)] = value;
 }
 
 void HttpResponse::setBody(const std::string& bodyData)

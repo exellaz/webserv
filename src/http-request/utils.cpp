@@ -77,7 +77,7 @@ void HttpRequest::setVersion(const std::string& version)
 
 void HttpRequest::setHeader(const std::string& name, const std::string& value)
 {
-    _headers[name] = value;
+    _headers[toLower(name)] = value;
 }
 
 void HttpRequest::setBody(const std::string& body)
