@@ -81,9 +81,17 @@ public:
 	void assignServerByServerName(std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers,
 									std::pair<std::string, std::string> ipPort, Server& defaultServer);
 
+	const std::string& getSessionId() const;
+	const std::string& getSessionData() const;
+
+	void setSessionId(const std::string& sessionId);
+	void setSessionData(const std::string& sesionData);
+
 
 private:
 	std::string _buffer;
+	std::string _sessionId;
+	std::string _sessionData;
 };
 
 std::ostream & operator<<( std::ostream & o, Client const & client );

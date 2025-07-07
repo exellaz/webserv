@@ -1,6 +1,7 @@
 #include "http-request.h"
 #include "read-request.h"
 #include "handle-sockets.h"
+#include "session.h"
 
 int handleParsingError(const HttpException& e, HttpResponse& response, Client& client)
 {
@@ -22,7 +23,6 @@ static void validateMethod(const std::string& method, const std::vector<std::str
     throw HttpException(METHOD_NOT_ALLOWED, "Method not allowed");
 }
 
-
 /*
 NOTE:
 - `readHeader` will remove the 'header' section from `buffers`
@@ -33,8 +33,6 @@ int receiveClientRequest(Client& client, std::map< std::pair<std::string, std::s
 {
     HttpRequest& request = client.request;
     HttpResponse& response = client.response;
-
-    // IP:PORT pair from fd
     std::pair<std::string, std::string> ipPort = getIpAndPortFromSocketFd(client.fd);
 
     // get default block by IP:PORT pair
@@ -48,7 +46,6 @@ int receiveClientRequest(Client& client, std::map< std::pair<std::string, std::s
                 return ret;
             request.parseRequestLine(headerStr);
             request.parseHeaderLines(headerStr);
-
             client.assignServerByServerName(servers, ipPort, defaultServer);
             client.location = client.server.getLocationPath(request.getURI());
             std::cout << "Connection Location Path: " << client.location.getLocaPath() << "\n";
@@ -59,11 +56,6 @@ int receiveClientRequest(Client& client, std::map< std::pair<std::string, std::s
             return handleParsingError(e, response, client);
         }
     }
-
-    // Refactor later
-    response.setHeader("Connection", request.getHeader("Connection"));
-    if (request.getHeader("Connection") == "close")
-        client.connType = CLOSE;
 
     // Initialise `readBodyMethod`
     if (request.hasHeader("Content-Length"))

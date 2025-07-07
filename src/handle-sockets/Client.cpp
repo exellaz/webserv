@@ -120,6 +120,26 @@ void Client::assignServerByServerName(std::map< std::pair<std::string, std::stri
 	this->server = defaultServer;
 }
 
+const std::string& Client::getSessionId() const
+{
+	return _sessionId;
+}
+
+const std::string& Client::getSessionData() const
+{
+	return _sessionData;
+}
+
+void Client::setSessionId(const std::string& sessionId)
+{
+	_sessionId = sessionId;
+}
+
+void Client::setSessionData(const std::string& sessionData)
+{
+	_sessionData = sessionData;
+}
+
 std::ostream & operator<<( std::ostream & o, Client const & client )
 {
 	o << "\nClient: \n"
