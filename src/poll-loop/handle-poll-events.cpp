@@ -1,6 +1,7 @@
 #include "read-request.h"
 #include "poll-loop.h"
 #include "Cgi.hpp"
+#include "session.h"
 
 static void setPfdTrackPollOutOnly(struct pollfd& pfd);
 static void setPfdTrackPollInOnly(struct pollfd& pfd);
@@ -23,6 +24,7 @@ void handlePollIn(std::map< std::pair<std::string, std::string> , std::vector<Se
     else if (res != REQUEST_ERR) {
         try {
             resolveLocationPath(client.request.getURI(), client);
+            SessionManager::handleSession(client);
             dispatchRequest(client);
         }
         catch (const HttpException& e) {
@@ -63,13 +65,13 @@ void handlePollErr(Client& client)
     client.setConnState(DISCONNECTED);
 }
 
-static void setPfdTrackPollOutOnly(struct pollfd& pfd) 
+static void setPfdTrackPollOutOnly(struct pollfd& pfd)
 {
     pfd.events &= ~POLLIN;
     pfd.events |= POLLOUT;
 }
 
-static void setPfdTrackPollInOnly(struct pollfd& pfd) 
+static void setPfdTrackPollInOnly(struct pollfd& pfd)
 {
     pfd.events &= ~POLLOUT;
     pfd.events |= POLLIN;

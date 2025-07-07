@@ -3,15 +3,15 @@
 HttpResponse::HttpResponse()
     : _status(OK)
 {
-    _headers["Server"] = "Webserv/1.0";
-    _headers["Connection"] = "keep-alive";
+    setHeader("Server", "Webserv/1.0");
+    setHeader("Connection", "keep-alive");
 }
 
 HttpResponse::HttpResponse(StatusCode code)
     : _status(code)
 {
-    _headers["Server"] = "Webserv/1.0";
-    _headers["Connection"] = "keep-alive";
+    setHeader("Server", "Webserv/1.0");
+    setHeader("Connection", "keep-alive");
 }
 
 HttpResponse::HttpResponse(const HttpResponse& other)
@@ -76,7 +76,8 @@ void HttpResponse::clearResponse()
 {
     _status = OK;
     _headers.clear();
-    _headers["Server"] = "Webserv/1.0";
+    setHeader("Server", "Webserv/1.0");
+    setHeader("Connection", "keep-alive");
     _body.clear();
 }
 
@@ -93,14 +94,38 @@ std::string HttpResponse::getHttpDate()
     return std::string(buf);
 }
 
-std::string HttpResponse::toString() {
+static std::string toTitleCase(const std::string& str)
+{
+    std::string result;
+    bool capitalizeNext = true;
+
+    for (std::size_t i = 0; i < str.length(); ++i) {
+        char c = str[i];
+        if (c == '-') {
+            result += c;
+            capitalizeNext = true;
+        }
+        else if (capitalizeNext) {
+            result += std::toupper(c);
+            capitalizeNext = false;
+        }
+        else {
+            result += std::tolower(c);
+        }
+    }
+
+    return result;
+}
+
+std::string HttpResponse::toString()
+{
     std::ostringstream responseStream;
 
-    _headers["Date"] = getHttpDate();
+    setHeader("Date", getHttpDate());
     responseStream << buildStatusLine();
     for (std::map<std::string, std::string>::const_iterator it = _headers.begin();
          it != _headers.end(); ++it) {
-        responseStream << it->first << ": " << it->second << "\r\n";
+        responseStream << toTitleCase(it->first) << ": " << it->second << "\r\n";
     }
     responseStream << "\r\n";
     responseStream << _body;

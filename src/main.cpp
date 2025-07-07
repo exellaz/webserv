@@ -4,6 +4,7 @@
 #include "handle-sockets.h"
 #include "poll-loop.h"
 #include "signal-handler.h"
+#include "session.h"
 
 volatile sig_atomic_t g_signalCaught = false;
 
@@ -34,7 +35,7 @@ int main(int argc, char **argv)
         std::vector<struct pollfd> pfds;
         std::vector<int> listeners;
         std::vector<Client> clients;
-        
+
         setupAllListenerSockets(servers, pfds, listeners);
         pollLoop(servers, pfds, listeners, clients);
     }

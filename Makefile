@@ -52,6 +52,8 @@ SRCS_FIL = \
 		signal/signalHandler.cpp \
 		\
 		utils/utils.cpp \
+		\
+		session/session-manager.cpp
 
 SRCS = $(addprefix $(SRCDIR), $(SRCS_FIL))
 

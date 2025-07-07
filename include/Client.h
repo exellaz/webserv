@@ -46,8 +46,8 @@ public:
 
 	HttpRequest request;
 	HttpResponse response;
-	Server& server;
-	Location& location;
+	Server server;
+	Location location;
 
 	// getters
 	int getFd() const;
@@ -61,6 +61,8 @@ public:
 	const std::string& getLocationPath() const;
 	bool isFirstTimeReadingBody() const;
 	bool isResponseReady() const;
+	const std::string& getSessionId() const;
+	const std::string& getSessionData() const;
 
 	// setters
 	void setFd(int fd);
@@ -74,6 +76,8 @@ public:
 	void setLocationPath(std::string locationPath);
 	void setFirstTimeReadingBody(bool status);
 	void setResponseReady(bool status);
+	void setSessionId(const std::string& sessionId);
+	void setSessionData(const std::string& sesionData);
 
 	// Buffer methods
 	void appendToBuffer(const char *str, size_t n);
@@ -98,7 +102,6 @@ public:
 	void assignServerByServerName(std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers,
 									std::pair<std::string, std::string> ipPort, Server& defaultServer);
 
-
 private:
 	int _fd;
 	enum ConnState _connState;
@@ -113,6 +116,8 @@ private:
 	std::string _locationPath;
 	bool _firstTimeReadingBody;
 	bool _responseReady;
+	std::string _sessionId;
+	std::string _sessionData;
 };
 
 std::ostream & operator<<( std::ostream & o, Client const & client );
