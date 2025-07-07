@@ -11,25 +11,25 @@ int readByContentLength(Client& client, std::string& bodyStr, const size_t buffe
 
     client.setContentLength(std::strtol(client.request.getHeader("Content-Length").c_str(), NULL, 10));
 
-	if (client.getContentLength() > maxSize)
-		throw HttpException(PAYLOAD_TOO_LARGE, "Request Body Too Large");
+    if (client.getContentLength() > maxSize)
+        throw HttpException(PAYLOAD_TOO_LARGE, "Request Body Too Large");
 
     while (bytesRead < client.getContentLength()) {
         if (g_signalCaught)
             return RECV_AGAIN;
         ret = readFromSocket(client, bufferSize);
         if (ret <= 0)
-			return ret; // RECV_AGAIN or RECV_CLOSED
+            return ret; // RECV_AGAIN or RECV_CLOSED
 
-		client.setStartTime(getNowInSeconds()); // reset timer
-		bytesRead += ret;
-	}
+        client.setStartTime(getNowInSeconds()); // reset timer
+        bytesRead += ret;
+    }
 
-	if (bytesRead == client.getContentLength()) {
-		bodyStr = client.getBuffer();
-		client.clearBuffer();
-	}
-	else { // bytesRead > client.getContentLength()
+    if (bytesRead == client.getContentLength()) {
+        bodyStr = client.getBuffer();
+        client.clearBuffer();
+    }
+    else { // bytesRead > client.getContentLength()
         bodyStr = client.getBuffer().substr(0, client.getContentLength());
         client.setBuffer(client.getBuffer().substr(client.getContentLength()));
     }

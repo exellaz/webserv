@@ -6,9 +6,9 @@ static int getListenerSocket(const std::string& host, const std::string& port)
 {
     int listener;     // Listening socket descriptor
     int rv;
-	struct addrinfo hints;
-	struct addrinfo *res;
-	struct addrinfo *p;
+    struct addrinfo hints;
+    struct addrinfo *res;
+    struct addrinfo *p;
 
 
     // Get socket and bind it
@@ -27,7 +27,7 @@ static int getListenerSocket(const std::string& host, const std::string& port)
         if (listener < 0)
             continue;
 
-		int yes = 1;
+        int yes = 1;
         // Lose the pesky "address already in use" error message
         setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
 
@@ -40,9 +40,9 @@ static int getListenerSocket(const std::string& host, const std::string& port)
 
     // If we got here, it means we didn't get bound
     if (p == NULL) {
-	    freeaddrinfo(res);
-		return -1;
-	}
+        freeaddrinfo(res);
+        return -1;
+    }
 
     freeaddrinfo(res);
 
@@ -58,7 +58,7 @@ void setupListenerSocket(std::vector<struct pollfd>& pfds, std::vector<int>& lis
 
     int listenerFd = getListenerSocket(server.getHost(), server.getPort());
     if (listenerFd == -1) {
-		std::cerr << "Error: error getting listening socket\n";
+        std::cerr << "Error: error getting listening socket\n";
         exit(1); // TODO: throw exception
     }
 
@@ -69,12 +69,12 @@ void setupListenerSocket(std::vector<struct pollfd>& pfds, std::vector<int>& lis
     }
 
     // Add the listenerFd to set
-	struct pollfd pfd;
+    struct pollfd pfd;
     pfd.fd = listenerFd;
     pfd.events = POLLIN; // Report ready to read on incoming connection
-	pfds.push_back(pfd);
+    pfds.push_back(pfd);
 
-	listeners.push_back(listenerFd);
+    listeners.push_back(listenerFd);
 }
 
 

@@ -1,55 +1,55 @@
 #include "../../include/Client.h"
 
 Client::Client(int fd, time_t startTime) :
-	_fd(fd), _connState(ACTIVE), _startTime(startTime), _connType(KEEP_ALIVE),
-	_buffer(""), _readBodyMethod(CONTENT_LENGTH), _contentLength(0),
-	_readChunkedRequestStatus(READ_CHUNK_SIZE), _chunkSize(0),
-	_chunkReqBuf(""), _locationPath(""),
-	_firstTimeReadingBody(true), _responseReady(false)
-	
+    _fd(fd), _connState(ACTIVE), _startTime(startTime), _connType(KEEP_ALIVE),
+    _buffer(""), _readBodyMethod(CONTENT_LENGTH), _contentLength(0),
+    _readChunkedRequestStatus(READ_CHUNK_SIZE), _chunkSize(0),
+    _chunkReqBuf(""), _locationPath(""),
+    _firstTimeReadingBody(true), _responseReady(false)
+    
 {
-	// std::cout << "Client:: Constructor Called (name: " << index << ")" << std::endl;
+    // std::cout << "Client:: Constructor Called (name: " << index << ")" << std::endl;
 
 
 }
 
 Client::Client(const Client& other) :
-	_fd(other._fd), _connState(other._connState), _startTime(other._startTime), _connType(other._connType),
-	_buffer(other._buffer), _readBodyMethod(other._readBodyMethod), _contentLength(other._contentLength),
-	_readChunkedRequestStatus(other._readChunkedRequestStatus), _chunkSize(other._chunkSize),
-	_chunkReqBuf(other._chunkReqBuf), _locationPath(other._locationPath),
-	_firstTimeReadingBody(other._firstTimeReadingBody), _responseReady(other._responseReady)
+    _fd(other._fd), _connState(other._connState), _startTime(other._startTime), _connType(other._connType),
+    _buffer(other._buffer), _readBodyMethod(other._readBodyMethod), _contentLength(other._contentLength),
+    _readChunkedRequestStatus(other._readChunkedRequestStatus), _chunkSize(other._chunkSize),
+    _chunkReqBuf(other._chunkReqBuf), _locationPath(other._locationPath),
+    _firstTimeReadingBody(other._firstTimeReadingBody), _responseReady(other._responseReady)
 {
-	// std::cout << "Client:: Copy Constructor Called" << std::endl;
+    // std::cout << "Client:: Copy Constructor Called" << std::endl;
 }
 
 Client& Client::operator=(const Client& other)
 {
-	// std::cout << "Client:: Copy Assignment Operator Called" << std::endl;
+    // std::cout << "Client:: Copy Assignment Operator Called" << std::endl;
 
-	if (this == &other)
-		return *this;
+    if (this == &other)
+        return *this;
 
-	_fd						 = other._fd;
-	_connState 				 = other._connState;
-	_startTime 				 = other._startTime;
-	_connType 				 = other._connType;
-	_buffer 				 = other._buffer;
-	_readBodyMethod 		 = other._readBodyMethod;
-	_contentLength 			 = other._contentLength;
-	_readChunkedRequestStatus = other._readChunkedRequestStatus;
-	_chunkSize 				 = other._chunkSize;
-	_chunkReqBuf 			 = other._chunkReqBuf;
-	_locationPath			 = other._locationPath;
-	_firstTimeReadingBody 	 = other._firstTimeReadingBody;
-	_responseReady 		 = other._responseReady;
+    _fd						 = other._fd;
+    _connState 				 = other._connState;
+    _startTime 				 = other._startTime;
+    _connType 				 = other._connType;
+    _buffer 				 = other._buffer;
+    _readBodyMethod 		 = other._readBodyMethod;
+    _contentLength 			 = other._contentLength;
+    _readChunkedRequestStatus = other._readChunkedRequestStatus;
+    _chunkSize 				 = other._chunkSize;
+    _chunkReqBuf 			 = other._chunkReqBuf;
+    _locationPath			 = other._locationPath;
+    _firstTimeReadingBody 	 = other._firstTimeReadingBody;
+    _responseReady 		 = other._responseReady;
 
-	return *this;
+    return *this;
 }
 
 Client::~Client()
 {
-	// std::cout << "Client:: Destructor Called (name: " << index << ")" << std::endl;
+    // std::cout << "Client:: Destructor Called (name: " << index << ")" << std::endl;
 }
 
 
@@ -102,11 +102,11 @@ std::string Client::getLocationPath() const
 
 bool Client:: isFirstTimeReadingBody() const
 {
-	return _firstTimeReadingBody;
+    return _firstTimeReadingBody;
 }
 bool Client::isResponseReady() const
 {
-	return _responseReady;
+    return _responseReady;
 }
 
 // =================== SETTERS ===============================
@@ -158,11 +158,11 @@ void Client::setLocationPath(std::string locationPath)
 
 void Client::setFirstTimeReadingBody(bool status)
 {
-	_firstTimeReadingBody = status;
+    _firstTimeReadingBody = status;
 }
 void Client::setResponseReady(bool status)
 {
-	_responseReady = status;
+    _responseReady = status;
 }
 
 
@@ -170,121 +170,121 @@ void Client::setResponseReady(bool status)
 
 void Client::appendToBuffer(const char *str, size_t n)
 {
-	_buffer.append(str, n);
+    _buffer.append(str, n);
 }
 
 const std::string& Client::getBuffer() const
 {
-	return _buffer;
+    return _buffer;
 }
 
 void Client::setBuffer(std::string str)
 {
-	_buffer = str;
+    _buffer = str;
 }
 
 void Client::clearBuffer()
 {
-	_buffer.clear();
+    _buffer.clear();
 }
 
 void Client::eraseBufferFromStart(size_t n)
 {
-	_buffer.erase(0, n);
+    _buffer.erase(0, n);
 }
 
 size_t Client::bufferSize() const
 {
-	return _buffer.size();
+    return _buffer.size();
 }
 
 bool Client::compareBuffer(const std::string str)
 {
-	if (_buffer == str)
-		return true;
-	return false;
+    if (_buffer == str)
+        return true;
+    return false;
 }
 
 size_t Client::findInBuffer(const std::string str, size_t pos)
 {
-	return _buffer.find(str, pos);
+    return _buffer.find(str, pos);
 }
 
 // =================== chunkedReqBuf METHODS ===============================
 
 void Client::appendToChunkReqBuf(const char *str, size_t n)
 {
-	_chunkReqBuf.append(str, n);
+    _chunkReqBuf.append(str, n);
 }
 
 const std::string& Client::getChunkReqBuf() const
 {
-	return _chunkReqBuf;
+    return _chunkReqBuf;
 }
 
 void Client::setChunkReqBuf(std::string str)
 {
-	_chunkReqBuf = str;
+    _chunkReqBuf = str;
 }
 
 void Client::clearChunkReqBuf()
 {
-	_chunkReqBuf.clear();
+    _chunkReqBuf.clear();
 }
 
 void Client::eraseChunkReqBufFromStart(size_t n)
 {
-	_chunkReqBuf.erase(0, n);
+    _chunkReqBuf.erase(0, n);
 }
 
 size_t Client::chunkReqBufSize() const
 {
-	return _chunkReqBuf.size();
+    return _chunkReqBuf.size();
 }
 
 bool Client::compareChunkReqBuf(const std::string str)
 {
-	if (_chunkReqBuf == str)
-		return true;
-	return false;
+    if (_chunkReqBuf == str)
+        return true;
+    return false;
 }
 
 size_t Client::findInChunkReqBuf(const std::string str, size_t pos)
 {
-	return _chunkReqBuf.find(str, pos);
+    return _chunkReqBuf.find(str, pos);
 }
 
 void Client::assignServerByServerName(std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers,
-											std::pair<std::string, std::string> ipPort, Server& defaultServer)
+                                            std::pair<std::string, std::string> ipPort, Server& defaultServer)
 {
-	const std::string& hostStr = request.getHeader("Host");
+    const std::string& hostStr = request.getHeader("Host");
 
-	size_t colonPos = hostStr.find(":");
-	std::string serverName = request.getHeader("Host").substr(0, colonPos);
+    size_t colonPos = hostStr.find(":");
+    std::string serverName = request.getHeader("Host").substr(0, colonPos);
 
-	std::map<std::pair<std::string, std::string>, std::vector<Server> >::iterator it = servers.begin();
+    std::map<std::pair<std::string, std::string>, std::vector<Server> >::iterator it = servers.begin();
     for (; it != servers.end(); ++it)
     {
         if (it->first == ipPort) {
-			std::vector<Server>& vec = it->second;
-			std::vector<Server>::iterator serverIt = vec.begin();
-			for (; serverIt != vec.end(); ++serverIt) {
-				if (serverIt->getServerName() == serverName) {
-					this->server = *serverIt;
-					return ;
-				}
-			}
-		}
+            std::vector<Server>& vec = it->second;
+            std::vector<Server>::iterator serverIt = vec.begin();
+            for (; serverIt != vec.end(); ++serverIt) {
+                if (serverIt->getServerName() == serverName) {
+                    this->server = *serverIt;
+                    return ;
+                }
+            }
+        }
     }
 
-	// if ServerName not match -> pick defaultServer
-	this->server = defaultServer;
+    // if ServerName not match -> pick defaultServer
+    this->server = defaultServer;
 }
 
 std::ostream & operator<<( std::ostream & o, Client const & client )
 {
-	o << "\nClient: \n"
-		<< "fd    : " << client.getFd() << '\n'
-		<< "buffer: "<< client.getBuffer() << '\n';
-	return o;
+    o << "\nClient: \n"
+        << "fd    : " << client.getFd() << '\n'
+        << "buffer: "<< client.getBuffer() << '\n';
+    return o;
 }
