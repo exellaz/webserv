@@ -1,5 +1,5 @@
 CXX = c++
-CXXFLAGS = -Wall -Wextra -Werror $(INCLUDES) -std=c++98 -fsanitize=address -g3
+CXXFLAGS = -Wall -Wextra -Werror $(INCLUDES) -std=c++98 #-fsanitize=address -g3
 INCLUDES = -Iinclude
 
 # COLORS
@@ -48,6 +48,8 @@ SRCS_FIL = \
 		handle-sockets/Client.cpp \
 		\
 		timeout/handle-timeout.cpp \
+		\
+		signal/signalHandler.cpp \
 		\
 		utils/utils.cpp \
 

@@ -35,7 +35,6 @@ int receiveClientRequest(Client& client, std::map< std::pair<std::string, std::s
     HttpResponse& response = client.response;
 
     // IP:PORT pair from fd
-    std::cout << "NULLL\n";
     std::pair<std::string, std::string> ipPort = getIpAndPortFromSocketFd(client.fd);
 
     // get default block by IP:PORT pair

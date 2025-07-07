@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
+
+import signal
 import os
 import json
+
+def signal_handler(signum, frame):
+    os._exit(1)
+
+signal.signal(signal.SIGINT, signal_handler)
+signal.signal(signal.SIGTERM, signal_handler)
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_DIR = os.path.join(SCRIPT_DIR, "storage")

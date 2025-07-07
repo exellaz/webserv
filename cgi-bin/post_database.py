@@ -1,9 +1,15 @@
 #!/usr/bin/python3
-# filepath: /home/welow/cgi-bin/post_database.py
 
+import signal
 import sys # call shell commands and read input data
 import json # call json functions to handle JSON data
 import os # call operating system functions to handle files and directories
+
+def signal_handler(signum, frame):
+    os._exit(1)
+
+signal.signal(signal.SIGINT, signal_handler)
+signal.signal(signal.SIGTERM, signal_handler)
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 json_file = os.path.join(SCRIPT_DIR, "data.json")
