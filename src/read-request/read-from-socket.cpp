@@ -5,7 +5,7 @@ int readFromSocket(Client& client, int bufferSize)
     // char buf[bufferSize + 1];
     char* buf = new char[bufferSize + 1];
 
-    ssize_t n = recv(client.fd, buf, bufferSize, 0);
+    ssize_t n = recv(client.getFd(), buf, bufferSize, 0);
     std::cout << "n: " << n << '\n';
 
     if (n == 0) {

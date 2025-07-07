@@ -44,28 +44,36 @@ public:
 	// Destructor
 	~Client();
 
-	int fd;
-	enum ConnState connState;
-	time_t startTime; // Timeout
-
-	enum connectionType connType;
-	enum readBodyMethod readBodyMethod;
-
-	size_t contentLength;
-
-	// Chunked Encoding
-	enum readChunkedRequestStatus readChunkedRequestStatus;
-	size_t chunkSize;
-	std::string chunkReqBuf;
-	bool isFirstTimeReadingBody;
-	bool isResponseReady;
-
 	HttpRequest request;
 	HttpResponse response;
 	Server server;
 	Location location;
 
-	std::string locationPath;
+	// getters
+	int getFd() const;
+	enum ConnState getConnState() const;
+	time_t getStartTime() const;
+	enum connectionType getConnType() const;
+	enum readBodyMethod getReadBodyMethod() const;
+	size_t getContentLength() const;
+	enum readChunkedRequestStatus getReadChunkedRequestStatus() const;
+	size_t getChunkSize() const;
+	std::string getLocationPath() const;
+	bool isFirstTimeReadingBody() const;
+	bool isResponseReady() const;
+
+	// setters
+	void setFd(int fd);
+	void setConnState(enum ConnState connState);
+	void setStartTime(time_t startTime);
+	void setConnType(enum connectionType connType);
+	void setReadBodyMethod(enum readBodyMethod readBodyMethod);
+	void setContentLength(size_t contentLength);
+	void setReadChunkedRequestStatus(enum readChunkedRequestStatus chunkedRequestStatus);
+	void setChunkSize(size_t chunkedSize);
+	void setLocationPath(std::string locationPath);
+	void setFirstTimeReadingBody(bool status);
+	void setResponseReady(bool status);
 
 	// Buffer methods
 	void appendToBuffer(const char *str, size_t n);
@@ -76,14 +84,35 @@ public:
 	size_t bufferSize() const;
 	bool compareBuffer(const std::string str);
 	size_t findInBuffer(const std::string str, size_t pos);
-	// void resolveServerConfig(std::vector<Config>& configs, HttpRequest& request);
+	
+	// chunkReqBuf methods
+	void appendToChunkReqBuf(const char *str, size_t n);
+	const std::string& getChunkReqBuf() const;
+	void setChunkReqBuf(std::string str);
+	void clearChunkReqBuf();
+	void eraseChunkReqBufFromStart(size_t n);
+	size_t chunkReqBufSize() const;
+	bool compareChunkReqBuf(const std::string str);
+	size_t findInChunkReqBuf(const std::string str, size_t pos);
 
 	void assignServerByServerName(std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers,
 									std::pair<std::string, std::string> ipPort, Server& defaultServer);
 
 
 private:
+	int _fd;
+	enum ConnState _connState;
+	time_t _startTime; // Timeout
+	enum connectionType _connType;
 	std::string _buffer;
+	enum readBodyMethod _readBodyMethod;
+	size_t _contentLength;
+	enum readChunkedRequestStatus _readChunkedRequestStatus;
+	size_t _chunkSize;
+	std::string _chunkReqBuf;
+	std::string _locationPath;
+	bool _firstTimeReadingBody;
+	bool _responseReady;
 };
 
 std::ostream & operator<<( std::ostream & o, Client const & client );

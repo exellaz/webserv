@@ -12,7 +12,7 @@ int readRequestHeader(Client& client, std::string& headerStr, const size_t buffe
 
         ret = readFromSocket(client, bufferSize);
         if (ret > 0) {
-            client.startTime = getNowInSeconds(); // reset timer
+            client.setStartTime(getNowInSeconds()); // reset timer
             found = client.getBuffer().find(HEADER_END);
             if (found != std::string::npos)
                 break;

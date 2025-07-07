@@ -9,7 +9,7 @@ void dispatchRequest(Client& client)
 
     response.setHeader("Connection", request.getHeader("Connection"));
     if (request.getHeader("Connection") == "close")
-        client.connType = CLOSE;
+        client.setConnType(CLOSE);
     if (!client.location.getReturnPath().empty())
     {
         int statusCode = client.location.getReturnPath().begin()->first;

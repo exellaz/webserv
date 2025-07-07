@@ -61,26 +61,26 @@ static std::string extractChunkData(const std::string& buffer, size_t chunkSize)
 static void resetChunkEnodingVariables(Client& client)
 {
     // RESET chunkEncoding
-    client.readChunkedRequestStatus = READ_CHUNK_SIZE;
-    client.chunkReqBuf.clear();
-    client.chunkSize = 0;
-	client.isFirstTimeReadingBody = true;
+    client.setReadChunkedRequestStatus(READ_CHUNK_SIZE);
+    client.clearChunkReqBuf();
+    client.setChunkSize(0);
+	client.setFirstTimeReadingBody(true);
 }
 
 int readByChunkedEncoding(Client& client, std::string& bodyStr, const size_t bufferSize, const size_t maxSize)
 {
     int ret = RECV_OK;
-    enum readChunkedRequestStatus& status = client.readChunkedRequestStatus;
+    enum readChunkedRequestStatus status = client.getReadChunkedRequestStatus();
 
     while (status != DONE) {
 
-        if (!(client.isFirstTimeReadingBody && client.bufferSize() > 0)) {
-			client.isFirstTimeReadingBody = false;
+        if (!(client.isFirstTimeReadingBody() && client.bufferSize() > 0)) {
+			client.setFirstTimeReadingBody(false);
 
 			ret = readFromSocket(client, bufferSize);
 			if (ret <= 0)
 				return ret; // RECV_AGAIN or RECV_CLOSED or RECV_ERROR
-			client.startTime = getNowInSeconds(); // reset timer
+			client.setStartTime(getNowInSeconds()); // reset timer
 		}
 
         while (client.bufferSize() > 0) {
@@ -89,8 +89,8 @@ int readByChunkedEncoding(Client& client, std::string& bodyStr, const size_t buf
                 std::cout << "READ_CHUNK_SIZE\n";
                 if (!doesLineHaveCRLF(client.getBuffer()))
                     break;
-                client.chunkSize = extractChunkSize(client);
-                if (client.chunkSize == 0)
+                client.setChunkSize(extractChunkSize(client));
+                if (client.getChunkSize() == 0)
                     status = EXPECT_CRLF_AFTER_ZERO_CHUNK_SIZE;
                 else
                     status = READ_CHUNK_DATA;
@@ -98,19 +98,19 @@ int readByChunkedEncoding(Client& client, std::string& bodyStr, const size_t buf
             else if (status == READ_CHUNK_DATA) {
                 std::cout << "READ_CHUNK_DATA\n";
 
-                if (client.bufferSize() < client.chunkSize + CRLF_LENGTH) // must have CRLF for a complete line
+                if (client.bufferSize() < client.getChunkSize() + CRLF_LENGTH) // must have CRLF for a complete line
 					break;
-                std::string chunkData = extractChunkData(client.getBuffer(), client.chunkSize);
-                client.chunkReqBuf.append(chunkData.c_str(), chunkData.length());
+                std::string chunkData = extractChunkData(client.getBuffer(), client.getChunkSize());
+                client.appendToChunkReqBuf(chunkData.c_str(), chunkData.length());
 
-				if (client.getBuffer()[client.chunkSize] != '\r' || client.getBuffer()[client.chunkSize + 1] != '\n')
+				if (client.getBuffer()[client.getChunkSize()] != '\r' || client.getBuffer()[client.getChunkSize() + 1] != '\n')
 					// characters after chunkData is not CRLF\n
 					throw HttpException(BAD_REQUEST, "Bad body format");
 
-                std::cout << "chunkReqBuf size " << client.chunkReqBuf.size() << '\n';
-				if (client.chunkReqBuf.size() > maxSize)
+                std::cout << "chunkReqBuf size " << client.chunkReqBufSize() << '\n';
+				if (client.chunkReqBufSize() > maxSize)
 				    throw HttpException(PAYLOAD_TOO_LARGE, "Request Body Too Large");
-                client.eraseBufferFromStart(client.chunkSize + CRLF_LENGTH);
+                client.eraseBufferFromStart(client.getChunkSize() + CRLF_LENGTH);
                 status = READ_CHUNK_SIZE;
             }
             else if (status == EXPECT_CRLF_AFTER_ZERO_CHUNK_SIZE) {
@@ -122,9 +122,10 @@ int readByChunkedEncoding(Client& client, std::string& bodyStr, const size_t buf
 				client.eraseBufferFromStart(CRLF_LENGTH);
 			}
 		}
+        client.setReadChunkedRequestStatus(status);
 	}
 
-	bodyStr.append(client.chunkReqBuf.c_str(), client.chunkReqBuf.length());
+	bodyStr.append(client.getChunkReqBuf().c_str(), client.chunkReqBufSize());
 	resetChunkEnodingVariables(client);
 
     return ret;

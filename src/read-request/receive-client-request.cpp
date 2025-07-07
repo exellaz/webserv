@@ -8,8 +8,8 @@ int handleParsingError(const HttpException& e, HttpResponse& response, Client& c
     response.setStatus(e.getStatusCode());
     // Set body here being the respective error page
     response.setHeader("Connection", "close");
-    client.connType = CLOSE;
-    client.isResponseReady = true;
+    client.setConnType(CLOSE);
+    client.setResponseReady(true);
     return REQUEST_ERR;
 }
 
@@ -35,7 +35,7 @@ int receiveClientRequest(Client& client, std::map< std::pair<std::string, std::s
     HttpResponse& response = client.response;
 
     // IP:PORT pair from fd
-    std::pair<std::string, std::string> ipPort = getIpAndPortFromSocketFd(client.fd);
+    std::pair<std::string, std::string> ipPort = getIpAndPortFromSocketFd(client.getFd());
 
     // get default block by IP:PORT pair
     Server& defaultServer = getDefaultServerBlockByIpPort(ipPort, servers);
@@ -63,17 +63,17 @@ int receiveClientRequest(Client& client, std::map< std::pair<std::string, std::s
     // Refactor later
     response.setHeader("Connection", request.getHeader("Connection"));
     if (request.getHeader("Connection") == "close")
-        client.connType = CLOSE;
+        client.setConnType(CLOSE);
 
     // Initialise `readBodyMethod`
     if (request.hasHeader("Content-Length"))
-        client.readBodyMethod = CONTENT_LENGTH;
+        client.setReadBodyMethod(CONTENT_LENGTH);
     else if (request.hasHeader("Transfer-Encoding"))
-        client.readBodyMethod = CHUNKED_ENCODING;
+        client.setReadBodyMethod(CHUNKED_ENCODING);
     else
-        client.readBodyMethod = NO_BODY;
+        client.setReadBodyMethod(NO_BODY);
 
-    if (client.readBodyMethod != NO_BODY) {
+    if (client.getReadBodyMethod() != NO_BODY) {
         try {
             std::string bodyStr;
 
