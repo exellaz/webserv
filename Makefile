@@ -41,6 +41,7 @@ SRCS_FIL = \
 		client/read-from-socket.cpp \
 		client/chunked-encoding.cpp \
 		client/dispatch-request.cpp \
+		client/send-response.cpp \
 		\
 		handle-sockets/setup-listeners.cpp \
 		handle-sockets/accept-client.cpp \
