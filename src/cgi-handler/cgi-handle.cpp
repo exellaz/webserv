@@ -1,4 +1,5 @@
 #include "../../include/Cgi.hpp"
+#include "utils.h"
 #include "session.h"
 
 static std::map<std::string, std::string> initEnv(HttpRequest &request);
@@ -114,21 +115,4 @@ static char **setEnvStrToEnvp(std::map<std::string, std::string> &env_vars, std:
         envp[i] = const_cast<char*>(env_str[i].c_str());
     envp[env_str.size()] = NULL;
     return envp;
-}
-
-/**
- * @brief get full path of the file
- * @param file name of the file
- * @return full path of the file
-*/
-std::string getFullPath(const std::string &file) {
-    std::string full_path;
-    char *cwd = getcwd(NULL, 0);
-    if (!cwd) {
-        perror("getcwd");
-        return "";
-    }
-    full_path = std::string(cwd) + file;
-    free(cwd);
-    return full_path;
 }

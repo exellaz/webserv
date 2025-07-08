@@ -1,12 +1,11 @@
-#ifndef CGIOBJECT_HPP
-#define CGIOBJECT_HPP
+#ifndef CGI_HPP
+#define CGI_HPP
 
 #include <string>
 #include <iostream>
 #include <vector>
 #include <map>
 #include <fstream>
-#include <sys/wait.h>
 #include "Configuration.hpp"
 #include "http-request.h"
 #include "http-response.h"
@@ -30,7 +29,6 @@ class Cgi
 
 };
 
-std::string getFullPath(const std::string &file);
 void    handleCgiRequest(const std::string &output, HttpResponse &response);
 
 #endif
