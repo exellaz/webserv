@@ -43,8 +43,6 @@ void HttpRequest::parseRequestLine(const std::string& headerStr)
 
 void HttpRequest::parseHeaderLines(const std::string& str)
 {
-    std::cout << "Method: " << _method << "\n";
-
     std::istringstream stream(str);
     std::string line;
     while (std::getline(stream, line)) {
@@ -75,9 +73,6 @@ void HttpRequest::parseHeaderLines(const std::string& str)
     if ((_method == "GET" || _method == "DELETE") && (hasHeader("Content-Length") || hasHeader("Transfer-Encoding")))
         throw HttpException(BAD_REQUEST, "No body expected for this method");
 
-    for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); ++it)
-        std::cout << "Header: [" << it->first << "] = [" << it->second << "]\n";
-
     if (!hasHeader("Host"))
         throw HttpException(BAD_REQUEST, "Missing Host header");
 
@@ -101,12 +96,13 @@ std::ostream& operator<<(std::ostream &stream, const HttpRequest& src)
 {
     stream << "Method: " << src.getMethod() << "\n";
     stream << "URI: " << src.getURI() << "\n";
-    stream << "Version: " << src.getVersion() << "\n";
     stream << "Query String: " << src.getQueryString() << "\n";
-    stream << "\nHeaders\n";
-    for (std::map<std::string, std::string>::const_iterator It = src.getHeaders().begin(); It != src.getHeaders().end(); ++It)
-        stream << It->first << ": " << It->second << "\n";
-    stream << "\nBody\n" << src.getBody() << "\n";
+    stream << "Version: " << src.getVersion() << "\n\n";
+    for (std::map<std::string, std::string>::const_iterator it = src.getHeaders().begin(); it != src.getHeaders().end(); ++it)
+        stream << "Header: [" << it->first << "] = [" << it->second << "]\n";
+    stream << std::endl;
+    if (!src.getBody().empty())
+        stream << "Body\n" << src.getBody() << "\n";
     return stream;
 }
 

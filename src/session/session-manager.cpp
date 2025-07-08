@@ -21,7 +21,6 @@ void SessionManager::handleSession(Client& client)
     client.setSessionId(sessionId);
     client.setSessionData(sessionMgr.getSessionData(sessionId));
     request.setSessionId(sessionId);
-    std::cout << "Session data: " << sessionMgr._sessions[sessionId] << "\n";
 }
 
 SessionManager::SessionManager()
