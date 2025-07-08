@@ -7,7 +7,6 @@ static std::string readFromFd(int fd);
 static char **setEnvStrToEnvp(std::map<std::string, std::string> &envVars,
                                         std::vector<std::string> &envStr);
 
-
 Cgi::Cgi() : status(0), pid(-1), argv(NULL), envp(NULL) {
     pipefd[0] = -1;
     pipefd[1] = -1;

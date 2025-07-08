@@ -49,8 +49,8 @@ class Server
         std::map<int, std::string>  _errorPage;
         std::map<std::string, Location> _location;
     public:
-        Server() {};
         Server(std::istream &conf);
+        Server() {};
         ~Server() {};
 
         const std::string                       &getPort() const;
@@ -89,17 +89,17 @@ class Location
         Location() {};
         ~Location() {};
 
-        void setAllowMethod(const std::vector<std::string> &methods);
-        const std::string           &getLocaPath() const;
-        const std::string           &getIndex() const;
-        const std::string           &getRoot() const;
-        const std::string           &getAlias() const;
-        const std::vector<std::string> &getAllowMethods() const;
-        const std::map<int, std::string> &getReturnPath() const;
-        int                         getClientMaxSize() const;
-        bool                        getAutoIndex() const;
-        bool                        getCgiPath() const;
-        bool                        getAllowUpload() const;
+        void                                setAllowMethod(const std::vector<std::string> &methods);
+        const std::string                   &getLocaPath() const;
+        const std::string                   &getIndex() const;
+        const std::string                   &getRoot() const;
+        const std::string                   &getAlias() const;
+        const std::vector<std::string>      &getAllowMethods() const;
+        const std::map<int, std::string>    &getReturnPath() const;
+        int                                 getClientMaxSize() const;
+        bool                                getAutoIndex() const;
+        bool                                getCgiPath() const;
+        bool                                getAllowUpload() const;
 
         void clearLocationBlock();
 };
@@ -107,8 +107,8 @@ class Location
 std::ostream &operator<<(std::ostream &cout, const Server &server);
 std::map< std::pair<std::string, std::string> , std::vector<Server> > parseAllServers(const std::string &filename);
 std::string ft_trim(const std::string &str);
-std::string	checkComment(const std::string &line);
-std::string	extractLocationValue(const std::string &line);
+std::string checkComment(const std::string &line);
+std::string extractLocationValue(const std::string &line);
 std::vector<std::string> checkMethod(std::string allowMethod);
 std::string checkPort(std::string port);
 int checkNumber(std::string number);

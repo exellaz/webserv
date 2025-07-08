@@ -6,6 +6,7 @@
 #include <vector>
 #include <map>
 #include <fstream>
+#include <sys/wait.h>
 #include "utils.h"
 #include "http-request.h"
 #include "http-response.h"
@@ -25,8 +26,8 @@ class Cgi
     public:
         Cgi();
         ~Cgi() {};
-        std::string executeCgi(HttpRequest &request, HttpResponse &response);
 
+        std::string executeCgi(HttpRequest &request, HttpResponse &response);
 };
 
 void    handleCgiRequest(const std::string &output, HttpResponse &response);
