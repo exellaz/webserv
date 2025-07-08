@@ -33,12 +33,12 @@ void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Client>& clients
     int newFd = accept(listener, (struct sockaddr *)&remoteAddr, &addrLen);
     if (newFd == -1) {
         perror("accept");
-        return ;
+        throw std::runtime_error("error in accept()");
     }
     if (setNonBlocking(newFd) == -1) {
-        perror("setNonBlocking (new_fd)");
+        perror("setNonBlocking");
         close(newFd);
-        return ;
+        throw std::runtime_error("error setting fd to non-blocking");
     }
 
     addToPfds(pfds, newFd);
