@@ -2,8 +2,6 @@
 #define CONFIGURATION_HPP
 
 #include <string>
-//#include <cstdlib>
-#include <cctype>
 #include <iostream>
 #include <fstream>
 #include <sstream>
