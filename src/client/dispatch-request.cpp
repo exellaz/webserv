@@ -28,7 +28,6 @@ void Client::dispatchRequest()
     }
     else if (location.getCgiPath() == true)
     {
-        std::cout << GREEN "CGI found\n" RESET;
         Cgi cgi;
 
         std::string cgiOutput = cgi.executeCgi(request, response);

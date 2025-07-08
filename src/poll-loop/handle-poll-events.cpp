@@ -2,6 +2,7 @@
 #include "poll-loop.h"
 #include "utils.h"
 #include "session.h"
+#include "utils.h"
 
 static void setPfdTrackPollOutOnly(struct pollfd& pfd);
 static void setPfdTrackPollInOnly(struct pollfd& pfd);
@@ -11,11 +12,11 @@ static void sendResponseToClient(int fd, HttpResponse& response);
 void handlePollIn(std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers,
                     struct pollfd& pfd, Client& client)
 {
-    std::cout << "POLLIN: socket " << pfd.fd << '\n';
+    std::cout << infoTime() << "POLLIN: socket " << pfd.fd << '\n';
 
     int res = client.receiveClientRequest(servers);
     if (res == RECV_CLOSED) {
-        std::cout << "server: socket " << pfd.fd << " hung up\n";
+        std::cout << infoTime() << "server: socket " << pfd.fd << " hung up\n";
         client.setConnState(DISCONNECTED);
         return;
     }
@@ -39,7 +40,7 @@ void handlePollIn(std::map< std::pair<std::string, std::string> , std::vector<Se
 
 void handlePollOut(struct pollfd& pfd, Client& client)
 {
-    std::cout << "POLLOUT: socket " << client.getFd() << '\n';
+    std::cout << infoTime() << "POLLOUT: socket " << client.getFd() << '\n';
 
     sendResponseToClient(client.getFd(), client.response);
     client.setResponseReady(false);
@@ -149,5 +150,5 @@ void resolveLocationPath(const std::string& uri, Client& client)
 static void sendResponseToClient(int fd, HttpResponse& response)
 {
     send(fd, response.toString().c_str(), response.toString().size(), 0);
-    std::cout << "server: Response sent to client.\n";
+    std::cout << infoTime() << "server: Response sent to client.\n";
 }

@@ -37,7 +37,7 @@ int getNearestUpcomingTimeout(std::vector<Client>& clients, std::map< std::pair<
     return (int)nearestTimeout * 1000; //convert to miliseconds
 }
 
-void disconnectTimedOutClients(std::vector<Client>& clients, std::vector<struct pollfd>& pfds, 
+void disconnectTimedOutClients(std::vector<Client>& clients, std::vector<struct pollfd>& pfds,
                                 std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers)
 {
     if (clients.empty())
@@ -48,12 +48,12 @@ void disconnectTimedOutClients(std::vector<Client>& clients, std::vector<struct 
         time_t clientTimeout = getTimeoutBySocketFd(clientIt->getFd(), servers);
 
         if (getNowInSeconds() - clientIt->getStartTime() >= clientTimeout) {
-            std::cout << "server: TIMEOUT for client socket " << clientIt->getFd() << '\n';
+            std::cout << infoTime() << "server: TIMEOUT for client socket " << clientIt->getFd() << '\n';
             //TODO: send response "408 Request Timeout"
 
             clientIt = disconnectClient(clients, clientIt, pfds);
         }
-        else 
+        else
             ++clientIt;
     }
 }

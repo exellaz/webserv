@@ -31,3 +31,12 @@ std::string getFullPath(const std::string &file) {
     free(cwd);
     return full_path;
 }
+
+std::string infoTime(void) {
+    std::time_t now = std::time(NULL);
+    std::tm *ltm = std::localtime(&now);
+    char buf[32];
+    std::strftime(buf, sizeof(buf), "%H:%M:%S", ltm);
+    std::string buffer = "[ " + std::string(buf) + " ] ";
+    return buffer;
+}
