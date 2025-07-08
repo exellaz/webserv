@@ -75,35 +75,11 @@ enum connectionType Client::getConnType() const
     return _connType;
 }
 
-enum readBodyMethod Client::getReadBodyMethod() const
-{
-    return _readBodyMethod;
-}
-
-size_t Client::getContentLength() const
-{
-    return _contentLength;
-}
-
-enum readChunkedRequestStatus Client::getReadChunkedRequestStatus() const
-{
-    return _readChunkedRequestStatus;
-}
-
-size_t Client::getChunkSize() const
-{
-    return _chunkSize;
-}
-
 const std::string& Client::getLocationPath() const
 {
     return _locationPath;
 }
 
-bool Client:: isFirstTimeReadingBody() const
-{
-    return _firstTimeReadingBody;
-}
 bool Client::isResponseReady() const
 {
     return _responseReady;
@@ -121,34 +97,9 @@ void Client::setConnState(enum ConnState connState)
     _connState = connState;
 }
 
-// void Client::setStartTime(time_t startTime)
-// {
-//     _startTime = startTime;
-// }
-
 void Client::setConnType(enum connectionType connType)
 {
     _connType = connType;
-}
-
-void Client::setReadBodyMethod(enum readBodyMethod readBodyMethod)
-{
-    _readBodyMethod = readBodyMethod;
-}
-
-void Client::setContentLength(size_t contentLength)
-{
-    _contentLength = contentLength;
-}
-
-void Client::setReadChunkedRequestStatus(enum readChunkedRequestStatus chunkedRequestStatus)
-{
-    _readChunkedRequestStatus = chunkedRequestStatus;
-}
-
-void Client::setChunkSize(size_t chunkSize)
-{
-    _chunkSize = chunkSize;
 }
 
 void Client::setLocationPath(std::string locationPath)
@@ -156,10 +107,6 @@ void Client::setLocationPath(std::string locationPath)
     _locationPath = locationPath;
 }
 
-void Client::setFirstTimeReadingBody(bool status)
-{
-    _firstTimeReadingBody = status;
-}
 void Client::setResponseReady(bool status)
 {
     _responseReady = status;
@@ -168,90 +115,14 @@ void Client::setResponseReady(bool status)
 
 // =================== BUFFER METHODS ===============================
 
-// void Client::appendToBuffer(const char *str, size_t n)
-// {
-//     _buffer.append(str, n);
-// }
-
 const std::string& Client::getBuffer() const
 {
     return _buffer;
 }
 
-// void Client::setBuffer(std::string str)
-// {
-//     _buffer = str;
-// }
-
 void Client::clearBuffer()
 {
     _buffer.clear();
-}
-
-// void Client::eraseBufferFromStart(size_t n)
-// {
-//     _buffer.erase(0, n);
-// }
-
-// size_t Client::bufferSize() const
-// {
-//     return _buffer.size();
-// }
-
-// bool Client::compareBuffer(const std::string str)
-// {
-//     if (_buffer == str)
-//         return true;
-//     return false;
-// }
-
-// size_t Client::findInBuffer(const std::string str, size_t pos)
-// {
-//     return _buffer.find(str, pos);
-// }
-
-// =================== chunkedReqBuf METHODS ===============================
-
-void Client::appendToChunkReqBuf(const char *str, size_t n)
-{
-    _chunkReqBuf.append(str, n);
-}
-
-const std::string& Client::getChunkReqBuf() const
-{
-    return _chunkReqBuf;
-}
-
-void Client::setChunkReqBuf(std::string str)
-{
-    _chunkReqBuf = str;
-}
-
-void Client::clearChunkReqBuf()
-{
-    _chunkReqBuf.clear();
-}
-
-void Client::eraseChunkReqBufFromStart(size_t n)
-{
-    _chunkReqBuf.erase(0, n);
-}
-
-size_t Client::chunkReqBufSize() const
-{
-    return _chunkReqBuf.size();
-}
-
-bool Client::compareChunkReqBuf(const std::string str)
-{
-    if (_chunkReqBuf == str)
-        return true;
-    return false;
-}
-
-size_t Client::findInChunkReqBuf(const std::string str, size_t pos)
-{
-    return _chunkReqBuf.find(str, pos);
 }
 
 void Client::assignServerByServerName(std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers,

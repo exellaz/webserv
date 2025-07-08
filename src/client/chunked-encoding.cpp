@@ -70,12 +70,12 @@ void Client::resetChunkEnodingVariables()
 int Client::readByChunkedEncoding(std::string& bodyStr, const size_t bufferSize, const size_t maxSize)
 {
     int ret = RECV_OK;
-    enum readChunkedRequestStatus status = getReadChunkedRequestStatus();
+    enum readChunkedRequestStatus status = _readChunkedRequestStatus;
 
     while (status != DONE) {
 
-        if (!(isFirstTimeReadingBody() && _buffer.size() > 0)) {
-            setFirstTimeReadingBody(false);
+        if (!(_firstTimeReadingBody && _buffer.size() > 0)) {
+            _firstTimeReadingBody = false;
 
             ret = readFromSocket(bufferSize);
             if (ret <= 0)
@@ -89,8 +89,8 @@ int Client::readByChunkedEncoding(std::string& bodyStr, const size_t bufferSize,
                 std::cout << "READ_CHUNK_SIZE\n";
                 if (!doesLineHaveCRLF(_buffer))
                     break;
-                setChunkSize(extractChunkSize());
-                if (getChunkSize() == 0)
+                _chunkSize = extractChunkSize();
+                if (_chunkSize == 0)
                     status = EXPECT_CRLF_AFTER_ZERO_CHUNK_SIZE;
                 else
                     status = READ_CHUNK_DATA;
@@ -98,17 +98,17 @@ int Client::readByChunkedEncoding(std::string& bodyStr, const size_t bufferSize,
             else if (status == READ_CHUNK_DATA) {
                 std::cout << "READ_CHUNK_DATA\n";
 
-                if (_buffer.size() < getChunkSize() + CRLF_LENGTH) // must have CRLF for a complete line
+                if (_buffer.size() < _chunkSize + CRLF_LENGTH) // must have CRLF for a complete line
                     break;
                 std::string chunkData = extractChunkData();
-                appendToChunkReqBuf(chunkData.c_str(), chunkData.length());
+                _chunkReqBuf.append(chunkData.c_str(), chunkData.length());
 
-                if (_buffer[getChunkSize()] != '\r' || _buffer[getChunkSize() + 1] != '\n')
+                if (_buffer[_chunkSize] != '\r' || _buffer[_chunkSize + 1] != '\n')
                     // characters after chunkData is not CRLF\n
                     throw HttpException(BAD_REQUEST, "Bad body format");
 
-                std::cout << "chunkReqBuf size " << chunkReqBufSize() << '\n';
-                if (chunkReqBufSize() > maxSize)
+                std::cout << "chunkReqBuf size " << _chunkReqBuf.size() << '\n';
+                if (_chunkReqBuf.size() > maxSize)
                     throw HttpException(PAYLOAD_TOO_LARGE, "Request Body Too Large");
                 _buffer.erase(0, _chunkSize + CRLF_LENGTH);
 
@@ -124,10 +124,10 @@ int Client::readByChunkedEncoding(std::string& bodyStr, const size_t bufferSize,
 
             }
         }
-        setReadChunkedRequestStatus(status);
+        _readChunkedRequestStatus = status;
     }
 
-    bodyStr.append(getChunkReqBuf().c_str(), chunkReqBufSize());
+    bodyStr.append(_chunkReqBuf.c_str(), _chunkReqBuf.size());
     resetChunkEnodingVariables();
 
     return ret;

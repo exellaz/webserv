@@ -55,12 +55,7 @@ public:
 	enum ConnState getConnState() const;
 	time_t getStartTime() const;
 	enum connectionType getConnType() const;
-	enum readBodyMethod getReadBodyMethod() const;
-	size_t getContentLength() const;
-	enum readChunkedRequestStatus getReadChunkedRequestStatus() const;
-	size_t getChunkSize() const;
 	const std::string& getLocationPath() const;
-	bool isFirstTimeReadingBody() const;
 	bool isResponseReady() const;
 	const std::string& getSessionId() const;
 	const std::string& getSessionData() const;
@@ -68,14 +63,8 @@ public:
 	// setters
 	void setFd(int fd);
 	void setConnState(enum ConnState connState);
-	// void setStartTime(time_t startTime);
 	void setConnType(enum connectionType connType);
-	void setReadBodyMethod(enum readBodyMethod readBodyMethod);
-	void setContentLength(size_t contentLength);
-	void setReadChunkedRequestStatus(enum readChunkedRequestStatus chunkedRequestStatus);
-	void setChunkSize(size_t chunkedSize);
 	void setLocationPath(std::string locationPath);
-	void setFirstTimeReadingBody(bool status);
 	void setResponseReady(bool status);
 	void setSessionId(const std::string& sessionId);
 	void setSessionData(const std::string& sesionData);
@@ -83,27 +72,11 @@ public:
 	// Buffer methods
 	const std::string& getBuffer() const;
 	void clearBuffer(); // neexed
-	// void appendToBuffer(const char *str, size_t n);
-	// void setBuffer(std::string str);
-	// void eraseBufferFromStart(size_t n);
-	// size_t bufferSize() const;
-	// bool compareBuffer(const std::string str);
-	// size_t findInBuffer(const std::string str, size_t pos);
-	
-	// chunkReqBuf methods
-	void appendToChunkReqBuf(const char *str, size_t n);
-	const std::string& getChunkReqBuf() const;
-	void setChunkReqBuf(std::string str);
-	void clearChunkReqBuf();
-	void eraseChunkReqBufFromStart(size_t n);
-	size_t chunkReqBufSize() const;
-	bool compareChunkReqBuf(const std::string str);
-	size_t findInChunkReqBuf(const std::string str, size_t pos);
 
 	void assignServerByServerName(std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers,
 									std::pair<std::string, std::string> ipPort, Server& defaultServer);
 
-
+	// read-request
 	int receiveClientRequest(std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers);
 	int readRequestHeader(std::string& headerStr, const size_t bufferSize);
 	int readRequestBody(std::string& bodyStr, const size_t bufferSize, const size_t maxSize);
@@ -112,7 +85,6 @@ public:
 	size_t extractChunkSize();
 	std::string extractChunkData();
 	void resetChunkEnodingVariables();
-
 	int readFromSocket(int bufferSize);
 	void dispatchRequest();
 				
