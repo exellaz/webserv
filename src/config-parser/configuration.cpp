@@ -239,3 +239,17 @@ Location Server::getLocationPath(const std::string &path) {
 
     throw HttpException(NOT_FOUND, "No matching location for URI: " + path);
 }
+
+void Server::clearServerBlock() {
+    this->_port.clear();
+    this->_host.clear();
+    this->_serverName.clear();
+    this->_root.clear();
+    this->_allowMethods.clear();
+    this->_clientMaxSize = 0;
+    this->_clientBodyBufferSize = 0;
+    this->_clientHeaderBufferSize = 0;
+    this->_clientTimeout = 0;
+    this->_errorPage.clear();
+    this->_location.clear();
+}

@@ -66,6 +66,8 @@ class Server
         const std::string                       &getErrorPageByCode(int errorCode) const;
         const std::map<std::string, Location>   &getLocations() const;
         Location                                getLocationPath(const std::string &path);
+
+        void    clearServerBlock();
 };
 
 class Location
@@ -83,6 +85,10 @@ class Location
         bool                        _allowUpload;
 
     public:
+        Location(std::istream &conf, const std::string &locName, const std::vector<std::string> & defaultMethods);
+        Location() {};
+        ~Location() {};
+
         void setAllowMethod(const std::vector<std::string> &methods);
         const std::string           &getLocaPath() const;
         const std::string           &getIndex() const;
@@ -94,10 +100,6 @@ class Location
         bool                        getAutoIndex() const;
         bool                        getCgiPath() const;
         bool                        getAllowUpload() const;
-
-        Location(std::istream &conf, const std::string &locName, const std::vector<std::string> & defaultMethods);
-        Location() {};
-        ~Location() {};
 
         void clearLocationBlock();
 };
