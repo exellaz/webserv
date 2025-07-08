@@ -111,10 +111,8 @@ static void validateRelativeUri(const std::string &relativeUri, Client& client, 
 {
     std::string getRelativeUri = relativeUri.substr(client.location.getLocaPath().length());
     std::string result = trimMultipleSlash(getRelativeUri);
-    std::cout << "Relative path: " << result << "\n"; ////debug
     if (result.empty() || result == "/")
     {
-        std::cout << GREEN "Alias/Root path: " << getFullPath(locationType + result) << "\n" RESET; ////debug
         if (client.server.getRoot().empty())
             client.locationPath = getFullPath(locationType + result);
         else
@@ -122,7 +120,6 @@ static void validateRelativeUri(const std::string &relativeUri, Client& client, 
     }
     else
     {
-        std::cout << GREEN "Alias/Root path extra value: " << getFullPath(locationType + result) << "\n" RESET; ////debug
         if (client.server.getRoot().empty())
             client.locationPath = getFullPath(locationType + result);
         else
@@ -137,18 +134,11 @@ void resolveLocationPath(const std::string& uri, Client& client)
 {
     const Location location = client.server.getLocationPath(uri);
     if (!location.getAlias().empty())
-    {
-        std::cout << "Alias found\n"; ////debug"
         validateRelativeUri(uri, client, location.getAlias());
-    }
     else if (!location.getRoot().empty())
-    {
-        std::cout << "Root found\n"; ////debug
         validateRelativeUri(uri, client, location.getRoot());
-    }
     else
     {
-        std::cout << RED "No alias or root found for the location path: " << uri << "\n" RESET; ////debug
         if (client.server.getRoot().empty())
             client.locationPath = getFullPath(uri + "/");
         else
