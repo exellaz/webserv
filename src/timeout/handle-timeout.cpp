@@ -1,5 +1,5 @@
 #include "timeout.h"
-#include "read-request.h"
+#include "Client.h"
 #include "handle-sockets.h"
 
 time_t getNowInSeconds() {
@@ -37,7 +37,7 @@ int getNearestUpcomingTimeout(std::vector<Client>& clients, std::map< std::pair<
     return (int)nearestTimeout * 1000; //convert to miliseconds
 }
 
-void disconnectTimedOutClients(std::vector<Client>& clients, std::vector<struct pollfd>& pfds, 
+void disconnectTimedOutClients(std::vector<Client>& clients, std::vector<struct pollfd>& pfds,
                                 std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers)
 {
     if (clients.empty())
@@ -53,7 +53,7 @@ void disconnectTimedOutClients(std::vector<Client>& clients, std::vector<struct 
 
             clientIt = disconnectClient(clients, clientIt, pfds);
         }
-        else 
+        else
             ++clientIt;
     }
 }

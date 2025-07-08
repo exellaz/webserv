@@ -1,4 +1,4 @@
-#include "read-request.h"
+#include "Client.h"
 #include "poll-loop.h"
 #include "Cgi.hpp"
 #include "session.h"
@@ -6,7 +6,6 @@
 static void setPfdTrackPollOutOnly(struct pollfd& pfd);
 static void setPfdTrackPollInOnly(struct pollfd& pfd);
 static void resolveLocationPath(const std::string& uri, Client& client);
-static void sendResponseToClient(int fd, HttpResponse& response);
 
 void handlePollIn(std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers,
                     struct pollfd& pfd, Client& client)
@@ -41,7 +40,7 @@ void handlePollOut(struct pollfd& pfd, Client& client)
 {
     std::cout << "POLLOUT: socket " << client.getFd() << '\n';
 
-    sendResponseToClient(client.getFd(), client.response);
+    client.sendResponseToClient();
     client.setResponseReady(false);
     client.request.clearRequest();
     client.response.clearResponse();
@@ -156,8 +155,3 @@ void resolveLocationPath(const std::string& uri, Client& client)
     }
 }
 
-static void sendResponseToClient(int fd, HttpResponse& response)
-{
-    send(fd, response.toString().c_str(), response.toString().size(), 0);
-    std::cout << "server: Response sent to client.\n";
-}
