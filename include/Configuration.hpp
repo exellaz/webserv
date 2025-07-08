@@ -20,7 +20,6 @@ enum Directive
     CLIENT_BODY_BUFFER_SIZE,
     CLIENT_HEADER_BUFFER_SIZE,
     CLIENT_TIMEOUT,
-    ERROR_PAGE,
     LOCATION,
     LOCATION_PATH,
     INDEX,
@@ -37,19 +36,18 @@ class Location;
 class Server
 {
     private:
-        std::string                 _port;           // port number
-        std::string                 _host;           // host IP address
-        std::string                 _serverName;     // server name
-        std::string                 _root;  // root directory
-        std::vector<std::string>    _allowMethods;   // allowed method type (GET, POST)
-        int                         _clientMaxSize;  // maximum client request size
-        int                         _clientBodyBufferSize; //client body buffer size
-        int                         _clientHeaderBufferSize; //client header buffer size
-        int                         _clientTimeout; //size of buffer for large client header (eg: user agent, cookies)
-        std::map<int, std::string>  _errorPage;      // error pages(error code to file path)
-        std::map<std::string, Location>	_location;       // location paths to Location obje
+        std::string                 _port;
+        std::string                 _host;
+        std::string                 _serverName;
+        std::string                 _root;
+        std::vector<std::string>    _allowMethods;
+        int                         _clientMaxSize;
+        int                         _clientBodyBufferSize;
+        int                         _clientHeaderBufferSize;
+        int                         _clientTimeout;
+        std::map<std::string, Location>	_location;
     public:
-        Server() {}; // Default constructor
+        Server() {};
         Server(std::istream &conf);
         ~Server() {};
 
@@ -62,8 +60,6 @@ class Server
         int                                     getClientHeaderBufferSize() const;
         int                                     getClientTimeout() const;
         int                                     getClientMaxSize() const;
-        const std::map<int, std::string>        &getErrorPage() const;
-        const std::string                       &getErrorPageByCode(int errorCode) const;
         const std::map<std::string, Location>   &getLocations() const;
         Location                                getLocationPath(const std::string &path);
 };
@@ -71,15 +67,15 @@ class Server
 class Location
 {
     private:
-        std::string                 _locaPath;   // location path
-        std::string                 _index;          // index file
-        std::string                 _root;  // root directory for this location
-        std::string                 _alias;     // alias for this location
-        std::vector<std::string>	_allowMethods;   // allowed method type (GET, POST)
-        std::map<int, std::string>  _returnPath;     // path to redirect to for return responses
-        int                         _clientMaxSize;  // maximum client request size
-        bool                        _autoIndex;      // auto generate a directory list if no index file is found
-        bool                        _cgiPath;       // cgi path for this location
+        std::string                 _locaPath;
+        std::string                 _index;
+        std::string                 _root;
+        std::string                 _alias;
+        std::vector<std::string>	_allowMethods;
+        std::map<int, std::string>  _returnPath;
+        int                         _clientMaxSize;
+        bool                        _autoIndex;
+        bool                        _cgiPath;
         bool                        _allowUpload;
 
     public:
