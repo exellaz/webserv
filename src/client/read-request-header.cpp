@@ -1,7 +1,7 @@
 #include "timeout.h"
 #include "read-request.h"
 
-int readRequestHeader(Client& client, std::string& headerStr, const size_t bufferSize)
+int Client::readRequestHeader(std::string& headerStr, const size_t bufferSize)
 {
     std::cout << GREY << "===== readRequestHeader =====" << RESET << '\n';
 
@@ -10,10 +10,10 @@ int readRequestHeader(Client& client, std::string& headerStr, const size_t buffe
 
     while (1) {
 
-        ret = readFromSocket(client, bufferSize);
+        ret = readFromSocket(bufferSize);
         if (ret > 0) {
-            client.startTime = getNowInSeconds(); // reset timer
-            found = client.getBuffer().find(HEADER_END);
+            _startTime = getNowInSeconds(); // reset timer
+            found = _buffer.find(HEADER_END);
             if (found != std::string::npos)
                 break;
             else
@@ -23,7 +23,7 @@ int readRequestHeader(Client& client, std::string& headerStr, const size_t buffe
             return ret; // RECV_AGAIN or RECV_CLOSED
     }
 
-    const std::string& buffer = client.getBuffer();
+    const std::string& buffer = _buffer;
 
     // TODO: if CRLF not found -> throw exception?
     if (found == std::string::npos) {
@@ -34,14 +34,13 @@ int readRequestHeader(Client& client, std::string& headerStr, const size_t buffe
     if (buffer.begin() + found == buffer.end() - DOUBLE_CRLF_LENGTH) {
         std::cout << "getHeaderStr: no body found\n";
         headerStr = buffer.substr(0, buffer.length() - DOUBLE_CRLF_LENGTH);
-        client.clearBuffer();
+        _buffer.clear();
     }
     else {
         headerStr = buffer.substr(0, found);
         // replace buffer with body part only
-        client.setBuffer(buffer.substr(found + DOUBLE_CRLF_LENGTH));
+        _buffer = buffer.substr(found + DOUBLE_CRLF_LENGTH);
     }
 
     return ret;
 }
-

@@ -34,18 +34,18 @@ SRCS_FIL = \
 		poll-loop/poll-loop.cpp \
 		poll-loop/poll-loop-utils.cpp \
 		\
-		read-request/receive-client-request.cpp \
-		read-request/read-request-header.cpp \
-		read-request/read-request-body.cpp \
-		read-request/read-from-socket.cpp \
-		read-request/chunked-encoding.cpp \
-		read-request/dispatch-request.cpp \
+		client/Client.cpp \
+		client/receive-client-request.cpp \
+		client/read-request-header.cpp \
+		client/read-request-body.cpp \
+		client/read-from-socket.cpp \
+		client/chunked-encoding.cpp \
+		client/dispatch-request.cpp \
 		\
 		handle-sockets/setup-listeners.cpp \
 		handle-sockets/accept-client.cpp \
 		handle-sockets/disconnect-client.cpp \
 		handle-sockets/socket-utils.cpp \
-		handle-sockets/Client.cpp \
 		\
 		timeout/handle-timeout.cpp \
 		\

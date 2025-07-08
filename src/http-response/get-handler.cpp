@@ -54,40 +54,29 @@ static std::string getMimeType(const std::string& path)
     return "application/octet-stream";
 }
 
-std::string validateIndex(const std::string& locationPath, const Location &location)
-{
+std::string validateIndex(const std::string& locationPath, const Location &location) {
     struct stat info;
     if (stat(locationPath.c_str(), &info) == 0 && S_ISDIR(info.st_mode) && (!location.getIndex().empty()))
-    {
-        std::cout << GREEN "URI AFTER: " << locationPath + "/" + location.getIndex() << "\n" RESET; //// debug
         return (locationPath + "/" + location.getIndex());
-    }
     else
-    {
-        std::cout << BLUE "URI AFTER: " << locationPath << "\n" RESET;
         return (locationPath);
-    }
 }
 
-void HttpResponse::handleGetRequest(const Location& location, const Client& client)
-{
-    std::string fullPath = validateIndex(client.locationPath, location);
+void HttpResponse::handleGetRequest(const Location& location, const Client& client) {
+    std::string fullPath = validateIndex(client.getLocationPath(), location);
 
     struct stat info;
     if (stat(fullPath.c_str(), &info) < 0)
         throw HttpException(NOT_FOUND, "Path is not a file or directory");
 
     if (S_ISDIR(info.st_mode)) {
-        std::cout << GREEN "AutoIndex found\n" RESET; //// debug
         std::string directoryContent = readDirectorytoString(fullPath, client.request.getURI());
         setStatus(OK);
         setHeader("Content-Type", "text/html");
         setBody(directoryContent);
         return ;
     }
-    else if (S_ISREG(info.st_mode))
-    {
-        std::cout << GREEN "Static file found\n" RESET; //// debug
+    else if (S_ISREG(info.st_mode)) {
         std::string fileContents = readFileToString(fullPath);
         if (fileContents.empty())
             throw HttpException(NOT_FOUND, "File not found or readable");
@@ -101,8 +90,7 @@ void HttpResponse::handleGetRequest(const Location& location, const Client& clie
 /**
  * @brief Reads the contents of a directory and generates an HTML index page
 */
-static std::string readDirectorytoString(const std::string &directoryPath, const std::string& uri)
-{
+static std::string readDirectorytoString(const std::string &directoryPath, const std::string& uri) {
     std::stringstream htmlOutput;
     htmlOutput << "<html><head><title>Index of " << uri << "</title></head><body>";
     htmlOutput << "<h1>Index of " << uri << "</h1><hr><ul>";

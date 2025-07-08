@@ -12,12 +12,11 @@ Location::Location(std::istream &conf, const std::string &locName, const std::ve
       _returnPath(),
       _clientMaxSize(0),
       _autoIndex(false),
-      _cgi_path(false),
+      _cgiPath(false),
       _allowUpload(false)
 {
-    this->_locaPath = extractLine(locName);
-    for(std::string line; std::getline(conf, line);)
-    {
+    this->_locaPath = extractLocationValue(locName);
+    for(std::string line; std::getline(conf, line);) {
         line = ft_trim(checkComment(line));
         if (line.empty())
             continue;
@@ -55,7 +54,7 @@ Location::Location(std::istream &conf, const std::string &locName, const std::ve
             case ALLOWED_METHOD:
             {
                 checkValidDirective(line, ALLOWED_METHOD);
-                this->_allowMethods.clear(); // clear the previous allowed methods
+                this->_allowMethods.clear();
                 this->_allowMethods = checkMethod(line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1));
                 break;
             }
@@ -69,7 +68,7 @@ Location::Location(std::istream &conf, const std::string &locName, const std::ve
                     int errorCode = checkNumber(returnPath.substr(0, space));
                     std::string path = ft_trim(returnPath.substr(space + 1));
                     if (path[0] == '"' && path[path.size() - 1] == '"')
-                        path = path.substr(1, path.size() - 2); // remove quotes
+                        path = path.substr(1, path.size() - 2);
                     this->_returnPath[errorCode] = path;
                 }
                 break;
@@ -86,7 +85,7 @@ Location::Location(std::istream &conf, const std::string &locName, const std::ve
                 checkValidDirective(line, CGI_PATH);
                 std::string cgiPath = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
                 if (cgiPath == "on")
-                    this->_cgi_path = true;
+                    this->_cgiPath = true;
                 break;
             }
             case ALLOW_UPLOAD:
@@ -105,71 +104,59 @@ Location::Location(std::istream &conf, const std::string &locName, const std::ve
 
 /////////////////////////////////////////////// GETTER /////////////////////////////////////////////////////////////
 
-void    Location::setAllowMethod(const std::vector<std::string> &methods)
-{
-	this->_allowMethods = methods;
+void    Location::setAllowMethod(const std::vector<std::string> &methods) {
+    this->_allowMethods = methods;
 }
 
-const std::string   &Location::getLocaPath() const
-{
+const std::string   &Location::getLocaPath() const {
     return this->_locaPath;
 }
 
-const std::string    &Location::getIndex() const
-{
+const std::string    &Location::getIndex() const {
     return this->_index;
 }
 
-const std::string    &Location::getRoot() const
-{
+const std::string    &Location::getRoot() const {
     return this->_root;
 }
 
-const std::string    &Location::getAlias() const
-{
+const std::string    &Location::getAlias() const {
     return this->_alias;
 }
 
-const std::vector<std::string> &Location::getAllowMethods() const
-{
+const std::vector<std::string> &Location::getAllowMethods() const {
     return this->_allowMethods;
 }
 
-const std::map<int, std::string> &Location::getReturnPath() const
-{
+const std::map<int, std::string> &Location::getReturnPath() const {
     return this->_returnPath;
 }
 
-int    Location::getClientMaxSize() const
-{
+int    Location::getClientMaxSize() const {
     return this->_clientMaxSize;
 }
 
-bool    Location::getAutoIndex() const
-{
+bool    Location::getAutoIndex() const {
     return this->_autoIndex;
 }
 
-bool    Location::getCgiPath() const
-{
-    return this->_cgi_path;
+bool    Location::getCgiPath() const {
+    return this->_cgiPath;
 }
 
-bool    Location::getAllowUpload() const
-{
+bool    Location::getAllowUpload() const {
     return this->_allowUpload;
 }
 
-void Location::clearLocationBlock()
-{
-	this->_locaPath.clear();
-	this->_index.clear();
-	this->_root.clear();
-	this->_alias.clear();
-	this->_allowMethods.clear();
-	this->_returnPath.clear();
-	this->_clientMaxSize = 0;
-	this->_autoIndex = false;
-	this->_cgi_path = false;
-	this->_allowUpload = false;
+void Location::clearLocationBlock() {
+    this->_locaPath.clear();
+    this->_index.clear();
+    this->_root.clear();
+    this->_alias.clear();
+    this->_allowMethods.clear();
+    this->_returnPath.clear();
+    this->_clientMaxSize = 0;
+    this->_autoIndex = false;
+    this->_cgiPath = false;
+    this->_allowUpload = false;
 }

@@ -25,7 +25,7 @@ static void addToPfds(std::vector<struct pollfd>& pfds, int newFd)
 
 void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Client>& clients, int listener)
 {
-    std::cout << "POLLIN: socket " << listener << '\n';
+    std::cout << infoTime() << "POLLIN: socket " << listener << '\n';
 
     // If listener is ready to read, handle new client
     struct sockaddr_storage remoteAddr; // Client address
@@ -45,9 +45,7 @@ void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Client>& clients
     clients.push_back(Client(newFd, getNowInSeconds()));
 
     char remoteIp[INET6_ADDRSTRLEN];
-    printf("server: new client from %s on "
-        "socket %d\n", inet_ntop(remoteAddr.ss_family,
-            getInAddr((struct sockaddr*)&remoteAddr),
-            remoteIp, INET6_ADDRSTRLEN),
-        newFd);
+    std::cout << infoTime() << "server: new client from " << inet_ntop(remoteAddr.ss_family,
+        getInAddr((struct sockaddr*)&remoteAddr),
+        remoteIp, INET6_ADDRSTRLEN) << " on socket " << newFd << '\n';
 }
