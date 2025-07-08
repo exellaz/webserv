@@ -32,7 +32,6 @@ void handlePollIn(std::map< std::pair<std::string, std::string> , std::vector<Se
             handleParsingError(e, client.response, client);
         }
     }
-    std::cout << "Response ready\n";
     client.setResponseReady(true);
     client.clearBuffer();
     setPfdTrackPollOutOnly(pfd);

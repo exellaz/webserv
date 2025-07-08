@@ -1,9 +1,8 @@
-#include "http-response.h"
-#include "http-request.h"
-#include "http-exception.h"
-#include "Client.h"
 #include <sys/stat.h>
 #include <unistd.h>
+#include "http-response.h"
+#include "http-request.h"
+#include "Client.h"
 
 static void validateUploadPath(const std::string& path, bool uploadAllowed) {
     struct stat info;
