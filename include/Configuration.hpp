@@ -2,7 +2,7 @@
 #define CONFIGURATION_HPP
 
 #include <string>
-#include <cstdlib>
+//#include <cstdlib>
 #include <cctype>
 #include <iostream>
 #include <fstream>
@@ -81,7 +81,7 @@ class Location
         std::map<int, std::string>  _returnPath;     // path to redirect to for return responses
         int                         _clientMaxSize;  // maximum client request size
         bool                        _autoIndex;      // auto generate a directory list if no index file is found
-        bool                        _cgi_path;       // cgi path for this location
+        bool                        _cgiPath;       // cgi path for this location
         bool                        _allowUpload;
 
     public:
@@ -104,19 +104,17 @@ class Location
         void clearLocationBlock();
 };
 
-// std::map<int, std::vector<Server> > parseAllServers(const std::string &filename);
-std::map< std::pair<std::string, std::string> , std::vector<Server> > parseAllServers(const std::string &filename);
-
 std::ostream &operator<<(std::ostream &cout, const Server &server);
+std::map< std::pair<std::string, std::string> , std::vector<Server> > parseAllServers(const std::string &filename);
 std::string ft_trim(const std::string &str);
 std::string	checkComment(const std::string &line);
-std::string	extractLine(const std::string &line);
+std::string	extractLocationValue(const std::string &line);
 std::vector<std::string> checkMethod(std::string allowMethod);
 std::string checkPort(std::string port);
 int checkNumber(std::string number);
 Directive getKey(const std::string &line);
 void checkValidDirective(const std::string &line, Directive directiveType);
-Server& getDefaultServerBlockByIpPort(std::pair<std::string, std::string> ipPort, 
+Server& getDefaultServerBlockByIpPort(std::pair<std::string, std::string> ipPort,
                                       std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers);
 
 #endif

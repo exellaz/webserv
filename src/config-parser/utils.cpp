@@ -17,14 +17,14 @@ std::map< std::pair<std::string, std::string> , std::vector<Server> > parseAllSe
         if (line.find("server") != std::string::npos && line.find("{") != std::string::npos)
         {
             serverBlock << line << "\n";
-            int braceCount = 1; //look for the next "}"
+            int braceCount = 1;
             while (braceCount != 0 && std::getline(conf, line))
             {
                 if (line.find('{') != std::string::npos)
                     braceCount++;
                 if (line.find('}') != std::string::npos)
                     braceCount--;
-                serverBlock << line << "\n"; // if not keep parse the line
+                serverBlock << line << "\n";
             }
             Server server(serverBlock);
             std::string host = server.getHost();
@@ -66,11 +66,11 @@ std::string	checkComment(const std::string &line)
 }
 
 /**
- * @brief extract the line between 'line' and '{'
+ * @brief extract the location value from the line
  * @param line line
  * @return extract line
 */
-std::string	extractLine(const std::string &line)
+std::string	extractLocationValue(const std::string &line)
 {
     std::istringstream iss(line);
     std::string keyword, path;

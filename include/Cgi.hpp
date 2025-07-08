@@ -16,10 +16,10 @@ class Cgi
         int                                 pipefd[2];
         int                                 status;
         pid_t                               pid;
-        std::string                         script_path;
+        std::string                         scriptPath;
         char                                **argv;
-        std::map<std::string, std::string>  env_vars;
-        std::vector<std::string>            env_str;
+        std::map<std::string, std::string>  envVars;
+        std::vector<std::string>            envStr;
         char                                **envp;
 
     public:

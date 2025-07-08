@@ -59,7 +59,7 @@ Server::Server(std::istream &conf)
             case ALLOWED_METHOD:
             {
                 checkValidDirective(line, ALLOWED_METHOD);
-                this->_allowMethods.clear(); // clear the previous allowed methods
+                this->_allowMethods.clear();
                 this->_allowMethods = checkMethod(line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1));
                 break;
             }

@@ -4,30 +4,30 @@
 
 static std::map<std::string, std::string> initEnv(HttpRequest &request);
 static std::string readFromFd(int fd);
-static char **setEnvStrToEnvp(std::map<std::string, std::string> &env_vars,
-                                        std::vector<std::string> &env_str);
+static char **setEnvStrToEnvp(std::map<std::string, std::string> &envVars,
+                                        std::vector<std::string> &envStr);
 
 
 Cgi::Cgi() : status(0), pid(-1), argv(NULL), envp(NULL) {
     pipefd[0] = -1;
     pipefd[1] = -1;
-    script_path.clear();
-    env_vars.clear();
+    scriptPath.clear();
+    envVars.clear();
 }
 
 std::string Cgi::executeCgi(HttpRequest &request, HttpResponse &response) {
-    this->env_vars = initEnv(request);
-    this->script_path = this->env_vars["SCRIPT_FILENAME"];
-    if (this->script_path.find(".cgi") == std::string::npos &&
-        this->script_path.find(".py") == std::string::npos &&
-        this->script_path.find(".js") == std::string::npos)
+    this->envVars = initEnv(request);
+    this->scriptPath = this->envVars["SCRIPT_FILENAME"];
+    if (this->scriptPath.find(".cgi") == std::string::npos &&
+        this->scriptPath.find(".py") == std::string::npos &&
+        this->scriptPath.find(".js") == std::string::npos)
     {
         response.setStatus(FORBIDDEN);
         response.setHeader("Content-Type", "text/plain");
         response.setBody("403 Forbiden: Invalid CGI script type");
         return response.toString();
     }
-    std::ifstream scriptFile(this->script_path.c_str());
+    std::ifstream scriptFile(this->scriptPath.c_str());
     if (!scriptFile.is_open()) {
         response.setStatus(FORBIDDEN);
         response.setHeader("Content-Type", "text/plain");
@@ -44,11 +44,11 @@ std::string Cgi::executeCgi(HttpRequest &request, HttpResponse &response) {
         dup2(this->pipefd[1], STDOUT_FILENO);
         close(this->pipefd[0]);
         close(this->pipefd[1]);
-        this->envp = setEnvStrToEnvp(this->env_vars, this->env_str);
+        this->envp = setEnvStrToEnvp(this->envVars, this->envStr);
         this->argv = new char*[2];
-        this->argv[0] = const_cast<char*>(this->script_path.c_str());
+        this->argv[0] = const_cast<char*>(this->scriptPath.c_str());
         this->argv[1] = NULL;
-        if(execve(this->script_path.c_str(), this->argv, this->envp) == -1)
+        if(execve(this->scriptPath.c_str(), this->argv, this->envp) == -1)
             (perror("execve"), delete[] this->envp, delete[] this->argv, exit(1));
     } else {
         if (request.getMethod() == "POST" || request.getMethod() == "DELETE")
@@ -66,20 +66,20 @@ std::string Cgi::executeCgi(HttpRequest &request, HttpResponse &response) {
 ////////////////////////////////////////////// HELPER FUNCTIONS /////////////////////////////////////////////////////////////
 
 static std::map<std::string, std::string> initEnv(HttpRequest &request) {
-    std::map<std::string, std::string> env_vars;
+    std::map<std::string, std::string> envVars;
     SessionManager& session = SessionManager::getInstance();
 
-    env_vars["REQUEST_METHOD"] = request.getMethod();
-    env_vars["QUERY_STRING"] = request.getQueryString();
-    env_vars["CONTENT_TYPE"] = request.getHeader("Content-Type");
-    env_vars["CONTENT_LENGTH"] = request.getHeader("Content-Length");
-    env_vars["REQUEST_URI"] = request.getURI();
-    env_vars["SCRIPT_NAME"] = request.getURI();
-    env_vars["SCRIPT_FILENAME"] = getFullPath(request.getURI());
-    env_vars["HTTP_VERSION"] = request.getVersion();
-    env_vars["SESSION_DATA"] = session.getSessionData(request.getSessionId());
+    envVars["REQUEST_METHOD"] = request.getMethod();
+    envVars["QUERY_STRING"] = request.getQueryString();
+    envVars["CONTENT_TYPE"] = request.getHeader("Content-Type");
+    envVars["CONTENT_LENGTH"] = request.getHeader("Content-Length");
+    envVars["REQUEST_URI"] = request.getURI();
+    envVars["SCRIPT_NAME"] = request.getURI();
+    envVars["SCRIPT_FILENAME"] = getFullPath(request.getURI());
+    envVars["HTTP_VERSION"] = request.getVersion();
+    envVars["SESSION_DATA"] = session.getSessionData(request.getSessionId());
 
-    return env_vars;
+    return envVars;
 }
 
 /**
@@ -103,16 +103,16 @@ static std::string readFromFd(int fd) {
 
 /**
  * @brief convert map to char **
- * @param env_vars map
+ * @param envVars map
  * @return char**
 */
-static char **setEnvStrToEnvp(std::map<std::string, std::string> &env_vars, std::vector<std::string> &env_str) {
+static char **setEnvStrToEnvp(std::map<std::string, std::string> &envVars, std::vector<std::string> &envStr) {
     char **envp = NULL;
-    for (std::map<std::string, std::string>::const_iterator it = env_vars.begin(); it != env_vars.end(); ++it)
-        env_str.push_back(it->first + "=" + it->second);
-    envp = new char*[env_str.size() + 1];
-    for (size_t i = 0; i < env_str.size(); ++i)
-        envp[i] = const_cast<char*>(env_str[i].c_str());
-    envp[env_str.size()] = NULL;
+    for (std::map<std::string, std::string>::const_iterator it = envVars.begin(); it != envVars.end(); ++it)
+        envStr.push_back(it->first + "=" + it->second);
+    envp = new char*[envStr.size() + 1];
+    for (size_t i = 0; i < envStr.size(); ++i)
+        envp[i] = const_cast<char*>(envStr[i].c_str());
+    envp[envStr.size()] = NULL;
     return envp;
 }

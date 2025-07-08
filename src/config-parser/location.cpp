@@ -12,10 +12,10 @@ Location::Location(std::istream &conf, const std::string &locName, const std::ve
       _returnPath(),
       _clientMaxSize(0),
       _autoIndex(false),
-      _cgi_path(false),
+      _cgiPath(false),
       _allowUpload(false)
 {
-    this->_locaPath = extractLine(locName);
+    this->_locaPath = extractLocationValue(locName);
     for(std::string line; std::getline(conf, line);)
     {
         line = ft_trim(checkComment(line));
@@ -55,7 +55,7 @@ Location::Location(std::istream &conf, const std::string &locName, const std::ve
             case ALLOWED_METHOD:
             {
                 checkValidDirective(line, ALLOWED_METHOD);
-                this->_allowMethods.clear(); // clear the previous allowed methods
+                this->_allowMethods.clear();
                 this->_allowMethods = checkMethod(line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1));
                 break;
             }
@@ -69,7 +69,7 @@ Location::Location(std::istream &conf, const std::string &locName, const std::ve
                     int errorCode = checkNumber(returnPath.substr(0, space));
                     std::string path = ft_trim(returnPath.substr(space + 1));
                     if (path[0] == '"' && path[path.size() - 1] == '"')
-                        path = path.substr(1, path.size() - 2); // remove quotes
+                        path = path.substr(1, path.size() - 2);
                     this->_returnPath[errorCode] = path;
                 }
                 break;
@@ -86,7 +86,7 @@ Location::Location(std::istream &conf, const std::string &locName, const std::ve
                 checkValidDirective(line, CGI_PATH);
                 std::string cgiPath = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
                 if (cgiPath == "on")
-                    this->_cgi_path = true;
+                    this->_cgiPath = true;
                 break;
             }
             case ALLOW_UPLOAD:
@@ -152,7 +152,7 @@ bool    Location::getAutoIndex() const
 
 bool    Location::getCgiPath() const
 {
-    return this->_cgi_path;
+    return this->_cgiPath;
 }
 
 bool    Location::getAllowUpload() const
@@ -170,6 +170,6 @@ void Location::clearLocationBlock()
 	this->_returnPath.clear();
 	this->_clientMaxSize = 0;
 	this->_autoIndex = false;
-	this->_cgi_path = false;
+	this->_cgiPath = false;
 	this->_allowUpload = false;
 }
