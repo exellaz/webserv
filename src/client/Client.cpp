@@ -4,8 +4,8 @@ Client::Client(int fd, time_t startTime) :
     _fd(fd), _connState(ACTIVE), _startTime(startTime), _connType(KEEP_ALIVE),
     _buffer(""), _readBodyMethod(CONTENT_LENGTH), _contentLength(0),
     _readChunkedRequestStatus(READ_CHUNK_SIZE), _chunkSize(0),
-    _chunkReqBuf(""), _locationPath(""),
-    _firstTimeReadingBody(true), _responseReady(false)
+    _chunkReqBuf(""), _firstTimeReadingBody(true), 
+    _locationPath(""), _responseReady(false)
     
 {
     // std::cout << "Client:: Constructor Called (name: " << index << ")" << std::endl;
@@ -17,8 +17,8 @@ Client::Client(const Client& other) :
     _fd(other._fd), _connState(other._connState), _startTime(other._startTime), _connType(other._connType),
     _buffer(other._buffer), _readBodyMethod(other._readBodyMethod), _contentLength(other._contentLength),
     _readChunkedRequestStatus(other._readChunkedRequestStatus), _chunkSize(other._chunkSize),
-    _chunkReqBuf(other._chunkReqBuf), _locationPath(other._locationPath),
-    _firstTimeReadingBody(other._firstTimeReadingBody), _responseReady(other._responseReady)
+    _chunkReqBuf(other._chunkReqBuf), _firstTimeReadingBody(other._firstTimeReadingBody), 
+    _locationPath(other._locationPath), _responseReady(other._responseReady)
 {
     // std::cout << "Client:: Copy Constructor Called" << std::endl;
 }
@@ -40,8 +40,8 @@ Client& Client::operator=(const Client& other)
     _readChunkedRequestStatus = other._readChunkedRequestStatus;
     _chunkSize 				 = other._chunkSize;
     _chunkReqBuf 			 = other._chunkReqBuf;
-    _locationPath			 = other._locationPath;
     _firstTimeReadingBody 	 = other._firstTimeReadingBody;
+    _locationPath			 = other._locationPath;
     _responseReady 		 = other._responseReady;
 
     return *this;
@@ -121,10 +121,10 @@ void Client::setConnState(enum ConnState connState)
     _connState = connState;
 }
 
-void Client::setStartTime(time_t startTime)
-{
-    _startTime = startTime;
-}
+// void Client::setStartTime(time_t startTime)
+// {
+//     _startTime = startTime;
+// }
 
 void Client::setConnType(enum connectionType connType)
 {
@@ -168,47 +168,47 @@ void Client::setResponseReady(bool status)
 
 // =================== BUFFER METHODS ===============================
 
-void Client::appendToBuffer(const char *str, size_t n)
-{
-    _buffer.append(str, n);
-}
+// void Client::appendToBuffer(const char *str, size_t n)
+// {
+//     _buffer.append(str, n);
+// }
 
 const std::string& Client::getBuffer() const
 {
     return _buffer;
 }
 
-void Client::setBuffer(std::string str)
-{
-    _buffer = str;
-}
+// void Client::setBuffer(std::string str)
+// {
+//     _buffer = str;
+// }
 
 void Client::clearBuffer()
 {
     _buffer.clear();
 }
 
-void Client::eraseBufferFromStart(size_t n)
-{
-    _buffer.erase(0, n);
-}
+// void Client::eraseBufferFromStart(size_t n)
+// {
+//     _buffer.erase(0, n);
+// }
 
-size_t Client::bufferSize() const
-{
-    return _buffer.size();
-}
+// size_t Client::bufferSize() const
+// {
+//     return _buffer.size();
+// }
 
-bool Client::compareBuffer(const std::string str)
-{
-    if (_buffer == str)
-        return true;
-    return false;
-}
+// bool Client::compareBuffer(const std::string str)
+// {
+//     if (_buffer == str)
+//         return true;
+//     return false;
+// }
 
-size_t Client::findInBuffer(const std::string str, size_t pos)
-{
-    return _buffer.find(str, pos);
-}
+// size_t Client::findInBuffer(const std::string str, size_t pos)
+// {
+//     return _buffer.find(str, pos);
+// }
 
 // =================== chunkedReqBuf METHODS ===============================
 

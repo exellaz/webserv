@@ -29,42 +29,42 @@ static bool isStrHex(const std::string& str)
     return true;
 }
 
-static size_t extractChunkSize(Client& client)
+size_t Client::extractChunkSize()
 {
     size_t chunkSize = 0;
-    size_t pos = client.findInBuffer(CRLF, 0);
+    size_t pos = _buffer.find(CRLF, 0);
 
-    if (client.compareBuffer(CRLF)) // no hex digits in chunk size line
+    if (_buffer == CRLF) // no hex digits in chunk size line
         throw HttpException(BAD_REQUEST, "Bad body format");
 
-    std::string sizeStr = client.getBuffer().substr(0, pos);
+    std::string sizeStr = _buffer.substr(0, pos);
 
     if (!isStrHex(sizeStr)) // chunkSize string contains non-Hex characters
         throw HttpException(BAD_REQUEST, "Bad body format");
 
     chunkSize = hexStrToSizeT(sizeStr);
     std::cout << "chunkSize: " << chunkSize << '\n';
+    _buffer.erase(0, sizeStr.length() + CRLF_LENGTH);
 
-    client.eraseBufferFromStart(sizeStr.length() + CRLF_LENGTH);
     return chunkSize;
 }
 
-static std::string extractChunkData(const std::string& buffer, size_t chunkSize)
+std::string Client::extractChunkData()
 {
-    std::string dataStr = buffer.substr(0, chunkSize);
+    std::string dataStr = _buffer.substr(0, _chunkSize);
 
     std::cout << "data: " << dataStr << '\n';
 
     return dataStr;
 }
 
-static void resetChunkEnodingVariables(Client& client)
+void Client::resetChunkEnodingVariables()
 {
     // RESET chunkEncoding
-    client.setReadChunkedRequestStatus(READ_CHUNK_SIZE);
-    client.clearChunkReqBuf();
-    client.setChunkSize(0);
-    client.setFirstTimeReadingBody(true);
+    _readChunkedRequestStatus = READ_CHUNK_SIZE;
+    _chunkReqBuf.clear();
+    _chunkSize = 0;
+    _firstTimeReadingBody = true;
 }
 
 int Client::readByChunkedEncoding(std::string& bodyStr, const size_t bufferSize, const size_t maxSize)
@@ -80,16 +80,16 @@ int Client::readByChunkedEncoding(std::string& bodyStr, const size_t bufferSize,
             ret = readFromSocket(bufferSize);
             if (ret <= 0)
                 return ret; // RECV_AGAIN or RECV_CLOSED or RECV_ERROR
-            setStartTime(getNowInSeconds()); // reset timer
+            _startTime = getNowInSeconds(); // reset timer
         }
 
         while (_buffer.size() > 0) {
 
             if (status == READ_CHUNK_SIZE) {
                 std::cout << "READ_CHUNK_SIZE\n";
-                if (!doesLineHaveCRLF(getBuffer()))
+                if (!doesLineHaveCRLF(_buffer))
                     break;
-                setChunkSize(extractChunkSize(*this));
+                setChunkSize(extractChunkSize());
                 if (getChunkSize() == 0)
                     status = EXPECT_CRLF_AFTER_ZERO_CHUNK_SIZE;
                 else
@@ -100,33 +100,35 @@ int Client::readByChunkedEncoding(std::string& bodyStr, const size_t bufferSize,
 
                 if (_buffer.size() < getChunkSize() + CRLF_LENGTH) // must have CRLF for a complete line
                     break;
-                std::string chunkData = extractChunkData(getBuffer(), getChunkSize());
+                std::string chunkData = extractChunkData();
                 appendToChunkReqBuf(chunkData.c_str(), chunkData.length());
 
-                if (getBuffer()[getChunkSize()] != '\r' || getBuffer()[getChunkSize() + 1] != '\n')
+                if (_buffer[getChunkSize()] != '\r' || _buffer[getChunkSize() + 1] != '\n')
                     // characters after chunkData is not CRLF\n
                     throw HttpException(BAD_REQUEST, "Bad body format");
 
                 std::cout << "chunkReqBuf size " << chunkReqBufSize() << '\n';
                 if (chunkReqBufSize() > maxSize)
                     throw HttpException(PAYLOAD_TOO_LARGE, "Request Body Too Large");
-                eraseBufferFromStart(getChunkSize() + CRLF_LENGTH);
+                _buffer.erase(0, _chunkSize + CRLF_LENGTH);
+
                 status = READ_CHUNK_SIZE;
             }
             else if (status == EXPECT_CRLF_AFTER_ZERO_CHUNK_SIZE) {
                 std::cout << "EXPECT_CRLF_AFTER_ZERO_CHUNK_SIE\n";
 
-                if (!compareBuffer(CRLF)) // line after chunkSize 0 is not CRLF only
+                if (_buffer != CRLF) // line after chunkSize 0 is not CRLF only
                     throw HttpException(BAD_REQUEST, "Bad body format");
                 status = DONE;
-                eraseBufferFromStart(CRLF_LENGTH);
+                _buffer.erase(0, CRLF_LENGTH);
+
             }
         }
         setReadChunkedRequestStatus(status);
     }
 
     bodyStr.append(getChunkReqBuf().c_str(), chunkReqBufSize());
-    resetChunkEnodingVariables(*this);
+    resetChunkEnodingVariables();
 
     return ret;
 }

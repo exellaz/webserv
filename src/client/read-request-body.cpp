@@ -27,11 +27,11 @@ int Client::readByContentLength(std::string& bodyStr, const size_t bufferSize, c
 
     if (bytesRead == _contentLength) {
         bodyStr = _buffer;
-        clearBuffer();
+        _buffer.clear();
     }
     else { // bytesRead > _contentLength
         bodyStr = _buffer.substr(0, _contentLength);
-        setBuffer(_buffer.substr(_contentLength));
+        _buffer = _buffer.substr(_contentLength);
     }
     return ret;
 }

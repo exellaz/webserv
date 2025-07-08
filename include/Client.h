@@ -33,6 +33,7 @@ enum readChunkedRequestStatus {
 	DONE
 };
 
+
 class Client {
 public:
 	// Constructor
@@ -67,7 +68,7 @@ public:
 	// setters
 	void setFd(int fd);
 	void setConnState(enum ConnState connState);
-	void setStartTime(time_t startTime);
+	// void setStartTime(time_t startTime);
 	void setConnType(enum connectionType connType);
 	void setReadBodyMethod(enum readBodyMethod readBodyMethod);
 	void setContentLength(size_t contentLength);
@@ -80,14 +81,14 @@ public:
 	void setSessionData(const std::string& sesionData);
 
 	// Buffer methods
-	void appendToBuffer(const char *str, size_t n);
 	const std::string& getBuffer() const;
-	void setBuffer(std::string str);
 	void clearBuffer(); // neexed
-	void eraseBufferFromStart(size_t n);
-	size_t bufferSize() const;
-	bool compareBuffer(const std::string str);
-	size_t findInBuffer(const std::string str, size_t pos);
+	// void appendToBuffer(const char *str, size_t n);
+	// void setBuffer(std::string str);
+	// void eraseBufferFromStart(size_t n);
+	// size_t bufferSize() const;
+	// bool compareBuffer(const std::string str);
+	// size_t findInBuffer(const std::string str, size_t pos);
 	
 	// chunkReqBuf methods
 	void appendToChunkReqBuf(const char *str, size_t n);
@@ -108,6 +109,10 @@ public:
 	int readRequestBody(std::string& bodyStr, const size_t bufferSize, const size_t maxSize);
 	int readByContentLength(std::string& bodyStr, const size_t bufferSize, const size_t maxSize);
 	int readByChunkedEncoding(std::string& bodyStr, const size_t bufferSize, const size_t maxSize);
+	size_t extractChunkSize();
+	std::string extractChunkData();
+	void resetChunkEnodingVariables();
+
 	int readFromSocket(int bufferSize);
 	void dispatchRequest();
 				
@@ -120,11 +125,13 @@ private:
 	std::string _buffer;
 	enum readBodyMethod _readBodyMethod;
 	size_t _contentLength;
+
 	enum readChunkedRequestStatus _readChunkedRequestStatus;
 	size_t _chunkSize;
 	std::string _chunkReqBuf;
-	std::string _locationPath;
 	bool _firstTimeReadingBody;
+
+	std::string _locationPath;
 	bool _responseReady;
 	std::string _sessionId;
 	std::string _sessionData;
