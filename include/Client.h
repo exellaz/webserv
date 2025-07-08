@@ -3,8 +3,6 @@
 
 #include <string>
 #include "http-request.h"
-#include "http-response.h"
-#include "http-exception.h"
 #include "Configuration.hpp"
 #include <iostream>
 #include <sys/time.h>
@@ -88,7 +86,7 @@ public:
 	void resetChunkEnodingVariables();
 	int readFromSocket(int bufferSize);
 	void dispatchRequest();
-				
+
 
 private:
 	int _fd;

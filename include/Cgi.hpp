@@ -9,7 +9,6 @@
 #include <sys/wait.h>
 #include "utils.h"
 #include "http-request.h"
-#include "http-response.h"
 
 class Cgi
 {

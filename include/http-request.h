@@ -5,6 +5,7 @@
 # include <sstream>
 # include <map>
 # include <cstdlib>
+# include "http-exception.h"
 
 class HttpRequest
 {

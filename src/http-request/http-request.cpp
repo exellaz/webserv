@@ -1,5 +1,4 @@
 #include "http-request.h"
-#include "http-exception.h"
 
 static bool isTChar(char c);
 static bool isValidToken(const std::string& token);
