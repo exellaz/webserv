@@ -1,11 +1,11 @@
 #include "read-request.h"
 
-int readFromSocket(Client& client, int bufferSize)
+int Client::readFromSocket(int bufferSize)
 {
     // char buf[bufferSize + 1];
     char* buf = new char[bufferSize + 1];
 
-    ssize_t n = recv(client.fd, buf, bufferSize, 0);
+    ssize_t n = recv(_fd, buf, bufferSize, 0);
     std::cout << "n: " << n << '\n';
 
     if (n == 0) {
@@ -20,7 +20,8 @@ int readFromSocket(Client& client, int bufferSize)
         return RECV_AGAIN;
     }
     buf[n] = '\0';
-    client.appendToBuffer(buf, n);
+    _buffer.append(buf, n);
+
     delete[] buf;
 
     return n;
