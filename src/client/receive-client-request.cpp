@@ -75,6 +75,5 @@ int Client::receiveClientRequest(std::map< std::pair<std::string, std::string> ,
             return handleParsingError(e, response, *this);
         }
     }
-    std::cout << request;
     return RECV_OK;
 }

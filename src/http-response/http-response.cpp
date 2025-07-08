@@ -94,29 +94,6 @@ std::string HttpResponse::getHttpDate()
     return std::string(buf);
 }
 
-static std::string toTitleCase(const std::string& str)
-{
-    std::string result;
-    bool capitalizeNext = true;
-
-    for (std::size_t i = 0; i < str.length(); ++i) {
-        char c = str[i];
-        if (c == '-') {
-            result += c;
-            capitalizeNext = true;
-        }
-        else if (capitalizeNext) {
-            result += std::toupper(c);
-            capitalizeNext = false;
-        }
-        else {
-            result += std::tolower(c);
-        }
-    }
-
-    return result;
-}
-
 std::string HttpResponse::toString()
 {
     std::ostringstream responseStream;

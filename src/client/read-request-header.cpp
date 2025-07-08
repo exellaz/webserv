@@ -3,8 +3,6 @@
 
 int Client::readRequestHeader(std::string& headerStr, const size_t bufferSize)
 {
-    std::cout << GREY << "===== readRequestHeader =====" << RESET << '\n';
-
     size_t found;
     int ret;
 

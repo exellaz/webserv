@@ -38,7 +38,6 @@ int Client::readByContentLength(std::string& bodyStr, const size_t bufferSize, c
 
 int Client::readRequestBody(std::string& bodyStr, const size_t bufferSize, const size_t maxSize)
 {
-    std::cout << GREY << "===== readRequestBody =====" << RESET << '\n';
     int ret = RECV_OK;
     if (_readBodyMethod == CONTENT_LENGTH)
         ret = readByContentLength(bodyStr, bufferSize, maxSize);

@@ -94,15 +94,32 @@ void HttpRequest::extractQueryString()
 
 std::ostream& operator<<(std::ostream &stream, const HttpRequest& src)
 {
-    stream << "Method: " << src.getMethod() << "\n";
-    stream << "URI: " << src.getURI() << "\n";
-    stream << "Query String: " << src.getQueryString() << "\n";
-    stream << "Version: " << src.getVersion() << "\n\n";
-    for (std::map<std::string, std::string>::const_iterator it = src.getHeaders().begin(); it != src.getHeaders().end(); ++it)
-        stream << "Header: [" << it->first << "] = [" << it->second << "]\n";
-    stream << std::endl;
-    if (!src.getBody().empty())
-        stream << "Body\n" << src.getBody() << "\n";
+    std::string timePrefix = infoTime();
+
+    stream << timePrefix << BOLD GREEN "=== HTTP REQUEST BEGIN ===" RESET << "\n";
+
+    stream << timePrefix << BOLD "Method      : " RESET << YELLOW << src.getMethod() << RESET << "\n";
+    stream << timePrefix << BOLD "URI         : " RESET << YELLOW << src.getURI() << RESET << "\n";
+    if (!src.getQueryString().empty())
+        stream << timePrefix << BOLD "QueryString : " RESET << YELLOW << src.getQueryString() << RESET << "\n";
+    stream << timePrefix << BOLD "SessionID   : " RESET << YELLOW << src.getSessionId() << RESET << "\n";
+    stream << timePrefix << BOLD "Version     : " RESET << YELLOW << src.getVersion() << RESET << "\n";
+
+    const std::map<std::string, std::string>& headers = src.getHeaders();
+    if (!headers.empty()) {
+        stream << timePrefix << BOLD BLUE "--- Headers ---" RESET << "\n";
+        for (std::map<std::string, std::string>::const_iterator it = headers.begin(); it != headers.end(); ++it) {
+            stream << timePrefix << "[" << toTitleCase(it->first) << "]" << RESET << " = "
+                   << MAGENTA "\"" << it->second << "\"" << RESET << "\n";
+        }
+    }
+
+    if (!src.getBody().empty()) {
+        stream << timePrefix << BOLD BLUE "--- Body ---" RESET << "\n";
+        stream << src.getBody() << "\n";
+    }
+
+    stream << timePrefix << BOLD GREEN "=== HTTP REQUEST END ===" RESET << "\n\n";
     return stream;
 }
 

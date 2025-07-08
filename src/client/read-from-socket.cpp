@@ -8,13 +8,13 @@ int Client::readFromSocket(int bufferSize)
     ssize_t n = recv(_fd, buf, bufferSize, 0);
 
     if (n == 0) {
-        std::cout << "RECV_CLOSED\n";
+        // std::cout << "RECV_CLOSED\n";
         delete[] buf;
 
         return RECV_CLOSED;
     }
     else if (n == -1) {
-        std::cout << "RECV_AGAIN: No data available yet, will try again next iteration.\n";
+        std::cout << infoTime() << "RECV_AGAIN: No data available yet, will try again next iteration.\n";
         delete[] buf;
         return RECV_AGAIN;
     }

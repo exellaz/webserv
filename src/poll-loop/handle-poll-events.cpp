@@ -26,6 +26,7 @@ void handlePollIn(std::map< std::pair<std::string, std::string> , std::vector<Se
         try {
             resolveLocationPath(client.request.getURI(), client);
             SessionManager::handleSession(client);
+            std::cout << client.request;
             client.dispatchRequest();
         }
         catch (const HttpException& e) {
@@ -144,5 +145,5 @@ void resolveLocationPath(const std::string& uri, Client& client)
 static void sendResponseToClient(int fd, HttpResponse& response)
 {
     send(fd, response.toString().c_str(), response.toString().size(), 0);
-    std::cout << infoTime() << "server: Response sent to client.\n";
+    std::cout << infoTime() << "server: response sent to client.\n";
 }
