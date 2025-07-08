@@ -28,12 +28,9 @@ void Client::dispatchRequest()
     }
     else if (location.getCgiPath() == true)
     {
-        std::cout << GREEN "CGI found\n" RESET;
         Cgi cgi;
 
-        std::cout << "response body: \n" << response.getBody() << '\n';
         std::string cgiOutput = cgi.executeCgi(request, response);
-        std::cerr << "cgiOutput: " << cgiOutput << "\n";
 
         if (cgiOutput.empty())
             throw HttpException(INTERNAL_ERROR, "CGI script execution failed");
@@ -44,20 +41,17 @@ void Client::dispatchRequest()
                 session.setSession(getSessionId(), response.getHeader("X-Session-Update"));
             if (response.getHeader("X-Session-Delete") == "yes")
                 session.clearSessionById(getSessionId());
-            std::cout << "---------- CGI Output ----------\n" << BLUE << response.toString() << RESET << "\n";
+            if (response.getStatus() == OK)
+                std::cout << "CGI EXECUTE: [ " << GREEN "SUCCESS" RESET << " ]\n\n";
+            else
+                std::cout << "CGI EXECUTE: [ " << RED "FAIL" RESET << " ]\n\n";
+            //std::cout << "---------- CGI Output ----------\n" << BLUE << response.toString() << RESET << "\n";
         }
-    }
-    else {
+    } else {
         if (request.getMethod() == "GET")
-        {
-            std::cout << GREEN "GET request\n" RESET;
             response.handleGetRequest(location, *this);
-        }
         else if (request.getMethod() == "POST")
-        {
-            std::cout << GREEN "POST request\n" RESET;
             response.handlePostRequest(request, *this);
-        }
         else if (request.getMethod() == "DELETE")
             throw HttpException(METHOD_NOT_ALLOWED, "Delete without CGI not allowed");
     }

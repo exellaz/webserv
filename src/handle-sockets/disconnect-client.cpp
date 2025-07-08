@@ -2,7 +2,7 @@
 
 std::vector<Client>::iterator disconnectClient(std::vector<Client>& clients, std::vector<Client>::iterator &clientIt, std::vector<struct pollfd>& pfds)
 {
-    std::cout << RED << "server: disconnected client socket " << clientIt->getFd() << "\n" << RESET << '\n';
+    std::cout << RED << infoTime() << "server: disconnected client socket " << clientIt->getFd() << "\n" << RESET << '\n';
 
     // find corresponding pfd element based on fd
     std::vector<struct pollfd>::iterator pfdIt = pfds.begin();

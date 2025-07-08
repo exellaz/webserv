@@ -1,7 +1,8 @@
 #include "read-request.h"
 #include "poll-loop.h"
-#include "Cgi.hpp"
+#include "utils.h"
 #include "session.h"
+#include "utils.h"
 
 static void setPfdTrackPollOutOnly(struct pollfd& pfd);
 static void setPfdTrackPollInOnly(struct pollfd& pfd);
@@ -11,11 +12,11 @@ static void sendResponseToClient(int fd, HttpResponse& response);
 void handlePollIn(std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers,
                     struct pollfd& pfd, Client& client)
 {
-    std::cout << "POLLIN: socket " << pfd.fd << '\n';
+    std::cout << infoTime() << "POLLIN: socket " << pfd.fd << '\n';
 
     int res = client.receiveClientRequest(servers);
     if (res == RECV_CLOSED) {
-        std::cout << "server: socket " << pfd.fd << " hung up\n";
+        std::cout << infoTime() << "server: socket " << pfd.fd << " hung up\n";
         client.setConnState(DISCONNECTED);
         return;
     }
@@ -39,7 +40,7 @@ void handlePollIn(std::map< std::pair<std::string, std::string> , std::vector<Se
 
 void handlePollOut(struct pollfd& pfd, Client& client)
 {
-    std::cout << "POLLOUT: socket " << client.getFd() << '\n';
+    std::cout << infoTime() << "POLLOUT: socket " << client.getFd() << '\n';
 
     sendResponseToClient(client.getFd(), client.response);
     client.setResponseReady(false);
@@ -111,10 +112,8 @@ static void validateRelativeUri(const std::string &relativeUri, Client& client, 
 {
     std::string getRelativeUri = relativeUri.substr(client.location.getLocaPath().length());
     std::string result = trimMultipleSlash(getRelativeUri);
-    std::cout << "Relative path: " << result << "\n"; ////debug
     if (result.empty() || result == "/")
     {
-        std::cout << GREEN "Alias/Root path: " << getFullPath(locationType + result) << "\n" RESET; ////debug
         if (client.server.getRoot().empty())
             client.setLocationPath(getFullPath(locationType + result));
         else
@@ -122,7 +121,6 @@ static void validateRelativeUri(const std::string &relativeUri, Client& client, 
     }
     else
     {
-        std::cout << GREEN "Alias/Root path extra value: " << getFullPath(locationType + result) << "\n" RESET; ////debug
         if (client.server.getRoot().empty())
             client.setLocationPath(getFullPath(locationType + result));
         else
@@ -137,18 +135,11 @@ void resolveLocationPath(const std::string& uri, Client& client)
 {
     const Location location = client.server.getLocationPath(uri);
     if (!location.getAlias().empty())
-    {
-        std::cout << "Alias found\n"; ////debug"
         validateRelativeUri(uri, client, location.getAlias());
-    }
     else if (!location.getRoot().empty())
-    {
-        std::cout << "Root found\n"; ////debug
         validateRelativeUri(uri, client, location.getRoot());
-    }
     else
     {
-        std::cout << RED "No alias or root found for the location path: " << uri << "\n" RESET; ////debug
         if (client.server.getRoot().empty())
             client.setLocationPath(getFullPath(uri + "/"));
         else
@@ -159,5 +150,5 @@ void resolveLocationPath(const std::string& uri, Client& client)
 static void sendResponseToClient(int fd, HttpResponse& response)
 {
     send(fd, response.toString().c_str(), response.toString().size(), 0);
-    std::cout << "server: Response sent to client.\n";
+    std::cout << infoTime() << "server: Response sent to client.\n";
 }
