@@ -20,6 +20,7 @@ enum Directive
     CLIENT_BODY_BUFFER_SIZE,
     CLIENT_HEADER_BUFFER_SIZE,
     CLIENT_TIMEOUT,
+    ERROR_PAGE,
     LOCATION,
     LOCATION_PATH,
     INDEX,
@@ -45,7 +46,8 @@ class Server
         int                         _clientBodyBufferSize;
         int                         _clientHeaderBufferSize;
         int                         _clientTimeout;
-        std::map<std::string, Location>	_location;
+        std::map<int, std::string>  _errorPage;
+        std::map<std::string, Location> _location;
     public:
         Server() {};
         Server(std::istream &conf);
@@ -60,6 +62,8 @@ class Server
         int                                     getClientHeaderBufferSize() const;
         int                                     getClientTimeout() const;
         int                                     getClientMaxSize() const;
+        const std::map<int, std::string>        &getErrorPage() const;
+        const std::string                       &getErrorPageByCode(int errorCode) const;
         const std::map<std::string, Location>   &getLocations() const;
         Location                                getLocationPath(const std::string &path);
 };
