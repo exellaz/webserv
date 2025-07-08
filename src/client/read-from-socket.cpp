@@ -20,7 +20,8 @@ int Client::readFromSocket(int bufferSize)
         return RECV_AGAIN;
     }
     buf[n] = '\0';
-    appendToBuffer(buf, n);
+    _buffer.append(buf, n);
+
     delete[] buf;
 
     return n;

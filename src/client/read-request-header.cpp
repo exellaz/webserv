@@ -12,7 +12,7 @@ int Client::readRequestHeader(std::string& headerStr, const size_t bufferSize)
 
         ret = readFromSocket(bufferSize);
         if (ret > 0) {
-            setStartTime(getNowInSeconds()); // reset timer
+            _startTime = getNowInSeconds(); // reset timer
             found = _buffer.find(HEADER_END);
             if (found != std::string::npos)
                 break;
@@ -34,12 +34,12 @@ int Client::readRequestHeader(std::string& headerStr, const size_t bufferSize)
     if (buffer.begin() + found == buffer.end() - DOUBLE_CRLF_LENGTH) {
         std::cout << "getHeaderStr: no body found\n";
         headerStr = buffer.substr(0, buffer.length() - DOUBLE_CRLF_LENGTH);
-        clearBuffer();
+        _buffer.clear();
     }
     else {
         headerStr = buffer.substr(0, found);
         // replace buffer with body part only
-        setBuffer(buffer.substr(found + DOUBLE_CRLF_LENGTH));
+        _buffer = buffer.substr(found + DOUBLE_CRLF_LENGTH);
     }
 
     return ret;
