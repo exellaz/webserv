@@ -48,8 +48,6 @@ int receiveClientRequest(Client& client, std::map< std::pair<std::string, std::s
             request.parseHeaderLines(headerStr);
             client.assignServerByServerName(servers, ipPort, defaultServer);
             client.location = client.server.getLocationPath(request.getURI());
-            std::cout << "Connection Location Path: " << client.location.getLocaPath() << "\n";
-            std::cout << "METHOD SIZE: " << client.location.getAllowMethods().size() << "\n"; //// debug
             validateMethod(request.getMethod(), client.location.getAllowMethods());
         }
         catch (const HttpException& e) {

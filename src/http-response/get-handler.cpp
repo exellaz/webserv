@@ -54,8 +54,7 @@ static std::string getMimeType(const std::string& path)
     return "application/octet-stream";
 }
 
-std::string validateIndex(const std::string& locationPath, const Location &location)
-{
+std::string validateIndex(const std::string& locationPath, const Location &location) {
     struct stat info;
     if (stat(locationPath.c_str(), &info) == 0 && S_ISDIR(info.st_mode) && (!location.getIndex().empty()))
         return (locationPath + "/" + location.getIndex());
@@ -63,8 +62,7 @@ std::string validateIndex(const std::string& locationPath, const Location &locat
         return (locationPath);
 }
 
-void HttpResponse::handleGetRequest(const Location& location, const Client& client)
-{
+void HttpResponse::handleGetRequest(const Location& location, const Client& client) {
     std::string fullPath = validateIndex(client.locationPath, location);
 
     struct stat info;
@@ -92,8 +90,7 @@ void HttpResponse::handleGetRequest(const Location& location, const Client& clie
 /**
  * @brief Reads the contents of a directory and generates an HTML index page
 */
-static std::string readDirectorytoString(const std::string &directoryPath, const std::string& uri)
-{
+static std::string readDirectorytoString(const std::string &directoryPath, const std::string& uri) {
     std::stringstream htmlOutput;
     htmlOutput << "<html><head><title>Index of " << uri << "</title></head><body>";
     htmlOutput << "<h1>Index of " << uri << "</h1><hr><ul>";

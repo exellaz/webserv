@@ -16,8 +16,7 @@ Server::Server(std::istream &conf)
 {
     if (conf.peek() == std::ifstream::traits_type::eof())
         throw std::runtime_error("server file is empty");
-    for (std::string line; std::getline(conf,line);)
-    {
+    for (std::string line; std::getline(conf,line);) {
         line = ft_trim(checkComment(line));
         if (line.empty())
             continue;
@@ -26,8 +25,7 @@ Server::Server(std::istream &conf)
         if (line == "}")
             break;
         Directive directiveType = getKey(line);
-        switch (directiveType)
-        {
+        switch (directiveType) {
             case LISTEN:
             {
                 checkValidDirective(line, LISTEN);
@@ -123,80 +121,70 @@ Server::Server(std::istream &conf)
 /**
  * @brief get port number
 */
-const std::string	&Server::getPort() const
-{
+const std::string   &Server::getPort() const {
     return (this->_port);
 }
 
 /**
  * @brief get ip address or DNS name
 */
-const std::string	&Server::getHost() const
-{
+const std::string   &Server::getHost() const {
     return (this->_host);
 }
 
 /**
  * @brief get server name
 */
-const std::string	&Server::getServerName() const
-{
+const std::string   &Server::getServerName() const {
     return (this->_serverName);
 }
 
 /**
  * @brief get root directory
 */
-const std::string	&Server::getRoot() const
-{
+const std::string   &Server::getRoot() const {
     return (this->_root);
 }
 
 /**
  * @brief get allowed methods
 */
-const std::vector<std::string>	&Server::getAllowMethods() const
-{
+const std::vector<std::string>  &Server::getAllowMethods() const {
     return (this->_allowMethods);
 }
 
 /**
  * @brief get client max size
 */
-int Server::getClientMaxSize() const
-{
+int Server::getClientMaxSize() const {
     return (this->_clientMaxSize);
 }
 
 /**
  * @brief get client body buffer size
 */
-int	Server::getClientBodyBufferSize() const
-{
+int Server::getClientBodyBufferSize() const {
     return (this->_clientBodyBufferSize);
 }
 
 /**
  * @brief get client header buffer size
 */
-int	Server::getClientHeaderBufferSize() const
-{
+int Server::getClientHeaderBufferSize() const {
     return (this->_clientHeaderBufferSize);
 }
 
 /**
  * @brief get large client header buffer number
 */
-int	Server::getClientTimeout() const
-{
+int Server::getClientTimeout() const {
     return (this->_clientTimeout);
 }
 
 /**
  * @brief get error log
 */
-const std::map<int, std::string>	&Server::getErrorPage() const
-{
+const std::map<int, std::string>    &Server::getErrorPage() const {
     return (this->_errorPage);
 }
 
@@ -204,8 +192,7 @@ const std::map<int, std::string>	&Server::getErrorPage() const
  * @brief get error log by code
  * @param errorCode error code
 */
-const std::string &Server::getErrorPageByCode(int errorCode) const
-{
+const std::string &Server::getErrorPageByCode(int errorCode) const {
     std::map<int, std::string>::const_iterator it = this->_errorPage.find(errorCode);
     if (it != this->_errorPage.end())
         return it->second;
@@ -215,8 +202,7 @@ const std::string &Server::getErrorPageByCode(int errorCode) const
 /**
  * @brief get location
 */
-const std::map<std::string, Location>	&Server::getLocations() const
-{
+const std::map<std::string, Location>   &Server::getLocations() const {
     return (this->_location);
 }
 
@@ -226,8 +212,7 @@ const std::map<std::string, Location>	&Server::getLocations() const
  * @note 1. if the location is "/", return the location if it matches the path
  * @note 2. if prefix match and (length is equal or next char is '/'), return the location
 */
-Location Server::getLocationPath(const std::string &path)
-{
+Location Server::getLocationPath(const std::string &path) {
     if (path.empty() || path[0] != '/')
         throw HttpException(BAD_REQUEST, "Invalid request path");
 
