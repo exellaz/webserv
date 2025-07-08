@@ -35,26 +35,6 @@ int Client::readByContentLength(std::string& bodyStr, const size_t bufferSize, c
     }
     return ret;
 }
-// int readRequestBody(Client& client, std::string& bodyStr, const size_t bufferSize, const size_t maxSize)
-// {
-//     std::cout << GREY << "===== readRequestBody =====" << RESET << '\n';
-//     int ret = RECV_OK;
-//     if (client.getReadBodyMethod() == CONTENT_LENGTH) {
-//         std::cout << "CONTENT_LENGTH\n";
-//         ret = readByContentLength(client, bodyStr, bufferSize, maxSize);
-//     }
-//     else if (client.getReadBodyMethod() == CHUNKED_ENCODING) {
-//         std::cout << "CHUNKED ENCODING\n";
-//         ret = readByChunkedEncoding(client, bodyStr, bufferSize, maxSize);
-//     }
-//     else {// NO_BODY
-//         std::cout << "NO BODY\n";
-//         return RECV_OK;
-//     }
-
-//     return ret;
-// }
-
 
 int Client::readRequestBody(std::string& bodyStr, const size_t bufferSize, const size_t maxSize)
 {

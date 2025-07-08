@@ -5,9 +5,6 @@
 
 void Client::dispatchRequest()
 {
-    // HttpRequest& request = client.request;
-    // HttpResponse& response = client.response;
-
     response.setHeader("Connection", request.getHeader("Connection"));
     if (request.getHeader("Connection") == "close")
         _connType = CLOSE;
