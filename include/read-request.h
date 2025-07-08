@@ -21,12 +21,12 @@ enum readReturnVal {
 	REQUEST_ERR = -3,
 };
 
-int receiveClientRequest(Client& client, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers);
-int readRequestHeader(Client& client, std::string& headerStr, const size_t bufferSize);
-int readRequestBody(Client& client, std::string& bodyStr, const size_t bufferSize, const size_t maxSize);
-int readByContentLength(Client& client, std::string& bodyStr, const size_t bufferSize, const size_t maxSize);
-int readByChunkedEncoding(Client& client, std::string& bodyStr, const size_t bufferSize, const size_t maxSize);
-int readFromSocket(Client& client, int bufferSize);
-void dispatchRequest(Client& client);
+// int receiveClientRequest(Client& client, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers);
+// int readRequestHeader(Client& client, std::string& headerStr, const size_t bufferSize);
+// int readRequestBody(Client& client, std::string& bodyStr, const size_t bufferSize, const size_t maxSize);
+// int readByContentLength(Client& client, std::string& bodyStr, const size_t bufferSize, const size_t maxSize);
+// int readByChunkedEncoding(Client& client, std::string& bodyStr, const size_t bufferSize, const size_t maxSize);
+// int readFromSocket(Client& client, int bufferSize);
+// void dispatchRequest(Client& client);
 
 #endif

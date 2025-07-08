@@ -81,7 +81,7 @@ void HttpResponse::handlePostRequest(const HttpRequest& request, const Client& c
     if (pos == std::string::npos)
         throw HttpException(BAD_REQUEST, "Missing boundary in Content-Type");
 
-    validateUploadPath(client.locationPath, client.location.getAllowUpload());
+    validateUploadPath(client.getLocationPath(), client.location.getAllowUpload());
 
     const std::string& body = request.getBody();
     std::string boundary = "--" + contentType.substr(pos + 9);
@@ -99,7 +99,7 @@ void HttpResponse::handlePostRequest(const HttpRequest& request, const Client& c
         if (fileContent.empty())
             continue;
 
-        std::string outputPath = saveUploadedFile(client.locationPath, filename, fileContent);
+        std::string outputPath = saveUploadedFile(client.getLocationPath(), filename, fileContent);
         if (first) {
             setStatus(CREATED);
             setBody("File uploaded successfully to: " + outputPath);

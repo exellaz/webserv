@@ -33,6 +33,8 @@ enum readChunkedRequestStatus {
 	DONE
 };
 
+
+
 class Client {
 public:
 	// Constructor
@@ -44,52 +46,66 @@ public:
 	// Destructor
 	~Client();
 
-	int fd;
-	enum ConnState connState;
-	time_t startTime; // Timeout
-
-	enum connectionType connType;
-	enum readBodyMethod readBodyMethod;
-
-	size_t contentLength;
-
-	// Chunked Encoding
-	enum readChunkedRequestStatus readChunkedRequestStatus;
-	size_t chunkSize;
-	std::string chunkReqBuf;
-	bool isFirstTimeReadingBody;
-	bool isResponseReady;
-
 	HttpRequest request;
 	HttpResponse response;
 	Server server;
 	Location location;
 
-	std::string locationPath;
+	// getters
+	int getFd() const;
+	enum ConnState getConnState() const;
+	time_t getStartTime() const;
+	enum connectionType getConnType() const;
+	const std::string& getLocationPath() const;
+	bool isResponseReady() const;
+	const std::string& getSessionId() const;
+	const std::string& getSessionData() const;
+
+	// setters
+	void setFd(int fd);
+	void setConnState(enum ConnState connState);
+	void setConnType(enum connectionType connType);
+	void setLocationPath(std::string locationPath);
+	void setResponseReady(bool status);
+	void setSessionId(const std::string& sessionId);
+	void setSessionData(const std::string& sesionData);
 
 	// Buffer methods
-	void appendToBuffer(const char *str, size_t n);
 	const std::string& getBuffer() const;
-	void setBuffer(std::string str);
-	void clearBuffer();
-	void eraseBufferFromStart(size_t n);
-	size_t bufferSize() const;
-	bool compareBuffer(const std::string str);
-	size_t findInBuffer(const std::string str, size_t pos);
-	// void resolveServerConfig(std::vector<Config>& configs, HttpRequest& request);
+	void clearBuffer(); // neexed
 
 	void assignServerByServerName(std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers,
 									std::pair<std::string, std::string> ipPort, Server& defaultServer);
 
-	const std::string& getSessionId() const;
-	const std::string& getSessionData() const;
-
-	void setSessionId(const std::string& sessionId);
-	void setSessionData(const std::string& sesionData);
-
+	// read-request
+	int receiveClientRequest(std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers);
+	int readRequestHeader(std::string& headerStr, const size_t bufferSize);
+	int readRequestBody(std::string& bodyStr, const size_t bufferSize, const size_t maxSize);
+	int readByContentLength(std::string& bodyStr, const size_t bufferSize, const size_t maxSize);
+	int readByChunkedEncoding(std::string& bodyStr, const size_t bufferSize, const size_t maxSize);
+	size_t extractChunkSize();
+	std::string extractChunkData();
+	void resetChunkEnodingVariables();
+	int readFromSocket(int bufferSize);
+	void dispatchRequest();
+				
 
 private:
+	int _fd;
+	enum ConnState _connState;
+	time_t _startTime; // Timeout
+	enum connectionType _connType;
 	std::string _buffer;
+	enum readBodyMethod _readBodyMethod;
+	size_t _contentLength;
+
+	enum readChunkedRequestStatus _readChunkedRequestStatus;
+	size_t _chunkSize;
+	std::string _chunkReqBuf;
+	bool _firstTimeReadingBody;
+
+	std::string _locationPath;
+	bool _responseReady;
 	std::string _sessionId;
 	std::string _sessionData;
 };
