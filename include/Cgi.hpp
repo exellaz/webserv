@@ -1,5 +1,5 @@
-#ifndef CGIOBJECT_HPP
-#define CGIOBJECT_HPP
+#ifndef CGI_HPP
+#define CGI_HPP
 
 #include <string>
 #include <iostream>
@@ -7,37 +7,29 @@
 #include <map>
 #include <fstream>
 #include <sys/wait.h>
-#include "Configuration.hpp"
+
+#include "utils.h"
 #include "http-request.h"
-#include "http-response.h"
 
 class Cgi
 {
-    public:
-        ////process
+    private:
         int                                 pipefd[2];
         int                                 status;
         pid_t                               pid;
+        std::string                         scriptPath;
+        char                                **argv;
+        std::map<std::string, std::string>  envVars;
+        std::vector<std::string>            envStr;
+        char                                **envp;
 
-        ////script
-        std::string                         script_path; // Path to the CGI script
-        char                                **argv; //argument vector for execve
-
-        ////environment
-        std::map<std::string, std::string>  env_vars; //set env
-        std::vector<std::string>            env_str; //convert env to string
-        char                                **envp; //convert string to char*
-
-        ////method
-        std::string executeCgi(HttpRequest &request, HttpResponse &response);
+    public:
         Cgi();
         ~Cgi() {};
-    private:
+
+        std::string executeCgi(HttpRequest &request, HttpResponse &response);
 };
 
-std::string getFullPath(const std::string &file);
-
-//http response
 void    handleCgiRequest(const std::string &output, HttpResponse &response);
 
 #endif

@@ -1,6 +1,58 @@
 #include "http-request.h"
 #include "utils.h"
 
+HttpRequest::HttpRequest()
+    : _headerParsed(false),
+    _bodyParsed(false),
+    _method(),
+    _uri(),
+    _version(),
+    _headers(),
+    _body(),
+    _queryString()
+{}
+
+HttpRequest::HttpRequest(const HttpRequest& other)
+    : _headerParsed(other._headerParsed),
+    _bodyParsed(other._bodyParsed),
+    _method(other._method),
+    _uri(other._uri),
+    _version(other._version),
+    _headers(other._headers),
+    _body(other._body),
+    _queryString(other._queryString)
+{}
+
+HttpRequest& HttpRequest::operator=(const HttpRequest& other)
+{
+    if (this != &other) {
+        _headerParsed = other._headerParsed;
+        _bodyParsed = other._bodyParsed;
+        _method = other._method;
+        _uri = other._uri;
+        _version = other._version;
+        _headers = other._headers;
+        _body = other._body;
+        _queryString = other._queryString;
+    }
+    return *this;
+}
+
+HttpRequest::~HttpRequest()
+{}
+
+void HttpRequest::clearRequest()
+{
+    _headerParsed = false;
+    _bodyParsed = false;
+    _method.clear();
+    _uri.clear();
+    _version.clear();
+    _headers.clear();
+    _body.clear();
+    _queryString.clear();
+}
+
 bool HttpRequest::isHeaderParsed() const
 {
     return _headerParsed;

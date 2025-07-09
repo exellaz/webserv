@@ -48,7 +48,7 @@ void disconnectTimedOutClients(std::vector<Client>& clients, std::vector<struct 
         time_t clientTimeout = getTimeoutBySocketFd(clientIt->getFd(), servers);
 
         if (getNowInSeconds() - clientIt->getStartTime() >= clientTimeout) {
-            std::cout << "server: TIMEOUT for client socket " << clientIt->getFd() << '\n';
+            std::cout << infoTime() << "server: TIMEOUT for client socket " << clientIt->getFd() << '\n';
             //TODO: send response "408 Request Timeout"
 
             clientIt = disconnectClient(clients, clientIt, pfds);

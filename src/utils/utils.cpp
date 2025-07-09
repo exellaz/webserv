@@ -1,4 +1,5 @@
 #include "utils.h"
+#include "color.h"
 
 std::string toLower(const std::string& str)
 {
@@ -17,3 +18,52 @@ bool isDigitsOnly(const std::string& str)
     return true;
 }
 
+/**
+ * @brief get full path of the file
+ * @param file name of the file
+ * @return full path of the file
+*/
+std::string getFullPath(const std::string &file)
+{
+    std::string full_path;
+    char *cwd = getcwd(NULL, 0);
+    if (!cwd) {
+        perror("getcwd");
+        return "";
+    }
+    full_path = std::string(cwd) + file;
+    free(cwd);
+    return full_path;
+}
+
+std::string infoTime()
+{
+    std::time_t now = std::time(NULL);
+    std::tm *ltm = std::localtime(&now);
+    char buf[32];
+    std::strftime(buf, sizeof(buf), "%H:%M:%S", ltm);
+    return std::string(BOLD CYAN "[ ") + buf + " ] " RESET;
+}
+
+std::string toTitleCase(const std::string& str)
+{
+    std::string result;
+    bool capitalizeNext = true;
+
+    for (std::size_t i = 0; i < str.length(); ++i) {
+        char c = str[i];
+        if (c == '-') {
+            result += c;
+            capitalizeNext = true;
+        }
+        else if (capitalizeNext) {
+            result += std::toupper(c);
+            capitalizeNext = false;
+        }
+        else {
+            result += std::tolower(c);
+        }
+    }
+
+    return result;
+}

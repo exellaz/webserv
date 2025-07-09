@@ -3,8 +3,7 @@
 #define RED "\033[31m"
 #define RESET "\033[0m"
 
-std::map< std::pair<std::string, std::string> , std::vector<Server> > parseAllServers(const std::string &filename)
-{
+std::map< std::pair<std::string, std::string> , std::vector<Server> > parseAllServers(const std::string &filename) {
     std::map< std::pair<std::string, std::string> , std::vector<Server> > listServers;
     std::ifstream conf(filename.c_str());
     std::stringstream serverBlock;
@@ -12,19 +11,16 @@ std::map< std::pair<std::string, std::string> , std::vector<Server> > parseAllSe
     if (!conf.is_open())
         throw std::runtime_error("all server: failed to open configuration file");
 
-    for (std::string line; std::getline(conf, line);)
-    {
-        if (line.find("server") != std::string::npos && line.find("{") != std::string::npos)
-        {
+    for (std::string line; std::getline(conf, line);) {
+        if (line.find("server") != std::string::npos && line.find("{") != std::string::npos) {
             serverBlock << line << "\n";
-            int braceCount = 1; //look for the next "}"
-            while (braceCount != 0 && std::getline(conf, line))
-            {
+            int braceCount = 1;
+            while (braceCount != 0 && std::getline(conf, line)) {
                 if (line.find('{') != std::string::npos)
                     braceCount++;
                 if (line.find('}') != std::string::npos)
                     braceCount--;
-                serverBlock << line << "\n"; // if not keep parse the line
+                serverBlock << line << "\n";
             }
             Server server(serverBlock);
             std::string host = server.getHost();
@@ -43,8 +39,7 @@ std::map< std::pair<std::string, std::string> , std::vector<Server> > parseAllSe
  * @param str string that i want to trim
  * @return trimmed string
 */
-std::string ft_trim(const std::string &str)
-{
+std::string ft_trim(const std::string &str) {
     size_t first = str.find_first_not_of(" \t\n\r\f\v");
     if (first == std::string::npos)
         return "";
@@ -57,8 +52,7 @@ std::string ft_trim(const std::string &str)
  * @param line string
  * @return line if no comment, otherwise return line before comment
 */
-std::string	checkComment(const std::string &line)
-{
+std::string	checkComment(const std::string &line) {
     size_t comment_pos = line.find('#');
     if (comment_pos != std::string::npos)
         return line.substr(0, comment_pos);
@@ -66,12 +60,11 @@ std::string	checkComment(const std::string &line)
 }
 
 /**
- * @brief extract the line between 'line' and '{'
+ * @brief extract the location value from the line
  * @param line line
  * @return extract line
 */
-std::string	extractLine(const std::string &line)
-{
+std::string	extractLocationValue(const std::string &line) {
     std::istringstream iss(line);
     std::string keyword, path;
     iss >> keyword >> path;
@@ -86,8 +79,7 @@ std::vector<std::string> checkMethod(std::string allowMethod)
     std::vector<std::string> methods;
     std::istringstream iss(allowMethod);
     std::string method;
-    while (iss >> method)
-    {
+    while (iss >> method) {
         if (method[method.size() - 1] == ';') // check if method ends with ';'
             method.erase(method.size() - 1); //if not erase the last character
         if (isupper(method[0]) == false)
@@ -177,8 +169,7 @@ Directive getKey(const std::string &line)
  * @brief check if the directive is valid
  * @note 1. getline(iss, rest, ';') => read theiss output and store to rest until ';' is found
 */
-void checkValidDirective(const std::string &line, Directive directiveType)
-{
+void checkValidDirective(const std::string &line, Directive directiveType) {
     std::string rest;
     std::istringstream iss(line);
     std::getline(iss, rest, ';');
@@ -187,8 +178,7 @@ void checkValidDirective(const std::string &line, Directive directiveType)
     std::istringstream rest_iss(rest);
     std::string key;
     rest_iss >> key;
-    if (getKey(key) == ERROR_PAGE)
-    {
+    if (getKey(key) == ERROR_PAGE) {
         int errorCode;
         std::string value;
         if (!(rest_iss >> errorCode >> value))
@@ -198,8 +188,7 @@ void checkValidDirective(const std::string &line, Directive directiveType)
             throw std::runtime_error(RED "extra value found in error_page directive: [" + line + "]" RESET);
         return ;
     }
-    if (getKey(key) == RETURN_PATH)
-    {
+    if (getKey(key) == RETURN_PATH) {
         int statusCode;
         std::string value;
         if (!(rest_iss >> statusCode))
@@ -208,17 +197,14 @@ void checkValidDirective(const std::string &line, Directive directiveType)
         value = ft_trim(value);
         if (value.empty())
             throw std::runtime_error(RED "missing value in return directive: [" + line + "]" RESET);
-        if (value[0] == '"')
-        {
+        if (value[0] == '"') {
             if (value[value.size() - 1] != '"')
                 throw std::runtime_error(RED "missing closing quote in return directive: [" + line + "]" RESET);
             size_t open_quote = value.find('"');
             size_t close_quote = value.rfind('"');
             if (open_quote != 0 || close_quote != value.size() - 1 || value.find('"', 1) != close_quote)
                 throw std::runtime_error(RED "extra value found in return directive: [" + line + "]" RESET);
-        }
-        else
-        {
+        } else {
             std::stringstream iss(value);
             std::string str, extra_str;
             iss >> str;
@@ -227,15 +213,13 @@ void checkValidDirective(const std::string &line, Directive directiveType)
         }
         return;
     }
-    if (getKey(key) == ALLOWED_METHOD)
-    {
+    if (getKey(key) == ALLOWED_METHOD) {
         std::string value;
         if (!(rest_iss >> value))
             throw std::runtime_error(RED "missing allowed method in allowed_method directive: [" + line + "]" RESET);
         return ;
     }
-    if (getKey(key) == AUTO_INDEX || getKey(key) == ALLOW_UPLOAD || getKey(key) == CGI_PATH)
-    {
+    if (getKey(key) == AUTO_INDEX || getKey(key) == ALLOW_UPLOAD || getKey(key) == CGI_PATH) {
         std::string value;
         if (!(rest_iss >> value))
             throw std::runtime_error(RED "missing directive value: [" + line + "]" RESET);
@@ -243,8 +227,7 @@ void checkValidDirective(const std::string &line, Directive directiveType)
             throw std::runtime_error(RED "invalid directive value, must be 'on' or 'off': [" + line + "]" RESET);
         return ;
     }
-    if (getKey(key) == LOCATION)
-    {
+    if (getKey(key) == LOCATION) {
         std::string key;
         std::string brace;
         if (!(rest_iss >> key))
@@ -252,8 +235,7 @@ void checkValidDirective(const std::string &line, Directive directiveType)
         if (!(rest_iss >> brace) || brace != "{")
             throw std::runtime_error(RED "invalid location directive: [" + line + "]" RESET);
     }
-    else if (getKey(key) == directiveType)
-    {
+    else if (getKey(key) == directiveType) {
         std::string value;
         std::string extra_value;
         if (!(rest_iss >> value))
@@ -266,13 +248,21 @@ void checkValidDirective(const std::string &line, Directive directiveType)
         throw std::runtime_error(RED "unknown directive: [" + line + "]" RESET);
 }
 
+Server& getDefaultServerBlockByIpPort(std::pair<std::string, std::string> ipPort, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers)
+{
+    for (std::map<std::pair<std::string, std::string>, std::vector<Server> >::iterator it = servers.begin(); it != servers.end(); ++it) {
+        if (it->first == ipPort)
+            return *(it->second.begin());
+    }
+    return *(servers.begin()->second.begin());
+}
+
 ///////////////////////////////////////////// DEBUG FUNCTION ///////////////////////////////////////////////////////////////
 
 /**
  * @brief print server information
 */
-std::ostream &operator<<(std::ostream &cout, const Server &server)
-{
+std::ostream &operator<<(std::ostream &cout, const Server &server) {
     if (!server.getPort().empty())
         cout << "port           : [" << server.getPort() << "]\n";
     if (!server.getHost().empty())
@@ -292,26 +282,22 @@ std::ostream &operator<<(std::ostream &cout, const Server &server)
     if (server.getClientTimeout() != 0)
         cout << "client_timeout: [" << server.getClientTimeout() << "]\n\n";
 
-    for (std::map<int, std::string>::const_iterator it = server.getErrorPage().begin(); it != server.getErrorPage().end(); ++it)
-    {
+    for (std::map<int, std::string>::const_iterator it = server.getErrorPage().begin(); it != server.getErrorPage().end(); ++it) {
         cout << "error_log      : [" << it->first << "] [" << it->second << "]\n";
     }
     std::cout << "\n";
 
-        if (!server.getAllowMethods().empty())
-    {
+    if (!server.getAllowMethods().empty()) {
         cout << "allow_methods  : ";
         for (std::vector<std::string>::const_iterator methodIt = server.getAllowMethods().begin();
-                methodIt != server.getAllowMethods().end(); ++methodIt)
-        {
+                methodIt != server.getAllowMethods().end(); ++methodIt) {
             cout << "[" << *methodIt << "]";
         }
         cout << "\n\n";
     }
 
     for (std::map<std::string, Location>::const_iterator it = server.getLocations().begin();
-            it != server.getLocations().end(); ++it)
-    {
+            it != server.getLocations().end(); ++it) {
         const Location &loc = it->second;
 
         if (!loc.getLocaPath().empty())
@@ -322,22 +308,18 @@ std::ostream &operator<<(std::ostream &cout, const Server &server)
             cout << "root_directory  : [" << loc.getRoot() << "]\n";
         if (!loc.getAlias().empty())
             cout << "alias_directory : [" << loc.getAlias() << "]\n";
-        if (!loc.getAllowMethods().empty())
-        {
+        if (!loc.getAllowMethods().empty()) {
             cout << "allow_methods   : ";
             for (std::vector<std::string>::const_iterator methodIt = loc.getAllowMethods().begin();
-                    methodIt != loc.getAllowMethods().end(); ++methodIt)
-            {
+                    methodIt != loc.getAllowMethods().end(); ++methodIt) {
                 cout << "[" << *methodIt << "]";
             }
             cout << "\n";
         }
-        if (!loc.getReturnPath().empty())
-        {
+        if (!loc.getReturnPath().empty()) {
             cout << "return_path     : ";
             for (std::map<int, std::string>::const_iterator retIt = loc.getReturnPath().begin();
-                    retIt != loc.getReturnPath().end(); ++retIt)
-            {
+                    retIt != loc.getReturnPath().end(); ++retIt) {
                 cout << "[" << retIt->first << "] [" << retIt->second << "]";
             }
             cout << "\n";
@@ -353,15 +335,4 @@ std::ostream &operator<<(std::ostream &cout, const Server &server)
         std::cout << "\n";
     }
     return cout;
-}
-
-Server& getDefaultServerBlockByIpPort(std::pair<std::string, std::string> ipPort, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers)
-{
-    for (std::map<std::pair<std::string, std::string>, std::vector<Server> >::iterator it = servers.begin(); it != servers.end(); ++it)
-    {
-        if (it->first == ipPort)
-            return *(it->second.begin());
-    }
-    // if cannot match with `ipPort` // ? will this ever happen?
-    return *(servers.begin()->second.begin());
 }

@@ -2,12 +2,11 @@
 #define CLIENT_H
 
 #include <string>
-#include "http-request.h"
-#include "http-response.h"
-#include "http-exception.h"
-#include "Configuration.hpp"
 #include <iostream>
 #include <sys/time.h>
+
+#include "http-request.h"
+#include "Configuration.hpp"
 #include "color.h"
 
 #define HEADER_END "\r\n\r\n"

@@ -43,7 +43,7 @@ size_t Client::extractChunkSize()
         throw HttpException(BAD_REQUEST, "Bad body format");
 
     chunkSize = hexStrToSizeT(sizeStr);
-    std::cout << "chunkSize: " << chunkSize << '\n';
+    // std::cout << "chunkSize: " << chunkSize << '\n';
     _buffer.erase(0, sizeStr.length() + CRLF_LENGTH);
 
     return chunkSize;
@@ -53,7 +53,7 @@ std::string Client::extractChunkData()
 {
     std::string dataStr = _buffer.substr(0, _chunkSize);
 
-    std::cout << "data: " << dataStr << '\n';
+    // std::cout << "data: " << dataStr << '\n';
 
     return dataStr;
 }
