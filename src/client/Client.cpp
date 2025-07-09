@@ -1,11 +1,13 @@
 #include "../../include/Client.h"
 
 Client::Client(int fd, time_t startTime) :
+    request(), response(), server(), location(),
     _fd(fd), _connState(ACTIVE), _startTime(startTime), _connType(KEEP_ALIVE),
     _buffer(""), _readBodyMethod(CONTENT_LENGTH), _contentLength(0),
     _readChunkedRequestStatus(READ_CHUNK_SIZE), _chunkSize(0),
     _chunkReqBuf(""), _firstTimeReadingBody(true), 
-    _locationPath(""), _responseReady(false)
+    _locationPath(""), _responseReady(false),
+    _sessionId(""), _sessionData("")
     
 {
     // std::cout << "Client:: Constructor Called (name: " << index << ")" << std::endl;
@@ -14,11 +16,14 @@ Client::Client(int fd, time_t startTime) :
 }
 
 Client::Client(const Client& other) :
+    request(other.request), response(other.response), server(other.server), location(other.location),
     _fd(other._fd), _connState(other._connState), _startTime(other._startTime), _connType(other._connType),
     _buffer(other._buffer), _readBodyMethod(other._readBodyMethod), _contentLength(other._contentLength),
     _readChunkedRequestStatus(other._readChunkedRequestStatus), _chunkSize(other._chunkSize),
     _chunkReqBuf(other._chunkReqBuf), _firstTimeReadingBody(other._firstTimeReadingBody), 
-    _locationPath(other._locationPath), _responseReady(other._responseReady)
+    _locationPath(other._locationPath), _responseReady(other._responseReady),
+    _sessionId(other._sessionId), _sessionData(other._sessionData)
+
 {
     // std::cout << "Client:: Copy Constructor Called" << std::endl;
 }
@@ -30,6 +35,10 @@ Client& Client::operator=(const Client& other)
     if (this == &other)
         return *this;
 
+    request                  = other.request;
+    response                 = other.response;
+    server                   = other.server;
+    location                 = other.location;
     _fd						 = other._fd;
     _connState 				 = other._connState;
     _startTime 				 = other._startTime;
@@ -42,7 +51,9 @@ Client& Client::operator=(const Client& other)
     _chunkReqBuf 			 = other._chunkReqBuf;
     _firstTimeReadingBody 	 = other._firstTimeReadingBody;
     _locationPath			 = other._locationPath;
-    _responseReady 		 = other._responseReady;
+    _responseReady 		     = other._responseReady;
+    _sessionId               = other._sessionId;
+    _sessionData             = other._sessionData;
 
     return *this;
 }
