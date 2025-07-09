@@ -5,9 +5,13 @@
 
 void Client::dispatchRequest()
 {
-    response.setHeader("Connection", request.getHeader("Connection"));
-    if (request.getHeader("Connection") == "close")
+    if (request.getHeader("Connection") == "close") {
+        response.setHeader("Connection", "close");
         _connType = CLOSE;
+    }
+    else
+        response.setHeader("Connection", "keep-alive");
+    
     if (!location.getReturnPath().empty()) {
         int statusCode = location.getReturnPath().begin()->first;
         std::string returnPath = location.getReturnPath().begin()->second;
