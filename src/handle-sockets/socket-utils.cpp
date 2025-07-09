@@ -35,3 +35,12 @@ std::pair<std::string, std::string> getIpAndPortFromSocketFd(int fd)
 
     return std::make_pair(ipStream.str(), portStream.str());
 }
+
+void closeAllSockets(std::vector<struct pollfd>& pfds)
+{
+    std::cout << GREY << "\nClosing all sockets.\n" << RESET;
+    std::vector<struct pollfd>::const_iterator it = pfds.begin();
+    for (; it != pfds.end(); ++it) {
+        close(it->fd);
+    }
+}

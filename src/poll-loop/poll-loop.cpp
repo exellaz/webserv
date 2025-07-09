@@ -42,4 +42,5 @@ void pollLoop(std::map< std::pair<std::string, std::string> , std::vector<Server
         }
         clearDisconnectedClients(clients, pfds);
     }
+    closeAllSockets(pfds);
 }
