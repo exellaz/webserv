@@ -17,10 +17,8 @@ static int getListenerSocket(const std::string& host, const std::string& port)
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE;
 
-    if ((rv = getaddrinfo(host.c_str(), port.c_str(), &hints, &res)) != 0) {
-        fprintf(stderr, "pollserver: %s\n", gai_strerror(rv));
-        exit(1);
-    }
+    if ((rv = getaddrinfo(host.c_str(), port.c_str(), &hints, &res)) != 0)
+        throw std::runtime_error(std::string("getaddrinfo: ") + gai_strerror(rv));
 
     for(p = res; p != NULL; p = p->ai_next) {
         listener = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
