@@ -29,12 +29,13 @@ int main(int argc, char **argv)
 {
     signal(SIGINT, signalHandler);
     signal(SIGTERM, signalHandler);
+
+    std::vector<struct pollfd> pfds;
+    std::vector<int> listeners;
+    std::vector<Client> clients;
     try {
         std::string configFile = getConfigFileString(argc, argv);
         std::map< std::pair<std::string, std::string> , std::vector<Server> > servers = parseAllServers(configFile);
-        std::vector<struct pollfd> pfds;
-        std::vector<int> listeners;
-        std::vector<Client> clients;
 
         setupAllListenerSockets(servers, pfds, listeners);
         pollLoop(servers, pfds, listeners, clients);
@@ -42,6 +43,7 @@ int main(int argc, char **argv)
     catch (const std::exception &e)
     {
         std::cerr << RED << "Error: " << RESET << e.what() << "\n";
+        closeAllSockets(pfds);
         return 1;
     }
 

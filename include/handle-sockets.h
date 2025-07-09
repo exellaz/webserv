@@ -2,7 +2,7 @@
 # define HANDLE_SOCKETS_H
 
 #include <poll.h> // poll(), struct pollfd
-#include <netdb.h> // struct addrinfo, freeaddrinfo 
+#include <netdb.h> // struct addrinfo, freeaddrinfo
 #include <unistd.h> // close
 
 #include "Configuration.hpp"
@@ -11,7 +11,7 @@
 // listener
 void setupListenerSocket(std::vector<struct pollfd>& pfds, std::vector<int>& listeners, Server& server);
 void setupAllListenerSockets(std::map< std::pair<std::string, std::string> , std::vector<Server> > servers,
-                             std::vector<struct pollfd>& pfds, 
+                             std::vector<struct pollfd>& pfds,
                              std::vector<int>& listeners);
 
 // client
@@ -20,6 +20,7 @@ std::vector<Client>::iterator disconnectClient(std::vector<Client>& clients, std
 
 // utils
 int  setNonBlocking(int fd);
-std::pair<std::string, std::string> getIpAndPortFromSocketFd(int fd); 
+std::pair<std::string, std::string> getIpAndPortFromSocketFd(int fd);
+void closeAllSockets(std::vector<struct pollfd>& pfds);
 
 #endif

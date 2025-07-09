@@ -9,6 +9,18 @@
 #include "Configuration.hpp"
 #include "color.h"
 
+#define HEADER_END "\r\n\r\n"
+#define CRLF "\r\n"
+#define CRLF_LENGTH 2
+#define DOUBLE_CRLF_LENGTH 4
+
+enum readReturnVal {
+    RECV_OK = 0,
+    RECV_AGAIN = -1,
+    RECV_CLOSED = -2,
+	REQUEST_ERR = -3,
+};
+
 enum ConnState {
 	ACTIVE,
 	DISCONNECTED
@@ -87,7 +99,7 @@ public:
 	void resetChunkEnodingVariables();
 	int readFromSocket(int bufferSize);
 	void dispatchRequest();
-
+	void sendResponseToClient();
 
 private:
 	int _fd;

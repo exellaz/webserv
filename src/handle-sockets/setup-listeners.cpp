@@ -17,10 +17,8 @@ static int getListenerSocket(const std::string& host, const std::string& port)
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE;
 
-    if ((rv = getaddrinfo(host.c_str(), port.c_str(), &hints, &res)) != 0) {
-        fprintf(stderr, "pollserver: %s\n", gai_strerror(rv));
-        exit(1);
-    }
+    if ((rv = getaddrinfo(host.c_str(), port.c_str(), &hints, &res)) != 0)
+        throw std::runtime_error(std::string("getaddrinfo: ") + gai_strerror(rv));
 
     for(p = res; p != NULL; p = p->ai_next) {
         listener = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
@@ -57,15 +55,13 @@ static int getListenerSocket(const std::string& host, const std::string& port)
 void setupListenerSocket(std::vector<struct pollfd>& pfds, std::vector<int>& listeners, Server& server) {
 
     int listenerFd = getListenerSocket(server.getHost(), server.getPort());
-    if (listenerFd == -1) {
-        std::cerr << "Error: error getting listening socket\n";
-        exit(1); // TODO: throw exception
-    }
+    if (listenerFd == -1)
+        throw std::runtime_error("error getting listening socket");
 
     if (setNonBlocking(listenerFd) == -1) {
         perror("setNonBlocking");
         close(listenerFd);
-        exit(4); // TODO: throw exception
+        throw std::runtime_error("error setting fd to non-blocking");
     }
 
     // Add the listenerFd to set
@@ -79,7 +75,7 @@ void setupListenerSocket(std::vector<struct pollfd>& pfds, std::vector<int>& lis
 
 
 void setupAllListenerSockets(std::map< std::pair<std::string, std::string> , std::vector<Server> > servers,
-                             std::vector<struct pollfd>& pfds, 
+                             std::vector<struct pollfd>& pfds,
                              std::vector<int>& listeners)
 {
     std::map<std::pair<std::string, std::string>, std::vector<Server> >::iterator it = servers.begin();
