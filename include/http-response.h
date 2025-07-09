@@ -2,13 +2,16 @@
 # define HTTP_RESPONSE_H
 
 # include <iostream>
-# include <map>
+# include <sstream>
 # include <ctime>
-#include "color.h"
-#include "Configuration.hpp"
+# include <map>
+
+# include "color.h"
+# include "utils.h"
 
 class Server;
-
+class Client;
+class Location;
 class HttpRequest;
 
 namespace HttpCodes {
@@ -29,8 +32,6 @@ namespace HttpCodes {
         VERSION_NOT_SUPPORTED = 505,
     };
 };
-
-class Client;
 
 using namespace HttpCodes;
 class HttpResponse

@@ -26,15 +26,14 @@ void handlePollIn(std::map< std::pair<std::string, std::string> , std::vector<Se
         try {
             resolveLocationPath(client.request.getURI(), client);
             SessionManager::handleSession(client);
+            std::cout << client.request;
             client.dispatchRequest();
         }
         catch (const HttpException& e) {
             handleParsingError(e, client.response, client);
         }
     }
-    std::cout << "Response ready\n";
     client.setResponseReady(true);
-    client.clearBuffer();
     setPfdTrackPollOutOnly(pfd);
 }
 
@@ -44,6 +43,7 @@ void handlePollOut(struct pollfd& pfd, Client& client)
 
     sendResponseToClient(client.getFd(), client.response);
     client.setResponseReady(false);
+    client.clearBuffer();
     client.request.clearRequest();
     client.response.clearResponse();
 
@@ -88,14 +88,12 @@ static std::string trimMultipleSlash(const std::string &relativeUri)
     for (size_t i = 0; i < relativeUri.size(); ++i)
     {
         if (relativeUri[i] == '/') {
-            if (lastSlash == false)
-            {
+            if (lastSlash == false) {
                 result += '/';
                 lastSlash = true;
             }
         }
-        else
-        {
+        else {
             result += relativeUri[i];
             lastSlash = false;
         }
@@ -112,15 +110,13 @@ static void validateRelativeUri(const std::string &relativeUri, Client& client, 
 {
     std::string getRelativeUri = relativeUri.substr(client.location.getLocaPath().length());
     std::string result = trimMultipleSlash(getRelativeUri);
-    if (result.empty() || result == "/")
-    {
+    if (result.empty() || result == "/") {
         if (client.server.getRoot().empty())
             client.setLocationPath(getFullPath(locationType + result));
         else
             client.setLocationPath(client.server.getRoot() + locationType + result);
     }
-    else
-    {
+    else {
         if (client.server.getRoot().empty())
             client.setLocationPath(getFullPath(locationType + result));
         else
@@ -138,8 +134,7 @@ void resolveLocationPath(const std::string& uri, Client& client)
         validateRelativeUri(uri, client, location.getAlias());
     else if (!location.getRoot().empty())
         validateRelativeUri(uri, client, location.getRoot());
-    else
-    {
+    else {
         if (client.server.getRoot().empty())
             client.setLocationPath(getFullPath(uri + "/"));
         else
@@ -150,5 +145,5 @@ void resolveLocationPath(const std::string& uri, Client& client)
 static void sendResponseToClient(int fd, HttpResponse& response)
 {
     send(fd, response.toString().c_str(), response.toString().size(), 0);
-    std::cout << infoTime() << "server: Response sent to client.\n";
+    std::cout << infoTime() << "server: response sent to client.\n";
 }

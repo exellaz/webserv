@@ -5,7 +5,7 @@
 
 int handleParsingError(const HttpException& e, HttpResponse& response, Client& client)
 {
-    std::cerr << "HTTP Error: " << e.getStatusCode() << " - " << e.what() << "\n";
+    std::cerr << RED <<"HTTP Error: " << e.getStatusCode() << " - " << e.what() << "\n";
     response.setStatus(e.getStatusCode());
     // Set body here being the respective error page
     response.setHeader("Connection", "close");
@@ -75,7 +75,5 @@ int Client::receiveClientRequest(std::map< std::pair<std::string, std::string> ,
             return handleParsingError(e, response, *this);
         }
     }
-
-    // std::cout << request;
     return RECV_OK;
 }

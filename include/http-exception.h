@@ -2,6 +2,7 @@
 # define HTTP_EXCEPTION_H
 
 # include <stdexcept>
+
 # include "http-response.h"
 
 class HttpException : public std::exception

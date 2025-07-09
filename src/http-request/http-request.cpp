@@ -1,5 +1,8 @@
 #include "http-request.h"
-#include "http-exception.h"
+
+static bool isTChar(char c);
+static bool isValidToken(const std::string& token);
+static bool isValidHeaderValue(const std::string& value);
 
 void HttpRequest::parseRequestLine(const std::string& headerStr)
 {
@@ -12,9 +15,8 @@ void HttpRequest::parseRequestLine(const std::string& headerStr)
             line.erase(line.size() - 1);
 
         if (line.empty())
-            continue; // Skip empty prelude lines
+            continue;
 
-        // Now this is the actual request line
         std::string extra;
         std::istringstream lineStream(line);
         if (!(lineStream >> _method >> _uri >> _version))
@@ -36,21 +38,18 @@ void HttpRequest::parseRequestLine(const std::string& headerStr)
         return ;
     }
 
-    // If we never found a non-empty line
     throw HttpException(BAD_REQUEST, "Missing request line");
 }
 
 void HttpRequest::parseHeaderLines(const std::string& str)
 {
-    std::cout << "Method: " << _method << "\n";
-
     std::istringstream stream(str);
     std::string line;
     while (std::getline(stream, line)) {
         if (!line.empty() && line[line.size() - 1] == '\r')
             line.erase(line.size() - 1);
         if (line.empty())
-            continue; // Skip empty prelude lines
+            continue;
 
         size_t colon = line.find(':');
         if (colon != std::string::npos) {
@@ -74,9 +73,6 @@ void HttpRequest::parseHeaderLines(const std::string& str)
     if ((_method == "GET" || _method == "DELETE") && (hasHeader("Content-Length") || hasHeader("Transfer-Encoding")))
         throw HttpException(BAD_REQUEST, "No body expected for this method");
 
-    for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); ++it)
-        std::cout << "Header: [" << it->first << "] = [" << it->second << "]\n";
-
     if (!hasHeader("Host"))
         throw HttpException(BAD_REQUEST, "Missing Host header");
 
@@ -85,34 +81,8 @@ void HttpRequest::parseHeaderLines(const std::string& str)
     _headerParsed = true;
 }
 
-bool HttpRequest::isTChar(char c) const
+void HttpRequest::extractQueryString()
 {
-    const std::string tcharSymbols = "!#$%&'*+-.^_`|~";
-    return std::isalnum(static_cast<unsigned char>(c)) || tcharSymbols.find(c) != std::string::npos;
-}
-
-bool HttpRequest::isValidToken(const std::string& token) const
-{
-    for (std::string::const_iterator It = token.begin(); It != token.end(); ++It) {
-        if (!isTChar(*It))
-            return false;
-    }
-    return !token.empty();
-}
-
-bool HttpRequest::isValidHeaderValue(const std::string& value) const
-{
-    for (std::string::const_iterator It = value.begin(); It != value.end(); ++It) {
-        unsigned char c = static_cast<unsigned char>(*It);
-        if (c == 9 || (c >= 32 && c <= 126) || c >= 128)
-            continue;
-
-        return false;
-    }
-    return true;
-}
-
-void HttpRequest::extractQueryString() {
     size_t qpos = _uri.find('?');
     if (qpos != std::string::npos) {
         _queryString = _uri.substr(qpos + 1);
@@ -122,67 +92,60 @@ void HttpRequest::extractQueryString() {
         _queryString.clear();
 }
 
-void HttpRequest::clearRequest()
-{
-    _headerParsed = false;
-    _bodyParsed = false;
-    _method.clear();
-    _uri.clear();
-    _version.clear();
-    _headers.clear();
-    _body.clear();
-    _queryString.clear();
-}
-
-HttpRequest::HttpRequest()
-    : _headerParsed(false),
-    _bodyParsed(false),
-    _method(),
-    _uri(),
-    _version(),
-    _headers(),
-    _body(),
-    _queryString()
-{}
-
-HttpRequest::HttpRequest(const HttpRequest& other)
-    : _headerParsed(other._headerParsed),
-    _bodyParsed(other._bodyParsed),
-    _method(other._method),
-    _uri(other._uri),
-    _version(other._version),
-    _headers(other._headers),
-    _body(other._body),
-    _queryString(other._queryString)
-{}
-
-HttpRequest& HttpRequest::operator=(const HttpRequest& other)
-{
-    if (this != &other) {
-        _headerParsed = other._headerParsed;
-        _bodyParsed = other._bodyParsed;
-        _method = other._method;
-        _uri = other._uri;
-        _version = other._version;
-        _headers = other._headers;
-        _body = other._body;
-        _queryString = other._queryString;
-    }
-    return *this;
-}
-
-HttpRequest::~HttpRequest()
-{}
-
 std::ostream& operator<<(std::ostream &stream, const HttpRequest& src)
 {
-    stream << "Method: " << src.getMethod() << "\n";
-    stream << "URI: " << src.getURI() << "\n";
-    stream << "Version: " << src.getVersion() << "\n";
-    stream << "Query String: " << src.getQueryString() << "\n";
-    stream << "\nHeaders\n";
-    for (std::map<std::string, std::string>::const_iterator It = src.getHeaders().begin(); It != src.getHeaders().end(); ++It)
-        stream << It->first << ": " << It->second << "\n";
-    stream << "\nBody\n" << src.getBody() << "\n";
+    std::string timePrefix = infoTime();
+
+    stream << timePrefix << BOLD GREEN "=== HTTP REQUEST BEGIN ===" RESET << "\n";
+
+    stream << timePrefix << BOLD "Method      : " RESET << YELLOW << src.getMethod() << RESET << "\n";
+    stream << timePrefix << BOLD "URI         : " RESET << YELLOW << src.getURI() << RESET << "\n";
+    if (!src.getQueryString().empty())
+        stream << timePrefix << BOLD "QueryString : " RESET << YELLOW << src.getQueryString() << RESET << "\n";
+    stream << timePrefix << BOLD "SessionID   : " RESET << YELLOW << src.getSessionId() << RESET << "\n";
+    stream << timePrefix << BOLD "Version     : " RESET << YELLOW << src.getVersion() << RESET << "\n";
+
+    const std::map<std::string, std::string>& headers = src.getHeaders();
+    if (!headers.empty()) {
+        stream << timePrefix << BOLD BLUE "--- Headers ---" RESET << "\n";
+        for (std::map<std::string, std::string>::const_iterator it = headers.begin(); it != headers.end(); ++it) {
+            stream << timePrefix << "[" << toTitleCase(it->first) << "]" << RESET << " = "
+                   << MAGENTA "\"" << it->second << "\"" << RESET << "\n";
+        }
+    }
+
+    if (!src.getBody().empty()) {
+        stream << timePrefix << BOLD BLUE "--- Body ---" RESET << "\n";
+        stream << src.getBody() << "\n";
+    }
+
+    stream << timePrefix << BOLD GREEN "=== HTTP REQUEST END ===" RESET << "\n\n";
     return stream;
+}
+
+static bool isTChar(char c)
+{
+    const std::string tcharSymbols = "!#$%&'*+-.^_`|~";
+    return std::isalnum(static_cast<unsigned char>(c)) || tcharSymbols.find(c) != std::string::npos;
+}
+
+static bool isValidToken(const std::string& token)
+{
+    for (std::string::const_iterator It = token.begin(); It != token.end(); ++It) {
+        if (!isTChar(*It))
+            return false;
+    }
+    return !token.empty();
+}
+
+static bool isValidHeaderValue(const std::string& value)
+{
+    for (std::string::const_iterator It = value.begin(); It != value.end(); ++It) {
+        unsigned char c = static_cast<unsigned char>(*It);
+        if (c == 9 || (c >= 32 && c <= 126) || c >= 128)
+            continue;
+
+        return false;
+    }
+    return true;
 }

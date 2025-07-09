@@ -1,13 +1,16 @@
 #include "utils.h"
+#include "color.h"
 
-std::string toLower(const std::string& str) {
+std::string toLower(const std::string& str)
+{
     std::string result = str;
     for (size_t i = 0; i < str.size(); ++i)
         result[i] = std::tolower(static_cast<int>(result[i]));
     return result;
 }
 
-bool isDigitsOnly(const std::string& str) {
+bool isDigitsOnly(const std::string& str)
+{
     for (size_t i = 0; i < str.size(); ++i) {
         if (!std::isdigit(static_cast<int>(str[i])))
             return false;
@@ -20,7 +23,8 @@ bool isDigitsOnly(const std::string& str) {
  * @param file name of the file
  * @return full path of the file
 */
-std::string getFullPath(const std::string &file) {
+std::string getFullPath(const std::string &file)
+{
     std::string full_path;
     char *cwd = getcwd(NULL, 0);
     if (!cwd) {
@@ -32,11 +36,34 @@ std::string getFullPath(const std::string &file) {
     return full_path;
 }
 
-std::string infoTime(void) {
+std::string infoTime()
+{
     std::time_t now = std::time(NULL);
     std::tm *ltm = std::localtime(&now);
     char buf[32];
     std::strftime(buf, sizeof(buf), "%H:%M:%S", ltm);
-    std::string buffer = "[ " + std::string(buf) + " ] ";
-    return buffer;
+    return std::string(BOLD CYAN "[ ") + buf + " ] " RESET;
+}
+
+std::string toTitleCase(const std::string& str)
+{
+    std::string result;
+    bool capitalizeNext = true;
+
+    for (std::size_t i = 0; i < str.length(); ++i) {
+        char c = str[i];
+        if (c == '-') {
+            result += c;
+            capitalizeNext = true;
+        }
+        else if (capitalizeNext) {
+            result += std::toupper(c);
+            capitalizeNext = false;
+        }
+        else {
+            result += std::tolower(c);
+        }
+    }
+
+    return result;
 }
