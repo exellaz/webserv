@@ -1,5 +1,5 @@
 CXX = c++
-CXXFLAGS = -Wall -Wextra -Werror $(INCLUDES) -std=c++98 #-fsanitize=address -g3
+CXXFLAGS = -Wall -Wextra -Werror $(INCLUDES) -std=c++98 -MMD -MP #-fsanitize=address -g3
 INCLUDES = -Iinclude
 
 # COLORS
@@ -60,19 +60,24 @@ SRCS = $(addprefix $(SRCDIR), $(SRCS_FIL))
 
 # Object files
 OBJDIR = objs/
-OBJS = $(patsubst $(SRCDIR)%.c, $(OBJDIR)%.o, $(SRCS))
+OBJS = $(patsubst $(SRCDIR)%.cpp, $(OBJDIR)%.o, $(SRCS))
+
+# Dependency files (one per object file)
+DEPS = $(OBJS:.o=.d)
+
+SUBDIRS = $(sort $(dir $(SRCS_FIL)))
 
 # Build targets
 all: $(OBJDIR) $(NAME)
 
 $(OBJDIR):
-	@mkdir -p $(OBJDIR) $(addprefix $(OBJDIR), $(dir $(SRCDIR)))
+	@mkdir -p $(OBJDIR) $(addprefix $(OBJDIR), $(SUBDIRS))
 
-$(NAME): $(OBJS)
+$(NAME): $(OBJS) 
 	@$(CXX) $(CXXFLAGS) $(OBJS) -o $(NAME) && echo "$(GREEN)$(NAME) was created$(RESET)"
 
 
-$(OBJDIR)%.o: $(SRCDIR)%.c
+$(OBJDIR)%.o: $(SRCDIR)%.cpp 
 	@$(CXX) $(CXXFLAGS) -c $< -o $@ && echo "$(GREEN)object files were created$(RESET)"
 
 # Clean Up
@@ -85,5 +90,8 @@ fclean: clean
 	@$(RM) $(NAME) && echo "$(ORANGE)$(NAME) was deleted$(RESET)"
 
 re: fclean all
+
+# Include dependency files if they exist
+-include $(DEPS)
 
 .PHONY: all clean fclean re bonus
