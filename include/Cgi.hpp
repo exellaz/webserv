@@ -8,6 +8,7 @@
 #include <fstream>
 #include <sys/wait.h>
 
+#include "Configuration.hpp"
 #include "utils.h"
 #include "http-request.h"
 
@@ -27,7 +28,7 @@ class Cgi
         Cgi();
         ~Cgi() {};
 
-        std::string executeCgi(HttpRequest &request, HttpResponse &response);
+        std::string executeCgi(HttpRequest &request);
 };
 
 void    handleCgiRequest(const std::string &output, HttpResponse &response);

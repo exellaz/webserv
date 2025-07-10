@@ -1,5 +1,4 @@
 #include "../../include/Cgi.hpp"
-#include "utils.h"
 #include "session.h"
 
 static std::map<std::string, std::string> initEnv(HttpRequest &request);
@@ -14,24 +13,18 @@ Cgi::Cgi() : status(0), pid(-1), argv(NULL), envp(NULL) {
     envVars.clear();
 }
 
-std::string Cgi::executeCgi(HttpRequest &request, HttpResponse &response) {
+std::string Cgi::executeCgi(HttpRequest &request) {
     this->envVars = initEnv(request);
     this->scriptPath = this->envVars["SCRIPT_FILENAME"];
     if (this->scriptPath.find(".cgi") == std::string::npos &&
         this->scriptPath.find(".py") == std::string::npos &&
         this->scriptPath.find(".js") == std::string::npos)
     {
-        response.setStatus(FORBIDDEN);
-        response.setHeader("Content-Type", "text/plain");
-        response.setBody("403 Forbiden: Invalid CGI script type");
-        return response.toString();
+        throw HttpException(FORBIDDEN, "CGI script must have .cgi, .py or .js extension");
     }
     std::ifstream scriptFile(this->scriptPath.c_str());
     if (!scriptFile.is_open()) {
-        response.setStatus(FORBIDDEN);
-        response.setHeader("Content-Type", "text/plain");
-        response.setBody("403 Forbiden: CGI script not found");
-        return response.toString();
+        throw HttpException(FORBIDDEN, "CGI script not found");
     }
     if (pipe(this->pipefd) == -1)
         throw std::runtime_error("pipe error");

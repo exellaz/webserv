@@ -1,14 +1,11 @@
-#include <sys/stat.h>
-#include <dirent.h> //for opendir, readdir, closedir
-#include <fcntl.h>
+#include <dirent.h>
 #include <unistd.h>
 #include "http-response.h"
 #include "http-exception.h"
 #include "Client.h"
+#include "utils.h"
 
 static std::string readDirectorytoString(const std::string &directoryPath, const std::string& uri);
-static std::string readFileToString(const std::string& filepath);
-static std::string getMimeType(const std::string& path);
 
 std::string validateIndex(const std::string& locationPath, const Location &location) {
     struct stat info;
@@ -68,49 +65,4 @@ static std::string readDirectorytoString(const std::string &directoryPath, const
     closedir(dir);
     htmlOutput << "</ul><hr></body></html>";
     return htmlOutput.str();
-}
-
-static std::string readFileToString(const std::string& filepath)
-{
-    struct stat st;
-    if (stat(filepath.c_str(), &st) < 0 || !S_ISREG(st.st_mode)) {
-        return "";
-    }
-
-    int fd = open(filepath.c_str(), O_RDONLY);
-    if (fd < 0)
-        return "";
-
-    std::string content;
-    content.reserve(st.st_size);
-
-    const size_t BUFFER_SIZE = 4096;
-    char buffer[BUFFER_SIZE];
-    ssize_t n;
-    while ((n = read(fd, buffer, BUFFER_SIZE)) > 0) {
-        content.append(buffer, n);
-    }
-    close(fd);
-    return content;
-}
-
-static std::string getMimeType(const std::string& path)
-{
-    size_t dot = path.rfind('.');
-    if (dot == std::string::npos)
-        return "application/octet-stream";
-
-    std::string ext = path.substr(dot + 1);
-    if (ext == "html" || ext == "htm") return "text/html";
-    if (ext == "css")                  return "text/css";
-    if (ext == "js")                   return "application/javascript";
-    if (ext == "png")                  return "image/png";
-    if (ext == "jpg" || ext == "jpeg") return "image/jpeg";
-    if (ext == "gif")                  return "image/gif";
-    if (ext == "txt")                  return "text/plain";
-    if (ext == "json")                 return "text/plain";
-    if (ext == "cgi")                  return "text/plain";
-    if (ext == "py")                   return "text/plain";
-    // Fallback
-    return "application/octet-stream";
 }

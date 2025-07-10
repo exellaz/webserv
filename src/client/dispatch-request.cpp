@@ -24,7 +24,7 @@ void Client::dispatchRequest()
     }
     else if (location.getCgiPath() == true) {
         Cgi cgi;
-        std::string cgiOutput = cgi.executeCgi(request, response);
+        std::string cgiOutput = cgi.executeCgi(request);
 
         if (cgiOutput.empty())
             throw HttpException(INTERNAL_ERROR, "CGI script execution failed");

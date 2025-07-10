@@ -2,13 +2,27 @@
 #include "Client.h"
 #include "handle-sockets.h"
 #include "session.h"
+#include "utils.h"
 
 int handleParsingError(const HttpException& e, HttpResponse& response, Client& client)
 {
-    std::cerr << RED <<"HTTP Error: " << e.getStatusCode() << " - " << e.what() << "\n";
+    std::cerr << infoTime() << RED <<"HTTP Error: " << e.getStatusCode() << " - " << e.what() << "\n";
     response.setStatus(e.getStatusCode());
-    // Set body here being the respective error page
     response.setHeader("Connection", "close");
+    if (client.server.getErrorPage().empty()) {
+        response.setHeader("Content-Type", "text/plain");
+        std::ostringstream oss;
+        oss << "Error: " << e.getStatusCode() << " - " << e.what();
+        response.setBody(oss.str());
+    } else {
+        std::string fullPath = client.server.getRoot() + client.server.getErrorPageByCode(e.getStatusCode());
+        std::string fileContents = readFileToString(fullPath);
+        if (fileContents.empty())
+            throw HttpException(NOT_FOUND, "File not found or readable");
+        std::string mime = getMimeType(fullPath);
+        response.setHeader("Content-Type", mime);
+        response.setBody(fileContents);
+    }
     client.setConnType(CLOSE);
     client.setResponseReady(true);
     return REQUEST_ERR;
