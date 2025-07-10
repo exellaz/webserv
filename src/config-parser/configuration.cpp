@@ -65,28 +65,28 @@ Server::Server(std::istream &conf)
             {
                 checkValidDirective(line, CLIENT_MAX_BODY_SIZE);
                 std::string clientMaxSize = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
-                this->_clientMaxSize = checkNumber(clientMaxSize);
+                this->_clientMaxSize = convertAndCheckNumber(clientMaxSize);
                 break;
             }
             case CLIENT_BODY_BUFFER_SIZE:
             {
                 checkValidDirective(line, CLIENT_BODY_BUFFER_SIZE);
                 std::string clientBodyBufferSize = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
-                this->_clientBodyBufferSize = checkNumber(clientBodyBufferSize);
+                this->_clientBodyBufferSize = convertAndCheckNumber(clientBodyBufferSize);
                 break;
             }
             case CLIENT_HEADER_BUFFER_SIZE:
             {
                 checkValidDirective(line, CLIENT_HEADER_BUFFER_SIZE);
                 std::string clientHeaderBufferSize = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
-                this->_clientHeaderBufferSize = checkNumber(clientHeaderBufferSize);
+                this->_clientHeaderBufferSize = convertAndCheckNumber(clientHeaderBufferSize);
                 break;
             }
             case CLIENT_TIMEOUT:
             {
                 checkValidDirective(line, CLIENT_TIMEOUT);
                 std::string clientTimeout = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
-                this->_clientTimeout = checkTimeout(clientTimeout);
+                this->_clientTimeout = convertAndCheckTimeout(clientTimeout);
                 break;
             }
             case ERROR_PAGE:
@@ -96,7 +96,7 @@ Server::Server(std::istream &conf)
                 size_t errorCodePos = errorPage.find(' ');
                 if (errorCodePos != std::string::npos)
                 {
-                    int errorCode = checkNumber(errorPage.substr(0, errorCodePos));
+                    int errorCode = convertAndCheckNumber(errorPage.substr(0, errorCodePos));
                     std::string errorFilePath = ft_trim(errorPage.substr(errorCodePos + 1));
                     this->_errorPage[errorCode] = errorFilePath;
                 }

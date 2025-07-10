@@ -114,8 +114,8 @@ std::string checkComment(const std::string &line);
 std::string extractLocationValue(const std::string &line);
 std::vector<std::string> checkMethod(std::string allowMethod);
 std::string checkPort(std::string port);
-int checkNumber(std::string number);
-time_t checkTimeout(std::string number);
+int convertAndCheckNumber(std::string number);
+time_t convertAndCheckTimeout(std::string number);
 Directive getKey(const std::string &line);
 void checkValidDirective(const std::string &line, Directive directiveType);
 Server& getDefaultServerBlockByIpPort(std::pair<std::string, std::string> ipPort,
