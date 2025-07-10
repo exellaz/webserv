@@ -6,7 +6,7 @@
 #include <sys/time.h>
 
 #include "http-request.h"
-#include "Configuration.hpp"
+#include "Configuration.h"
 #include "color.h"
 
 #define HEADER_END "\r\n\r\n"

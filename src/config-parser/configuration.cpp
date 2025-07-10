@@ -1,4 +1,4 @@
-#include "Configuration.hpp"
+#include "Configuration.h"
 #include "http-exception.h"
 #include "color.h"
 
@@ -86,7 +86,7 @@ Server::Server(std::istream &conf)
             {
                 checkValidDirective(line, CLIENT_TIMEOUT);
                 std::string clientTimeout = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
-                this->_clientTimeout = checkNumber(clientTimeout);
+                this->_clientTimeout = checkTimeout(clientTimeout);
                 break;
             }
             case ERROR_PAGE:
@@ -177,7 +177,7 @@ int Server::getClientHeaderBufferSize() const {
 /**
  * @brief get large client header buffer number
 */
-int Server::getClientTimeout() const {
+time_t Server::getClientTimeout() const {
     return (this->_clientTimeout);
 }
 

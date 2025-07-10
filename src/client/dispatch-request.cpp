@@ -1,6 +1,6 @@
 #include "Client.h"
 #include "http-request.h"
-#include "Cgi.hpp"
+#include "Cgi.h"
 #include "session.h"
 
 void Client::dispatchRequest()
@@ -11,7 +11,7 @@ void Client::dispatchRequest()
     }
     else
         response.setHeader("Connection", "keep-alive");
-    
+
     if (!location.getReturnPath().empty()) {
         int statusCode = location.getReturnPath().begin()->first;
         std::string returnPath = location.getReturnPath().begin()->second;
