@@ -107,16 +107,18 @@ std::string checkPort(std::string port)
     return port;
 }
 
+#include <cerrno>
 time_t checkTimeout(std::string number)
 {
     if (number.empty())
         throw std::runtime_error(RED "client_max_body_size is empty" RESET);
     if (isDigitsOnly(number) == false)
         throw std::runtime_error(RED "client_max_body_size is not a number" RESET);
-    time_t nb = std::strtol(number.c_str(), NULL, 10);
-    if (std::numeric_limits<time_t>::min() < nb && std::numeric_limits<time_t>::max() > nb)
+    errno = 0;
+    long long nb = std::strtoll(number.c_str(), NULL, 10);
+    if (errno == ERANGE || std::numeric_limits<time_t>::min() > nb || std::numeric_limits<time_t>::max() < nb)
                     throw std::runtime_error("client timeout is overflow");
-    return (nb);
+    return (static_cast<time_t>(nb));
 }
 
 /**
@@ -128,10 +130,10 @@ int checkNumber(std::string number)
         throw std::runtime_error(RED "client_max_body_size is empty" RESET);
     if (isDigitsOnly(number) == false)
         throw std::runtime_error(RED "client_max_body_size is not a number" RESET);
-    int nb = std::strtol(number.c_str(), NULL, 10);
+    long nb = std::strtol(number.c_str(), NULL, 10);
     if (INT_MIN > nb || INT_MAX < nb)
         throw std::runtime_error(RED "client_max_body_size is overflow" RESET);
-    return (nb);
+    return (static_cast<int>(nb));
 }
 
 /**
