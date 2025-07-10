@@ -11,7 +11,7 @@ static void resolveLocationPath(const std::string& uri, Client& client);
 void handlePollIn(std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers,
                     struct pollfd& pfd, Client& client)
 {
-    std::cout << infoTime() << "POLLIN: socket " << pfd.fd << '\n';
+    std::cout << infoTime() << GREY "POLLIN: socket " << pfd.fd << RESET "\n";
 
     int res = client.receiveClientRequest(servers);
     if (res == RECV_CLOSED) {
@@ -38,7 +38,7 @@ void handlePollIn(std::map< std::pair<std::string, std::string> , std::vector<Se
 
 void handlePollOut(struct pollfd& pfd, Client& client)
 {
-    std::cout << infoTime() << "POLLOUT: socket " << client.getFd() << '\n';
+    std::cout << infoTime() << GREY "POLLOUT: socket " << client.getFd() << RESET "\n";
 
     client.sendResponseToClient();
     client.setResponseReady(false);
@@ -55,13 +55,13 @@ void handlePollOut(struct pollfd& pfd, Client& client)
 
 void handlePollHup(Client& client)
 {
-    std::cout << "POLLHUP: socket " << client.getFd() << '\n';
+    std::cout << GREY "POLLHUP: socket " << client.getFd() << RESET "\n";
     client.setConnState(DISCONNECTED);
 }
 
 void handlePollErr(Client& client)
 {
-    std::cout << "POLLERR: socket " << client.getFd() << '\n';
+    std::cout << GREY "POLLERR: socket " << client.getFd() << RESET "\n";
     client.setConnState(DISCONNECTED);
 }
 

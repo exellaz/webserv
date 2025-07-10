@@ -45,7 +45,8 @@ void acceptClient(std::vector<struct pollfd>& pfds, std::vector<Client>& clients
     clients.push_back(Client(newFd, getNowInSeconds()));
 
     char remoteIp[INET6_ADDRSTRLEN];
-    std::cout << infoTime() << "server: new client from " << inet_ntop(remoteAddr.ss_family,
-        getInAddr((struct sockaddr*)&remoteAddr),
-        remoteIp, INET6_ADDRSTRLEN) << " on socket " << newFd << '\n';
+    std::cout << infoTime() << GREEN "New client from "
+        << inet_ntop(remoteAddr.ss_family, getInAddr((struct sockaddr*)&remoteAddr),
+                    remoteIp, INET6_ADDRSTRLEN)
+        << " on socket " << newFd << RESET << '\n';
 }

@@ -4,9 +4,13 @@
 void Client::sendResponseToClient()
 {
     if (send(_fd, response.toString().c_str(), response.toString().size(), 0) == -1) {
-        std::cout << "server: error sending response to Socket " << _fd << ", closed connection.\n";
+        std::cout << RED << "Error sending response to Socket " << _fd << ", closed connection." RESET << "\n";
 		_connState = DISCONNECTED;
         return;
     }
-    std::cout << "server: Response sent to client.\n";
+    std::cout << infoTime() << "Response sent to client.\n";
+    std::cout << infoTime() << BOLD ORANGE "=== HTTP RESPONSE BEGIN ===" RESET << "\n";
+    std::cout << response.toString() << "\n";
+    std::cout << infoTime() << BOLD ORANGE "=== HTTP RESPONSE END ===" RESET << "\n";
+
 }

@@ -71,6 +71,8 @@ void setupListenerSocket(std::vector<struct pollfd>& pfds, std::vector<int>& lis
     pfds.push_back(pfd);
 
     listeners.push_back(listenerFd);
+
+    std::cout << infoTime() << "Listener socket fd: " << listenerFd << " binded to " << server.getHost() << ":" << server.getPort() << "\n";
 }
 
 
@@ -84,7 +86,5 @@ void setupAllListenerSockets(std::map< std::pair<std::string, std::string> , std
         Server &curServer = *(it->second.begin());
         setupListenerSocket(pfds, listeners, curServer);
     }
-    for (std::vector<int>::iterator it = listeners.begin(); it != listeners.end(); ++it) ////debug
-        std::cout << "Listener socket fd: " << *it << "\n";
 }
 
