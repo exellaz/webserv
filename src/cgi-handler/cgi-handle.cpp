@@ -55,7 +55,9 @@ std::string Cgi::executeCgi(HttpRequest &request) {
         int timeout = timerWaitpid(this->pid, &this->status, 5);
         if (timeout == -2)
             throw HttpException(GATEWAY_TIMEOUT, "CGI script execution timed out");
-        std::string output = readFromFd(this->pipefd[0]);
+        else if (timeout == -1)
+            throw HttpException(INTERNAL_ERROR, "CGI waitpid failed");
+            std::string output = readFromFd(this->pipefd[0]);
         if (!WIFEXITED(status) || WEXITSTATUS(status) != 0 || output.empty())
             return "";
         return (output);
