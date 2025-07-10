@@ -30,6 +30,7 @@ namespace HttpCodes {
         INTERNAL_ERROR = 500,
         NOT_IMPLEMENTED = 501,
         VERSION_NOT_SUPPORTED = 505,
+        GATEWAY_TIMEOUT = 504
     };
 };
 

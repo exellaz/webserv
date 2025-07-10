@@ -5,6 +5,7 @@ static std::map<std::string, std::string> initEnv(HttpRequest &request);
 static std::string readFromFd(int fd);
 static char **setEnvStrToEnvp(std::map<std::string, std::string> &envVars,
                                         std::vector<std::string> &envStr);
+static int timerWaitpid(pid_t pid, int *status, int timeout);
 
 Cgi::Cgi() : status(0), pid(-1), argv(NULL), envp(NULL) {
     pipefd[0] = -1;
@@ -36,6 +37,11 @@ std::string Cgi::executeCgi(HttpRequest &request) {
         dup2(this->pipefd[1], STDOUT_FILENO);
         close(this->pipefd[0]);
         close(this->pipefd[1]);
+        std::string scriptDir = this->scriptPath.substr(0, this->scriptPath.find_last_of('/'));
+        if (chdir(scriptDir.c_str()) == -1) {
+            perror("chdir failed");
+            exit(1);
+        }
         this->envp = setEnvStrToEnvp(this->envVars, this->envStr);
         this->argv = new char*[2];
         this->argv[0] = const_cast<char*>(this->scriptPath.c_str());
@@ -46,7 +52,9 @@ std::string Cgi::executeCgi(HttpRequest &request) {
         if (request.getMethod() == "POST" || request.getMethod() == "DELETE")
             write(this->pipefd[1], request.getBody().c_str(), request.getBody().size());
         close(this->pipefd[1]);
-        waitpid(this->pid, &status, 0);
+        int timeout = timerWaitpid(this->pid, &this->status, 5);
+        if (timeout == -2)
+            throw HttpException(GATEWAY_TIMEOUT, "CGI script execution timed out");
         std::string output = readFromFd(this->pipefd[0]);
         if (!WIFEXITED(status) || WEXITSTATUS(status) != 0 || output.empty())
             return "";
@@ -107,4 +115,22 @@ static char **setEnvStrToEnvp(std::map<std::string, std::string> &envVars, std::
         envp[i] = const_cast<char*>(envStr[i].c_str());
     envp[envStr.size()] = NULL;
     return envp;
+}
+
+static int timerWaitpid(pid_t pid, int *status, int timeout)
+{
+    int elapsed = 0;
+    while (elapsed < timeout) {
+        pid_t ret = waitpid(pid, status, WNOHANG);
+        if (ret == pid)
+            return ret;
+        else if (ret == 0)
+            sleep(1);
+        else
+            return -1;
+        ++elapsed;
+    }
+    kill(pid, SIGKILL);
+    waitpid(pid, status, 0);
+    return -2;
 }

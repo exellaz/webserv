@@ -50,6 +50,7 @@ std::string HttpResponse::reasonPhrase(StatusCode code)
         case INTERNAL_ERROR:         return "Internal Server Error";
         case NOT_IMPLEMENTED:        return "Not Implemented";
         case VERSION_NOT_SUPPORTED:  return "HTTP Version Not Supported";
+        case GATEWAY_TIMEOUT:        return "Gateway Timeout";
     }
     return "Unknown";
 }
