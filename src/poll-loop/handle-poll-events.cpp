@@ -55,13 +55,13 @@ void handlePollOut(struct pollfd& pfd, Client& client)
 
 void handlePollHup(Client& client)
 {
-    std::cout << GREY "POLLHUP: socket " << client.getFd() << RESET "\n";
+    std::cout << infoTime() << GREY "POLLHUP: socket " << client.getFd() << RESET "\n";
     client.setConnState(DISCONNECTED);
 }
 
 void handlePollErr(Client& client)
 {
-    std::cout << GREY "POLLERR: socket " << client.getFd() << RESET "\n";
+    std::cout << infoTime() << GREY "POLLERR: socket " << client.getFd() << RESET "\n";
     client.setConnState(DISCONNECTED);
 }
 

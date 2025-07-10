@@ -11,7 +11,7 @@ void Client::dispatchRequest()
     }
     else
         response.setHeader("Connection", "keep-alive");
-    
+
     if (!location.getReturnPath().empty()) {
         int statusCode = location.getReturnPath().begin()->first;
         std::string returnPath = location.getReturnPath().begin()->second;
@@ -40,9 +40,9 @@ void Client::dispatchRequest()
             if (response.getHeader("X-Session-Delete") == "yes")
                 session.clearSessionById(getSessionId());
             if (response.getStatus() == OK)
-                std::cout << "CGI EXECUTE: [ " << GREEN "SUCCESS" RESET << " ]\n\n";
+                std::cout << infoTime() << "CGI EXECUTE: [ " << GREEN "SUCCESS" RESET << " ]\n\n";
             else
-                std::cout << "CGI EXECUTE: [ " << RED "FAIL" RESET << " ]\n\n";
+                std::cout << infoTime() << "CGI EXECUTE: [ " << RED "FAIL" RESET << " ]\n\n";
         }
     }
     else {
