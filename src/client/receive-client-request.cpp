@@ -10,7 +10,6 @@ int handleParsingError(const HttpException& e, HttpResponse& response, Client& c
     // Set body here being the respective error page
     response.setHeader("Connection", "close");
     client.setConnType(CLOSE);
-    client.setResponseReady(true);
     return REQUEST_ERR;
 }
 

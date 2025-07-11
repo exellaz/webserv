@@ -68,7 +68,6 @@ public:
 	time_t getStartTime() const;
 	enum connectionType getConnType() const;
 	const std::string& getLocationPath() const;
-	bool isResponseReady() const;
 	const std::string& getSessionId() const;
 	const std::string& getSessionData() const;
 
@@ -77,7 +76,6 @@ public:
 	void setConnState(enum ConnState connState);
 	void setConnType(enum connectionType connType);
 	void setLocationPath(std::string locationPath);
-	void setResponseReady(bool status);
 	void setSessionId(const std::string& sessionId);
 	void setSessionData(const std::string& sesionData);
 
@@ -116,7 +114,6 @@ private:
 	bool _firstTimeReadingBody;
 
 	std::string _locationPath;
-	bool _responseReady;
 	std::string _sessionId;
 	std::string _sessionData;
 };

@@ -32,7 +32,6 @@ void handlePollIn(std::map< std::pair<std::string, std::string> , std::vector<Se
             handleParsingError(e, client.response, client);
         }
     }
-    client.setResponseReady(true);
     setPfdTrackPollOutOnly(pfd);
 }
 
@@ -41,7 +40,6 @@ void handlePollOut(struct pollfd& pfd, Client& client)
     std::cout << infoTime() << GREY "POLLOUT: socket " << client.getFd() << RESET "\n";
 
     client.sendResponseToClient();
-    client.setResponseReady(false);
     client.clearBuffer();
     client.request.clearRequest();
     client.response.clearResponse();
