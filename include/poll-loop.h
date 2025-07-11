@@ -24,6 +24,4 @@ bool isListener(std::vector<int>& listeners, int fd);
 Client& findClientByFd(std::vector<Client>& clients, int fd);
 void clearDisconnectedClients(std::vector<Client>& clients, std::vector<struct pollfd>& pfds);
 
-int handleParsingError(const HttpException& e, HttpResponse& response, Client& client);
-
 #endif

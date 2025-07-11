@@ -31,8 +31,6 @@ void HttpResponse::handleGetRequest(const Location& location, const Client& clie
     }
     else if (S_ISREG(info.st_mode)) {
         std::string fileContents = readFileToString(fullPath);
-        if (fileContents.empty())
-            throw HttpException(NOT_FOUND, "File not found or readable");
         std::string mime = getMimeType(fullPath);
         setHeader("Content-Type", mime);
         setBody(fileContents);

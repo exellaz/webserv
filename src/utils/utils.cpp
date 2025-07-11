@@ -1,4 +1,5 @@
 #include "utils.h"
+#include "http-exception.h"
 #include "color.h"
 
 std::string toLower(const std::string& str)
@@ -91,13 +92,12 @@ std::string getMimeType(const std::string& path)
 std::string readFileToString(const std::string& filepath)
 {
     struct stat st;
-    if (stat(filepath.c_str(), &st) < 0 || !S_ISREG(st.st_mode)) {
-        return "";
-    }
+    if (stat(filepath.c_str(), &st) < 0 || !S_ISREG(st.st_mode))
+        throw HttpException(NOT_FOUND, "File does not exist or is not regular");
 
     int fd = open(filepath.c_str(), O_RDONLY);
     if (fd < 0)
-        return "";
+        throw HttpException(NOT_FOUND, "File cannot be open");
 
     std::string content;
     content.reserve(st.st_size);
