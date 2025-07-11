@@ -1,4 +1,4 @@
-#include "Configuration.hpp"
+#include "Configuration.h"
 
 #define RED "\033[31m"
 #define RESET "\033[0m"
@@ -65,7 +65,7 @@ Location::Location(std::istream &conf, const std::string &locName, const std::ve
                 size_t space = returnPath.find(' ');
                 if (space != std::string::npos)
                 {
-                    int errorCode = checkNumber(returnPath.substr(0, space));
+                    int errorCode = convertAndCheckNumber(returnPath.substr(0, space));
                     std::string path = ft_trim(returnPath.substr(space + 1));
                     if (path[0] == '"' && path[path.size() - 1] == '"')
                         path = path.substr(1, path.size() - 2);
@@ -77,7 +77,7 @@ Location::Location(std::istream &conf, const std::string &locName, const std::ve
             {
                 checkValidDirective(line, CLIENT_MAX_BODY_SIZE);
                 std::string clientMaxSize = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
-                this->_clientMaxSize = checkNumber(clientMaxSize);
+                this->_clientMaxSize = convertAndCheckNumber(clientMaxSize);
                 break;
             }
             case CGI_PATH:

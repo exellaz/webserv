@@ -5,7 +5,7 @@
 #include <netdb.h> // struct addrinfo, freeaddrinfo
 #include <unistd.h> // close
 
-#include "Configuration.hpp"
+#include "Configuration.h"
 #include "Client.h"
 
 // listener

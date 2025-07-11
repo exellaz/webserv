@@ -1,4 +1,4 @@
-#include "Configuration.hpp"
+#include "Configuration.h"
 #define BLUE "\033[34m"
 #define RESET "\033[0m"
 #define ORANGE "\033[0;38;5;166m"
