@@ -268,11 +268,9 @@ void checkValidDirective(const std::string &line, Directive directiveType) {
 Server& getDefaultServerBlockByIpPort(std::pair<std::string, std::string> ipPort, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers)
 {
     for (std::map<std::pair<std::string, std::string>, std::vector<Server> >::iterator it = servers.begin(); it != servers.end(); ++it) {\
-        // TODO: if host is 0.0.0.0 and Port is the same -> return
-        if (it->first.first == "0.0.0.0" && ipPort.second == it->first.second) {
-            std::cout << "here\n";
+        // if server's host is 0.0.0.0 and Port is the same as what client is connected to
+        if (it->first.first == "0.0.0.0" && ipPort.second == it->first.second)
             return *(it->second.begin());
-        }
         if (it->first == ipPort)
             return *(it->second.begin());
     }
