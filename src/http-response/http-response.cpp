@@ -1,5 +1,5 @@
 #include "http-response.h"
-#include "Client.h"
+#include "client.h"
 
 static std::string generateErrorPage(int statusCode, const std::string& reasonPhrase);
 
@@ -36,7 +36,7 @@ HttpResponse& HttpResponse::operator=(const HttpResponse& other)
 HttpResponse::~HttpResponse()
 {}
 
-std::string HttpResponse::reasonPhrase(StatusCode code)
+std::string HttpResponse::reasonPhrase(StatusCode code) const
 {
     switch (code) {
         case OK:                     return "OK";
@@ -58,7 +58,7 @@ std::string HttpResponse::reasonPhrase(StatusCode code)
     return "Unknown";
 }
 
-std::string HttpResponse::buildStatusLine()
+std::string HttpResponse::buildStatusLine() const
 {
     std::ostringstream line;
     line << "HTTP/1.1 "
@@ -133,7 +133,6 @@ int handleParsingError(const HttpException& e, HttpResponse& response, Client& c
         response.setBody(errorPage);
     }
     client.setConnType(CLOSE);
-    client.setResponseReady(true);
     return REQUEST_ERR;
 }
 
@@ -172,4 +171,19 @@ static std::string generateErrorPage(int statusCode, const std::string& reasonPh
         << "</html>\n";
 
     return oss.str();
+}
+std::ostream& operator<<(std::ostream &stream, const HttpResponse& src)
+{
+    std::string timePrefix = infoTime();
+
+    std::cout << infoTime() << BOLD ORANGE "=== HTTP RESPONSE BEGIN ===" RESET << "\n";
+
+    stream << infoTime() << src.buildStatusLine();
+    for (std::map<std::string, std::string>::const_iterator it = src.getHeaders().begin();
+         it != src.getHeaders().end(); ++it) {
+        stream << infoTime() << toTitleCase(it->first) << ": " << it->second << "\r\n";
+    }
+
+    std::cout << infoTime() << BOLD ORANGE "=== HTTP RESPONSE END ===" RESET << "\n";
+    return stream;
 }

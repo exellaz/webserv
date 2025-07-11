@@ -1,4 +1,4 @@
-#include "../../include/Cgi.h"
+#include "../../include/cgi.h"
 
 static std::string parseBody(std::istringstream &cgi_output, std::string &line);
 static std::map<std::string, std::string> parseHeader(std::istringstream &cgi_output, std::string &line);

@@ -114,10 +114,10 @@ std::ostream& operator<<(std::ostream &stream, const HttpRequest& src)
         }
     }
 
-    if (!src.getBody().empty()) {
-        stream << timePrefix << BOLD BLUE "--- Body ---" RESET << "\n";
-        stream << src.getBody() << "\n";
-    }
+    // if (!src.getBody().empty()) {
+    //     stream << timePrefix << BOLD BLUE "--- Body ---" RESET << "\n";
+    //     stream << src.getBody() << "\n";
+    // }
 
     stream << timePrefix << BOLD GREEN "=== HTTP REQUEST END ===" RESET << "\n\n";
     return stream;

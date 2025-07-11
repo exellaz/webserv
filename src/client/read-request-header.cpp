@@ -1,5 +1,5 @@
 #include "timeout.h"
-#include "Client.h"
+#include "client.h"
 
 int Client::readRequestHeader(std::string& headerStr, const size_t bufferSize)
 {

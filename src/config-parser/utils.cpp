@@ -1,8 +1,6 @@
-#include "Configuration.h"
+#include "configuration.h"
 #include <cerrno>
-
-#define RED "\033[31m"
-#define RESET "\033[0m"
+#include "color.h"
 
 std::map< std::pair<std::string, std::string> , std::vector<Server> > parseAllServers(const std::string &filename) {
     std::map< std::pair<std::string, std::string> , std::vector<Server> > listServers;
@@ -267,7 +265,10 @@ void checkValidDirective(const std::string &line, Directive directiveType) {
 
 Server& getDefaultServerBlockByIpPort(std::pair<std::string, std::string> ipPort, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers)
 {
-    for (std::map<std::pair<std::string, std::string>, std::vector<Server> >::iterator it = servers.begin(); it != servers.end(); ++it) {
+    for (std::map<std::pair<std::string, std::string>, std::vector<Server> >::iterator it = servers.begin(); it != servers.end(); ++it) {\
+        // if server's host is 0.0.0.0 and Port is the same as what client is connected to
+        if (it->first.first == "0.0.0.0" && ipPort.second == it->first.second)
+            return *(it->second.begin());
         if (it->first == ipPort)
             return *(it->second.begin());
     }
@@ -341,8 +342,6 @@ std::ostream &operator<<(std::ostream &cout, const Server &server) {
             }
             cout << "\n";
         }
-        if (loc.getClientMaxSize() != 0)
-            cout << "client_max_size : [" << loc.getClientMaxSize() << "]\n";
         if (loc.getAutoIndex() == true)
             cout << "list_directory  : [on]\n";
         if (loc.getCgiPath() == true)

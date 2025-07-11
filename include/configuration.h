@@ -82,7 +82,6 @@ class Location
         std::string                 _alias;
         std::vector<std::string>	_allowMethods;
         std::map<int, std::string>  _returnPath;
-        int                         _clientMaxSize;
         bool                        _autoIndex;
         bool                        _cgiPath;
         bool                        _allowUpload;
@@ -99,7 +98,6 @@ class Location
         const std::string                   &getAlias() const;
         const std::vector<std::string>      &getAllowMethods() const;
         const std::map<int, std::string>    &getReturnPath() const;
-        int                                 getClientMaxSize() const;
         bool                                getAutoIndex() const;
         bool                                getCgiPath() const;
         bool                                getAllowUpload() const;

@@ -1,4 +1,4 @@
-#include "../../include/Cgi.h"
+#include "../../include/cgi.h"
 #include "session.h"
 
 static std::map<std::string, std::string> initEnv(HttpRequest &request);

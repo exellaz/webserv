@@ -1,4 +1,4 @@
-#include "Configuration.h"
+#include "configuration.h"
 #include "http-exception.h"
 #include "color.h"
 

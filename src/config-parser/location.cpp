@@ -1,7 +1,5 @@
-#include "Configuration.h"
-
-#define RED "\033[31m"
-#define RESET "\033[0m"
+#include "configuration.h"
+#include "color.h"
 
 Location::Location(std::istream &conf, const std::string &locName, const std::vector<std::string> & allowMethods)
     : _locaPath(""),
@@ -10,7 +8,6 @@ Location::Location(std::istream &conf, const std::string &locName, const std::ve
       _alias(""),
       _allowMethods(allowMethods),
       _returnPath(),
-      _clientMaxSize(0),
       _autoIndex(false),
       _cgiPath(false),
       _allowUpload(false)
@@ -73,13 +70,6 @@ Location::Location(std::istream &conf, const std::string &locName, const std::ve
                 }
                 break;
             }
-            case CLIENT_MAX_BODY_SIZE:
-            {
-                checkValidDirective(line, CLIENT_MAX_BODY_SIZE);
-                std::string clientMaxSize = line.substr(line.find(' ') + 1, line.find(';') - line.find(' ') - 1);
-                this->_clientMaxSize = convertAndCheckNumber(clientMaxSize);
-                break;
-            }
             case CGI_PATH:
             {
                 checkValidDirective(line, CGI_PATH);
@@ -132,10 +122,6 @@ const std::map<int, std::string> &Location::getReturnPath() const {
     return this->_returnPath;
 }
 
-int    Location::getClientMaxSize() const {
-    return this->_clientMaxSize;
-}
-
 bool    Location::getAutoIndex() const {
     return this->_autoIndex;
 }
@@ -155,7 +141,6 @@ void Location::clearLocationBlock() {
     this->_alias.clear();
     this->_allowMethods.clear();
     this->_returnPath.clear();
-    this->_clientMaxSize = 0;
     this->_autoIndex = false;
     this->_cgiPath = false;
     this->_allowUpload = false;

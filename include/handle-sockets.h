@@ -5,8 +5,8 @@
 #include <netdb.h> // struct addrinfo, freeaddrinfo
 #include <unistd.h> // close
 
-#include "Configuration.h"
-#include "Client.h"
+#include "configuration.h"
+#include "client.h"
 
 // listener
 void setupListenerSocket(std::vector<struct pollfd>& pfds, std::vector<int>& listeners, Server& server);

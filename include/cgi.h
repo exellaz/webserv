@@ -8,7 +8,7 @@
 #include <fstream>
 #include <sys/wait.h>
 
-#include "Configuration.h"
+#include "configuration.h"
 #include "utils.h"
 #include "http-request.h"
 

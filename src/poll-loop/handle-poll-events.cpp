@@ -1,4 +1,4 @@
-#include "Client.h"
+#include "client.h"
 #include "poll-loop.h"
 #include "utils.h"
 #include "session.h"
@@ -11,40 +11,40 @@ static void resolveLocationPath(const std::string& uri, Client& client);
 void handlePollIn(std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers,
                     struct pollfd& pfd, Client& client)
 {
-    std::cout << infoTime() << "POLLIN: socket " << pfd.fd << '\n';
+    std::cout << infoTime() << GREY "POLLIN: socket " << pfd.fd << RESET "\n";
 
-    int res = client.receiveClientRequest(servers);
-    if (res == RECV_CLOSED) {
-        std::cout << infoTime() << "server: socket " << pfd.fd << " hung up\n";
-        client.setConnState(DISCONNECTED);
-        return;
-    }
-    else if (res == RECV_AGAIN)
-        return;
-    else if (res != REQUEST_ERR) {
-        try {
+    try {
+        int res = client.receiveClientRequest(servers);
+        if (res == RECV_CLOSED) {
+            std::cout << infoTime() << "server: socket " << pfd.fd << " hung up\n";
+            client.setConnState(DISCONNECTED);
+            return;
+        }
+        else if (res == RECV_AGAIN)
+            return;
+        else if (res != REQUEST_ERR) {
             resolveLocationPath(client.request.getURI(), client);
             SessionManager::handleSession(client);
             std::cout << client.request;
             client.dispatchRequest();
         }
-        catch (const HttpException& e) {
-            handleParsingError(e, client.response, client);
-        }
     }
-    client.setResponseReady(true);
+    catch (const HttpException& e) {
+        handleParsingError(e, client.response, client);
+    }
     setPfdTrackPollOutOnly(pfd);
 }
 
 void handlePollOut(struct pollfd& pfd, Client& client)
 {
-    std::cout << infoTime() << "POLLOUT: socket " << client.getFd() << '\n';
+    std::cout << infoTime() << GREY "POLLOUT: socket " << client.getFd() << RESET "\n";
 
     client.sendResponseToClient();
-    client.setResponseReady(false);
     client.clearBuffer();
     client.request.clearRequest();
     client.response.clearResponse();
+    client.location.clearLocationBlock();
+    client.server.clearServerBlock();
 
     if (client.getConnType() == CLOSE) {
         client.setConnState(DISCONNECTED);
@@ -55,13 +55,13 @@ void handlePollOut(struct pollfd& pfd, Client& client)
 
 void handlePollHup(Client& client)
 {
-    std::cout << "POLLHUP: socket " << client.getFd() << '\n';
+    std::cout << infoTime() << GREY "POLLHUP: socket " << client.getFd() << RESET "\n";
     client.setConnState(DISCONNECTED);
 }
 
 void handlePollErr(Client& client)
 {
-    std::cout << "POLLERR: socket " << client.getFd() << '\n';
+    std::cout << infoTime() << GREY "POLLERR: socket " << client.getFd() << RESET "\n";
     client.setConnState(DISCONNECTED);
 }
 

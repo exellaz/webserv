@@ -1,14 +1,13 @@
-#include "../../include/Client.h"
+#include "../../include/client.h"
 
 Client::Client(int fd, time_t startTime) :
     request(), response(), server(), location(),
     _fd(fd), _connState(ACTIVE), _startTime(startTime), _connType(KEEP_ALIVE),
     _buffer(""), _readBodyMethod(CONTENT_LENGTH), _contentLength(0),
     _readChunkedRequestStatus(READ_CHUNK_SIZE), _chunkSize(0),
-    _chunkReqBuf(""), _firstTimeReadingBody(true), 
-    _locationPath(""), _responseReady(false),
-    _sessionId(""), _sessionData("")
-    
+    _chunkReqBuf(""), _firstTimeReadingBody(true),
+    _locationPath(""), _sessionId(""), _sessionData("")
+
 {
     // std::cout << "Client:: Constructor Called (name: " << index << ")" << std::endl;
 
@@ -20,9 +19,8 @@ Client::Client(const Client& other) :
     _fd(other._fd), _connState(other._connState), _startTime(other._startTime), _connType(other._connType),
     _buffer(other._buffer), _readBodyMethod(other._readBodyMethod), _contentLength(other._contentLength),
     _readChunkedRequestStatus(other._readChunkedRequestStatus), _chunkSize(other._chunkSize),
-    _chunkReqBuf(other._chunkReqBuf), _firstTimeReadingBody(other._firstTimeReadingBody), 
-    _locationPath(other._locationPath), _responseReady(other._responseReady),
-    _sessionId(other._sessionId), _sessionData(other._sessionData)
+    _chunkReqBuf(other._chunkReqBuf), _firstTimeReadingBody(other._firstTimeReadingBody),
+    _locationPath(other._locationPath), _sessionId(other._sessionId), _sessionData(other._sessionData)
 
 {
     // std::cout << "Client:: Copy Constructor Called" << std::endl;
@@ -51,7 +49,6 @@ Client& Client::operator=(const Client& other)
     _chunkReqBuf 			 = other._chunkReqBuf;
     _firstTimeReadingBody 	 = other._firstTimeReadingBody;
     _locationPath			 = other._locationPath;
-    _responseReady 		     = other._responseReady;
     _sessionId               = other._sessionId;
     _sessionData             = other._sessionData;
 
@@ -91,11 +88,6 @@ const std::string& Client::getLocationPath() const
     return _locationPath;
 }
 
-bool Client::isResponseReady() const
-{
-    return _responseReady;
-}
-
 // =================== SETTERS ===============================
 
 void Client::setFd(int fd)
@@ -117,12 +109,6 @@ void Client::setLocationPath(std::string locationPath)
 {
     _locationPath = locationPath;
 }
-
-void Client::setResponseReady(bool status)
-{
-    _responseReady = status;
-}
-
 
 // =================== BUFFER METHODS ===============================
 

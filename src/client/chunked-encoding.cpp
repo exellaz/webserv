@@ -1,6 +1,6 @@
 #include "timeout.h"
 #include <cctype>
-#include "Client.h"
+#include "client.h"
 
 static bool doesLineHaveCRLF(const std::string& buffer)
 {
@@ -86,7 +86,7 @@ int Client::readByChunkedEncoding(std::string& bodyStr, const size_t bufferSize,
         while (_buffer.size() > 0) {
 
             if (status == READ_CHUNK_SIZE) {
-                std::cout << "READ_CHUNK_SIZE\n";
+                // std::cout << "READ_CHUNK_SIZE\n";
                 if (!doesLineHaveCRLF(_buffer))
                     break;
                 _chunkSize = extractChunkSize();
@@ -96,7 +96,7 @@ int Client::readByChunkedEncoding(std::string& bodyStr, const size_t bufferSize,
                     status = READ_CHUNK_DATA;
             }
             else if (status == READ_CHUNK_DATA) {
-                std::cout << "READ_CHUNK_DATA\n";
+                // std::cout << "READ_CHUNK_DATA\n";
 
                 if (_buffer.size() < _chunkSize + CRLF_LENGTH) // must have CRLF for a complete line
                     break;
@@ -107,7 +107,7 @@ int Client::readByChunkedEncoding(std::string& bodyStr, const size_t bufferSize,
                     // characters after chunkData is not CRLF\n
                     throw HttpException(BAD_REQUEST, "Bad body format");
 
-                std::cout << "chunkReqBuf size " << _chunkReqBuf.size() << '\n';
+                // std::cout << "chunkReqBuf size " << _chunkReqBuf.size() << '\n';
                 if (_chunkReqBuf.size() > maxSize)
                     throw HttpException(PAYLOAD_TOO_LARGE, "Request Body Too Large");
                 _buffer.erase(0, _chunkSize + CRLF_LENGTH);
@@ -115,7 +115,7 @@ int Client::readByChunkedEncoding(std::string& bodyStr, const size_t bufferSize,
                 status = READ_CHUNK_SIZE;
             }
             else if (status == EXPECT_CRLF_AFTER_ZERO_CHUNK_SIZE) {
-                std::cout << "EXPECT_CRLF_AFTER_ZERO_CHUNK_SIE\n";
+                // std::cout << "EXPECT_CRLF_AFTER_ZERO_CHUNK_SIE\n";
 
                 if (_buffer != CRLF) // line after chunkSize 0 is not CRLF only
                     throw HttpException(BAD_REQUEST, "Bad body format");

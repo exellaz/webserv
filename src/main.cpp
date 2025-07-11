@@ -1,5 +1,5 @@
 #include <map>
-#include "Configuration.h"
+#include "configuration.h"
 #include "timeout.h"
 #include "handle-sockets.h"
 #include "poll-loop.h"

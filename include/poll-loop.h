@@ -3,8 +3,8 @@
 
 #include <poll.h> // poll(), struct pollfd
 
-#include "Configuration.h"
-#include "Client.h"
+#include "configuration.h"
+#include "client.h"
 #include "color.h"
 #include "handle-sockets.h"
 

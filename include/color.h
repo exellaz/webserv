@@ -11,5 +11,6 @@
 #define YELLOW  "\033[33m"
 #define MAGENTA "\033[35m"
 #define WHITE   "\033[37m"
+#define ORANGE  "\033[0;38;5;166m"
 
 #endif

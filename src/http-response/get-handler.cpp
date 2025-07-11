@@ -2,7 +2,7 @@
 #include <unistd.h>
 #include "http-response.h"
 #include "http-exception.h"
-#include "Client.h"
+#include "client.h"
 #include "utils.h"
 
 static std::string readDirectorytoString(const std::string &directoryPath, const std::string& uri);

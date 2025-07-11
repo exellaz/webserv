@@ -1,6 +1,6 @@
-#include "Client.h"
+#include "client.h"
 #include "http-request.h"
-#include "Cgi.h"
+#include "cgi.h"
 #include "session.h"
 
 void Client::dispatchRequest()
@@ -40,9 +40,9 @@ void Client::dispatchRequest()
             if (response.getHeader("X-Session-Delete") == "yes")
                 session.clearSessionById(getSessionId());
             if (response.getStatus() == OK)
-                std::cout << "CGI EXECUTE: [ " << GREEN "SUCCESS" RESET << " ]\n\n";
+                std::cout << infoTime() << "CGI EXECUTE: [ " << GREEN "SUCCESS" RESET << " ]\n\n";
             else
-                std::cout << "CGI EXECUTE: [ " << RED "FAIL" RESET << " ]\n\n";
+                std::cout << infoTime() << "CGI EXECUTE: [ " << RED "FAIL" RESET << " ]\n\n";
         }
     }
     else {

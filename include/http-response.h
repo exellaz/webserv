@@ -45,8 +45,8 @@ class HttpResponse
         HttpResponse& operator=(const HttpResponse& other);
         ~HttpResponse();
 
-        std::string reasonPhrase(StatusCode code);
-        std::string buildStatusLine();
+        std::string reasonPhrase(StatusCode code) const;
+        std::string buildStatusLine() const;
         void printResponseHeaders();
         void appendToBody(const std::string& bodyData);
         void handleGetRequest(const Location& location, const Client& client);
@@ -62,6 +62,7 @@ class HttpResponse
 
         StatusCode getStatus();
         std::string getHeader(const std::string &name);
+        const std::map<std::string, std::string>& getHeaders() const;
         std::string getBody();
 
     private:
@@ -71,5 +72,7 @@ class HttpResponse
 };
 
 int handleParsingError(const HttpException& e, HttpResponse& response, Client& client);
+
+std::ostream& operator<<(std::ostream &stream, const HttpResponse& src);
 
 #endif

@@ -1,5 +1,5 @@
 CXX = c++
-CXXFLAGS = -Wall -Wextra -Werror $(INCLUDES) -std=c++98 #-fsanitize=address -g3
+CXXFLAGS = -Wall -Wextra -Werror $(INCLUDES) -std=c++98 -MMD -MP #-fsanitize=address -g3
 INCLUDES = -Iinclude
 
 # COLORS
@@ -12,68 +12,30 @@ NAME = webserv
 
 # Source Files
 SRCDIR = src/
-SRCS_FIL = \
-		main.cpp \
-		\
-		cgi-handler/cgi-handle.cpp \
-		cgi-handler/cgi-response.cpp \
-		\
-		config-parser/configuration.cpp \
-		config-parser/location.cpp \
-		config-parser/utils.cpp \
-		\
-		http-request/http-request.cpp \
-		http-request/utils.cpp \
-		\
-		http-response/http-response.cpp \
-		http-response/utils.cpp \
-		http-response/get-handler.cpp \
-		http-response/post-handler.cpp \
-		\
-		poll-loop/handle-poll-events.cpp \
-		poll-loop/poll-loop.cpp \
-		poll-loop/poll-loop-utils.cpp \
-		\
-		client/Client.cpp \
-		client/receive-client-request.cpp \
-		client/read-request-header.cpp \
-		client/read-request-body.cpp \
-		client/read-from-socket.cpp \
-		client/chunked-encoding.cpp \
-		client/dispatch-request.cpp \
-		client/send-response.cpp \
-		\
-		handle-sockets/setup-listeners.cpp \
-		handle-sockets/accept-client.cpp \
-		handle-sockets/disconnect-client.cpp \
-		handle-sockets/socket-utils.cpp \
-		\
-		timeout/handle-timeout.cpp \
-		\
-		signal/signalHandler.cpp \
-		\
-		utils/utils.cpp \
-		\
-		session/session-manager.cpp
-
-SRCS = $(addprefix $(SRCDIR), $(SRCS_FIL))
+SRCS := $(shell find $(SRCDIR) -name '*.cpp')
 
 # Object files
 OBJDIR = objs/
-OBJS = $(patsubst $(SRCDIR)%.c, $(OBJDIR)%.o, $(SRCS))
+OBJS = $(patsubst $(SRCDIR)%.cpp, $(OBJDIR)%.o, $(SRCS))
+
+# Dependency files (one per object file)
+DEPS = $(OBJS:.o=.d)
+
+# SUBDIRS = $(sort $(dir $(SRCS_FIL)))
+SUBDIRS = $(sort $(dir $(patsubst $(SRCDIR)%,%,$(SRCS))))
 
 # Build targets
 all: $(OBJDIR) $(NAME)
 
 $(OBJDIR):
-	@mkdir -p $(OBJDIR) $(addprefix $(OBJDIR), $(dir $(SRCDIR)))
+	@mkdir -p $(OBJDIR) $(addprefix $(OBJDIR), $(SUBDIRS))
 
-$(NAME): $(OBJS)
+$(NAME): $(OBJS) 
+	@echo "$(GREEN)object files were created$(RESET)"
 	@$(CXX) $(CXXFLAGS) $(OBJS) -o $(NAME) && echo "$(GREEN)$(NAME) was created$(RESET)"
 
-
-$(OBJDIR)%.o: $(SRCDIR)%.c
-	@$(CXX) $(CXXFLAGS) -c $< -o $@ && echo "$(GREEN)object files were created$(RESET)"
+$(OBJDIR)%.o: $(SRCDIR)%.cpp 
+	@$(CXX) $(CXXFLAGS) -c $< -o $@ 
 
 # Clean Up
 RM = rm -rf
@@ -85,5 +47,8 @@ fclean: clean
 	@$(RM) $(NAME) && echo "$(ORANGE)$(NAME) was deleted$(RESET)"
 
 re: fclean all
+
+# Include dependency files if they exist
+-include $(DEPS)
 
 .PHONY: all clean fclean re bonus

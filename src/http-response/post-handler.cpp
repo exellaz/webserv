@@ -2,7 +2,7 @@
 #include <unistd.h>
 #include "http-response.h"
 #include "http-request.h"
-#include "Client.h"
+#include "client.h"
 
 static void validateUploadPath(const std::string& path, bool uploadAllowed) {
     struct stat info;
