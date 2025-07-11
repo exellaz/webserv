@@ -9,8 +9,5 @@ void Client::sendResponseToClient()
         return;
     }
     std::cout << infoTime() << "Response sent to client.\n";
-    std::cout << infoTime() << BOLD ORANGE "=== HTTP RESPONSE BEGIN ===" RESET << "\n";
-    std::cout << response.toString() << "\n";
-    std::cout << infoTime() << BOLD ORANGE "=== HTTP RESPONSE END ===" RESET << "\n";
-
+    std::cout << response;
 }

@@ -14,6 +14,11 @@ std::string HttpResponse::getHeader(const std::string& name)
     return empty;
 }
 
+const std::map<std::string, std::string>& HttpResponse::getHeaders() const
+{
+    return _headers;
+}
+
 std::string HttpResponse::getBody()
 {
     return _body;
