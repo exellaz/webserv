@@ -1,8 +1,6 @@
-#include "Configuration.h"
+#include "configuration.h"
 #include <cerrno>
-
-#define RED "\033[31m"
-#define RESET "\033[0m"
+#include "color.h"
 
 std::map< std::pair<std::string, std::string> , std::vector<Server> > parseAllServers(const std::string &filename) {
     std::map< std::pair<std::string, std::string> , std::vector<Server> > listServers;
@@ -344,8 +342,6 @@ std::ostream &operator<<(std::ostream &cout, const Server &server) {
             }
             cout << "\n";
         }
-        if (loc.getClientMaxSize() != 0)
-            cout << "client_max_size : [" << loc.getClientMaxSize() << "]\n";
         if (loc.getAutoIndex() == true)
             cout << "list_directory  : [on]\n";
         if (loc.getCgiPath() == true)

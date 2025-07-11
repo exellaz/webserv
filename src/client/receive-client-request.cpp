@@ -1,6 +1,6 @@
 #include "http-request.h"
 #include "http-response.h"
-#include "Client.h"
+#include "client.h"
 #include "handle-sockets.h"
 #include "session.h"
 #include "utils.h"

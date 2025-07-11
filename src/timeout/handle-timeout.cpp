@@ -1,5 +1,5 @@
 #include "timeout.h"
-#include "Client.h"
+#include "client.h"
 #include "handle-sockets.h"
 
 time_t getNowInSeconds() {

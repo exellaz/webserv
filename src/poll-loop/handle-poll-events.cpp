@@ -1,4 +1,4 @@
-#include "Client.h"
+#include "client.h"
 #include "poll-loop.h"
 #include "utils.h"
 #include "session.h"
@@ -43,6 +43,8 @@ void handlePollOut(struct pollfd& pfd, Client& client)
     client.clearBuffer();
     client.request.clearRequest();
     client.response.clearResponse();
+    client.location.clearLocationBlock();
+    client.server.clearServerBlock();
 
     if (client.getConnType() == CLOSE) {
         client.setConnState(DISCONNECTED);

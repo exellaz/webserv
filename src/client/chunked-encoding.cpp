@@ -1,6 +1,6 @@
 #include "timeout.h"
 #include <cctype>
-#include "Client.h"
+#include "client.h"
 
 static bool doesLineHaveCRLF(const std::string& buffer)
 {

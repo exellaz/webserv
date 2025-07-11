@@ -1,6 +1,6 @@
-#include "Client.h"
+#include "client.h"
 #include "http-request.h"
-#include "Cgi.h"
+#include "cgi.h"
 #include "session.h"
 
 void Client::dispatchRequest()

@@ -1,4 +1,4 @@
-#include "Client.h"
+#include "client.h"
 #include <sys/socket.h>
 
 void Client::sendResponseToClient()

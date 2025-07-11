@@ -1,5 +1,5 @@
 #include "http-response.h"
-#include "Client.h"
+#include "client.h"
 
 static std::string generateErrorPage(int statusCode, const std::string& reasonPhrase);
 

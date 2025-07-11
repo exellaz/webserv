@@ -3,8 +3,8 @@
 
 #include <sys/time.h> // gettimeofday, struct timeval
 
-#include "Configuration.h"
-#include "Client.h"
+#include "configuration.h"
+#include "client.h"
 
 time_t getNowInSeconds();
 int getNearestUpcomingTimeout(std::vector<Client>& clients, std::map< std::pair<std::string, std::string> , std::vector<Server> >& servers);

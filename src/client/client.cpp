@@ -1,4 +1,4 @@
-#include "../../include/Client.h"
+#include "../../include/client.h"
 
 Client::Client(int fd, time_t startTime) :
     request(), response(), server(), location(),

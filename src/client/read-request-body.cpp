@@ -1,5 +1,5 @@
 #include "timeout.h"
-#include "Client.h"
+#include "client.h"
 #include "signal-handler.h"
 
 // if actual body size is larger than contentLength, remainder is stored in buffer

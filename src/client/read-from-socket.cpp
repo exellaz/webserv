@@ -1,4 +1,4 @@
-#include "Client.h"
+#include "client.h"
 #include <sys/socket.h>
 
 int Client::readFromSocket(int bufferSize)
