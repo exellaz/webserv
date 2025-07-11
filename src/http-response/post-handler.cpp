@@ -101,7 +101,7 @@ void HttpResponse::handlePostRequest(const HttpRequest& request, const Client& c
         std::string outputPath = saveUploadedFile(client.getLocationPath(), filename, fileContent);
         if (first) {
             setStatus(CREATED);
-            setBody("File uploaded successfully to: " + outputPath);
+            setBody("File uploaded successfully to: " + request.getURI() + "/" + filename);
             first = false;
         }
         else
