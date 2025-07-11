@@ -37,20 +37,15 @@ int Client::receiveClientRequest(std::map< std::pair<std::string, std::string> ,
     Server& defaultServer = getDefaultServerBlockByIpPort(ipPort, servers);
 
     if (!request.isHeaderParsed()) {
-        try {
-            std::string headerStr;
-            int ret = readRequestHeader(headerStr, defaultServer.getClientHeaderBufferSize());
-            if (ret < 0)
-                return ret;
-            request.parseRequestLine(headerStr);
-            request.parseHeaderLines(headerStr);
-            assignServerByServerName(servers, ipPort, defaultServer);
-            location = server.getLocationPath(request.getURI());
-            validateMethod(request.getMethod(), location.getAllowMethods());
-        }
-        catch (const HttpException& e) {
-            return handleParsingError(e, response, *this);
-        }
+        std::string headerStr;
+        int ret = readRequestHeader(headerStr, defaultServer.getClientHeaderBufferSize());
+        if (ret < 0)
+            return ret;
+        request.parseRequestLine(headerStr);
+        request.parseHeaderLines(headerStr);
+        assignServerByServerName(servers, ipPort, defaultServer);
+        location = server.getLocationPath(request.getURI());
+        validateMethod(request.getMethod(), location.getAllowMethods());
     }
 
     // Initialise `readBodyMethod`
@@ -62,17 +57,12 @@ int Client::receiveClientRequest(std::map< std::pair<std::string, std::string> ,
         _readBodyMethod = NO_BODY;
 
     if (_readBodyMethod != NO_BODY) {
-        try {
-            std::string bodyStr;
+        std::string bodyStr;
 
-            int ret2 = readRequestBody(bodyStr, defaultServer.getClientBodyBufferSize(), defaultServer.getClientMaxSize());
-            if (ret2 < 0)
-                return ret2;
-            request.setBody(bodyStr);
-        }
-        catch (const HttpException& e) {
-            return handleParsingError(e, response, *this);
-        }
+        int ret2 = readRequestBody(bodyStr, defaultServer.getClientBodyBufferSize(), defaultServer.getClientMaxSize());
+        if (ret2 < 0)
+            return ret2;
+        request.setBody(bodyStr);
     }
 
     std::cout << infoTime() << "Request received from client.\n";

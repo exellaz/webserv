@@ -13,24 +13,24 @@ void handlePollIn(std::map< std::pair<std::string, std::string> , std::vector<Se
 {
     std::cout << infoTime() << GREY "POLLIN: socket " << pfd.fd << RESET "\n";
 
-    int res = client.receiveClientRequest(servers);
-    if (res == RECV_CLOSED) {
-        std::cout << infoTime() << "server: socket " << pfd.fd << " hung up\n";
-        client.setConnState(DISCONNECTED);
-        return;
-    }
-    else if (res == RECV_AGAIN)
-        return;
-    else if (res != REQUEST_ERR) {
-        try {
+    try {
+        int res = client.receiveClientRequest(servers);
+        if (res == RECV_CLOSED) {
+            std::cout << infoTime() << "server: socket " << pfd.fd << " hung up\n";
+            client.setConnState(DISCONNECTED);
+            return;
+        }
+        else if (res == RECV_AGAIN)
+            return;
+        else if (res != REQUEST_ERR) {
             resolveLocationPath(client.request.getURI(), client);
             SessionManager::handleSession(client);
             std::cout << client.request;
             client.dispatchRequest();
         }
-        catch (const HttpException& e) {
-            handleParsingError(e, client.response, client);
-        }
+    }
+    catch (const HttpException& e) {
+        handleParsingError(e, client.response, client);
     }
     setPfdTrackPollOutOnly(pfd);
 }
