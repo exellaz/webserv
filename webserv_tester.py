@@ -88,16 +88,19 @@ def main():
 
         if actual_status == "timeout":
             status_info = color("timeout", RED)
+            expected_color = RED
         elif actual_status.startswith("2"):
             status_info = color(status_info, GREEN)
+            expected_color = GREEN
         elif actual_status.startswith("4"):
             status_info = color(status_info, RED)
+            expected_color = RED
         elif actual_status.startswith("5"):
             status_info = color(status_info, YELLOW)
+            expected_color = YELLOW
         else:
             status_info = color(status_info, MAGENTA)
-
-        expected_color = GREEN if expected_status.startswith("2") else YELLOW
+            expected_color = MAGENTA
 
         print(f"{result} {method:<6} {endpoint:<25} -> "
               f"Status: {status_info:<32} | "
