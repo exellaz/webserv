@@ -3,7 +3,7 @@
 
 #include <sys/time.h> // gettimeofday, struct timeval
 
-#include "Configuration.hpp"
+#include "Configuration.h"
 #include "Client.h"
 
 time_t getNowInSeconds();

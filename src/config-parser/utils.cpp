@@ -1,4 +1,5 @@
-#include "Configuration.hpp"
+#include "Configuration.h"
+#include <cerrno>
 
 #define RED "\033[31m"
 #define RESET "\033[0m"
@@ -107,16 +108,32 @@ std::string checkPort(std::string port)
     return port;
 }
 
+time_t convertAndCheckTimeout(std::string number)
+{
+    if (number.empty())
+        throw std::runtime_error(RED "client timeout is empty" RESET);
+    if (isDigitsOnly(number) == false)
+        throw std::runtime_error(RED "client timeout is not a number" RESET);
+    errno = 0;
+    long long nb = std::strtoll(number.c_str(), NULL, 10);
+    if (errno == ERANGE || std::numeric_limits<time_t>::min() > nb || std::numeric_limits<time_t>::max() < nb)
+                    throw std::runtime_error(RED "client timeout exceed numeric limit" RESET);
+    return (static_cast<time_t>(nb));
+}
+
 /**
  * @brief check if the number
 */
-int checkNumber(std::string number)
+int convertAndCheckNumber(std::string number)
 {
     if (number.empty())
-        throw std::runtime_error(RED "client_max_body_size is empty" RESET);
+        throw std::runtime_error(RED "this is empty" RESET);
     if (isDigitsOnly(number) == false)
-        throw std::runtime_error(RED "client_max_body_size is not a number" RESET);
-    return (std::strtol(number.c_str(), NULL, 10));
+        throw std::runtime_error(RED "this is not a number" RESET);
+    long nb = std::strtol(number.c_str(), NULL, 10);
+    if (INT_MIN > nb || INT_MAX < nb)
+        throw std::runtime_error(RED "this had exceed numeric limit" RESET);
+    return (static_cast<int>(nb));
 }
 
 /**

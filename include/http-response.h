@@ -13,6 +13,7 @@ class Server;
 class Client;
 class Location;
 class HttpRequest;
+class HttpException;
 
 namespace HttpCodes {
     enum StatusCode {
@@ -29,7 +30,8 @@ namespace HttpCodes {
         PAYLOAD_TOO_LARGE = 413,
         INTERNAL_ERROR = 500,
         NOT_IMPLEMENTED = 501,
-        VERSION_NOT_SUPPORTED = 505,
+        GATEWAY_TIMEOUT = 504,
+        VERSION_NOT_SUPPORTED = 505
     };
 };
 
@@ -68,6 +70,8 @@ class HttpResponse
         std::map<std::string, std::string> _headers;
         std::string _body;
 };
+
+int handleParsingError(const HttpException& e, HttpResponse& response, Client& client);
 
 std::ostream& operator<<(std::ostream &stream, const HttpResponse& src);
 

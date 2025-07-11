@@ -1,6 +1,6 @@
 #include "Client.h"
 #include "http-request.h"
-#include "Cgi.hpp"
+#include "Cgi.h"
 #include "session.h"
 
 void Client::dispatchRequest()
@@ -28,7 +28,7 @@ void Client::dispatchRequest()
     }
     else if (location.getCgiPath() == true) {
         Cgi cgi;
-        std::string cgiOutput = cgi.executeCgi(request, response);
+        std::string cgiOutput = cgi.executeCgi(request);
 
         if (cgiOutput.empty())
             throw HttpException(INTERNAL_ERROR, "CGI script execution failed");

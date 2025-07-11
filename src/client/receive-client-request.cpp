@@ -1,17 +1,9 @@
 #include "http-request.h"
+#include "http-response.h"
 #include "Client.h"
 #include "handle-sockets.h"
 #include "session.h"
-
-int handleParsingError(const HttpException& e, HttpResponse& response, Client& client)
-{
-    std::cerr << infoTime() << RED <<"HTTP Error: " << e.getStatusCode() << " - " << e.what() << "\n";
-    response.setStatus(e.getStatusCode());
-    // Set body here being the respective error page
-    response.setHeader("Connection", "close");
-    client.setConnType(CLOSE);
-    return REQUEST_ERR;
-}
+#include "utils.h"
 
 static void validateMethod(const std::string& method, const std::vector<std::string>& allowedMethods)
 {

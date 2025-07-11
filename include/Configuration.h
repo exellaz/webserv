@@ -1,5 +1,5 @@
-#ifndef CONFIGURATION_HPP
-#define CONFIGURATION_HPP
+#ifndef CONFIGURATION_H
+#define CONFIGURATION_H
 
 #include <string>
 #include <iostream>
@@ -7,6 +7,8 @@
 #include <sstream>
 #include <vector>
 #include <map>
+#include <climits>
+#include <limits>
 
 #include "utils.h"
 #include <utility>
@@ -61,7 +63,7 @@ class Server
         const std::vector<std::string>          &getAllowMethods() const;
         int                                     getClientBodyBufferSize() const;
         int                                     getClientHeaderBufferSize() const;
-        int                                     getClientTimeout() const;
+        time_t                                  getClientTimeout() const;
         int                                     getClientMaxSize() const;
         const std::map<int, std::string>        &getErrorPage() const;
         const std::string                       &getErrorPageByCode(int errorCode) const;
@@ -112,7 +114,8 @@ std::string checkComment(const std::string &line);
 std::string extractLocationValue(const std::string &line);
 std::vector<std::string> checkMethod(std::string allowMethod);
 std::string checkPort(std::string port);
-int checkNumber(std::string number);
+int convertAndCheckNumber(std::string number);
+time_t convertAndCheckTimeout(std::string number);
 Directive getKey(const std::string &line);
 void checkValidDirective(const std::string &line, Directive directiveType);
 Server& getDefaultServerBlockByIpPort(std::pair<std::string, std::string> ipPort,

@@ -1,4 +1,7 @@
 #include "http-response.h"
+#include "Client.h"
+
+static std::string generateErrorPage(int statusCode, const std::string& reasonPhrase);
 
 HttpResponse::HttpResponse()
     : _status(OK)
@@ -50,6 +53,7 @@ std::string HttpResponse::reasonPhrase(StatusCode code) const
         case INTERNAL_ERROR:         return "Internal Server Error";
         case NOT_IMPLEMENTED:        return "Not Implemented";
         case VERSION_NOT_SUPPORTED:  return "HTTP Version Not Supported";
+        case GATEWAY_TIMEOUT:        return "Gateway Timeout";
     }
     return "Unknown";
 }
@@ -109,6 +113,65 @@ std::string HttpResponse::toString()
     return responseStream.str();
 }
 
+int handleParsingError(const HttpException& e, HttpResponse& response, Client& client)
+{
+    StatusCode status = e.getStatusCode();
+    std::cerr << infoTime() << RED << "HTTP Error: " << status << " - " << e.what() << "\n" << RESET;
+    response.setStatus(status);
+    response.setHeader("Connection", "close");
+
+    try {
+        std::string fullPath = client.server.getRoot() + client.server.getErrorPageByCode(status);
+        std::string fileContents = readFileToString(fullPath);
+        std::string mime = getMimeType(fullPath);
+        response.setHeader("Content-Type", mime);
+        response.setBody(fileContents);
+    }
+    catch (std::exception &error) {
+        response.setHeader("Content-Type", "text/html");
+        std::string errorPage = generateErrorPage(status, response.reasonPhrase(status));
+        response.setBody(errorPage);
+    }
+    client.setConnType(CLOSE);
+    return REQUEST_ERR;
+}
+
+static std::string generateErrorPage(int statusCode, const std::string& reasonPhrase)
+{
+    std::ostringstream oss;
+
+    oss << "<!DOCTYPE html>\n"
+        << "<html lang=\"en\">\n"
+        << "<head>\n"
+        << "    <meta charset=\"UTF-8\">\n"
+        << "    <title>" << statusCode << " " << reasonPhrase << "</title>\n"
+        << "    <style>\n"
+        << "        body {\n"
+        << "            display: flex;\n"
+        << "            flex-direction: column;\n"
+        << "            align-items: center;\n"
+        << "            justify-content: center;\n"
+        << "            height: 100vh;\n"
+        << "            margin: 0;\n"
+        << "            font-family: sans-serif;\n"
+        << "        }\n"
+        << "        h1 {\n"
+        << "            font-size: 36px;\n"
+        << "            margin-bottom: 10px;\n"
+        << "        }\n"
+        << "        p {\n"
+        << "            font-size: 14px;\n"
+        << "        }\n"
+        << "    </style>\n"
+        << "</head>\n"
+        << "<body>\n"
+        << "    <h1>" << statusCode << " " << reasonPhrase << "</h1>\n"
+        << "    <p>webserv</p>\n"
+        << "</body>\n"
+        << "</html>\n";
+
+    return oss.str();
+}
 std::ostream& operator<<(std::ostream &stream, const HttpResponse& src)
 {
     std::string timePrefix = infoTime();
