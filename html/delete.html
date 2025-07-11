@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Delete Message</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #181a1b;
+      color: #f1f3f4;
+      margin: 40px;
+    }
+    #result {
+      background: #23272a;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+      padding: 24px;
+      max-width: 500px;
+    }
+    ul.messages {
+      list-style: none;
+      padding: 0;
+    }
+    ul.messages li {
+      background: #2c2f33;
+      color: #f1f3f4;
+      margin-bottom: 10px;
+      padding: 12px;
+      border-radius: 5px;
+    }
+    h2 {
+      color: #f8d568;
+    }
+    label, input[type="text"], input[type="submit"] {
+      font-size: 1rem;
+      margin-bottom: 10px;
+      display: block;
+    }
+    input[type="text"] {
+      background: #23272a;
+      color: #f1f3f4;
+      border: 1px solid #444;
+      border-radius: 4px;
+      padding: 8px;
+      width: 100%;
+      margin-bottom: 16px;
+    }
+    input[type="submit"] {
+      background: #f8d568;
+      color: #23272a;
+      border: none;
+      border-radius: 4px;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.2s;
+    }
+    input[type="submit"]:hover {
+      background: #ffe082;
+    }
+  </style>
+</head>
+<body>
+  <h2>Delete a Message</h2>
+  <form id="deleteForm">
+    <label for="msg">Message to delete:</label>
+    <input type="text" id="msg" name="delete" required>
+    <input type="submit" value="Delete">
+  </form>
+  <div id="result"></div>
+  <script>
+  document.getElementById('deleteForm').onsubmit = async function(e) {
+    e.preventDefault();
+    const msg = document.getElementById('msg').value;
+    // Send as JSON (or you can use FormData if your CGI expects it)
+    const response = await fetch('/cgi-bin/delete_database.py', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ delete: msg })
+    });
+    const data = await response.json();
+    let html = `<p>${data.result}</p>`;
+    if (data.database && data.database.length) {
+      html += "<h3>Database Contents:</h3><ul class=\"messages\">";
+      for (const item of data.database) {
+        html += `<li>${item}</li>`;
+      }
+      html += "</ul>";
+    } else {
+      html += "<p>Database is empty.</p>";
+    }
+    document.getElementById('result').innerHTML = html;
+  };
+</script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+method,endpoint,options,expected
+DELETE, /delete, NONE, 405
+DELETE, /delete_file, NONE, 405
+GET, /, NONE, 200
+GET, /cgi-bin/form.cgi, NONE, 200
+GET, /delete, NONE, 200
+GET, /delete_file, NONE, 200
+GET, /does-not-exist, NONE, 404
+GET, /get, NONE, 200
+GET, /get_file, NONE, 200
+GET, /post, NONE, 200
+GET, /post_file, NONE, 200
+GET, /return, NONE, 200
+GET, /return_link, NONE, 301
+GET, /test, NONE, 200
+GET, /test_html, NONE, 200
+GET, /upload, NONE, 405
+POST, /cgi-bin/loop.cgi, NONE, 504
+POST, /cgi-bin/session.cgi, -d data=testuser, 200
+POST, /cgi-bin/session.cgi, -d delete=1, 200
+POST, /get, -d "x=1", 405
+POST, /post, -d "msg=hello", 400
+POST, /post_file, -F "file=@tests.csv", 403
+POST, /test, -d "form=test", 400
+POST, /test_html, -d "val=1", 400
+POST, /upload, -F "file=@tests.csv", 201

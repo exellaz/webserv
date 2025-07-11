@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            background: #181a1b;
+            color: #f1f3f4;
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+        ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        li {
+            padding: 6px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #2c2f33;
+        }
+        button {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #ff4c4c;
+        }
+    </style>
+</head>
+<body>
+    <h2></h2>Uploaded Files</h2>
+    <ul id="fileList">Loading...</ul>
+
+    <script>
+        async function fetchFiles() {
+            const list = document.getElementById('fileList');
+            list.innerHTML = 'Loading...';
+
+            try {
+                const response = await fetch('/cgi-bin/get_file.cgi');
+                const data = await response.json();
+                list.innerHTML = '';
+
+                if (data.files && data.files.length > 0) {
+                    data.files.forEach(filename => {
+                        const li = document.createElement('li');
+                        li.textContent = filename;
+
+                        const delBtn = document.createElement('button');
+                        delBtn.textContent = 'Delete';
+                        delBtn.onclick = () => deleteFile(filename);
+
+                        li.appendChild(delBtn);
+                        list.appendChild(li);
+                    });
+                } else {
+                    list.innerHTML = '<li><em>No files uploaded.</em></li>';
+                }
+            } catch (error) {
+                list.innerHTML = '<li style="color: red;">Error loading files.</li>';
+                console.error(error);
+            }
+        }
+
+        async function deleteFile(filename) {
+            const formData = new URLSearchParams();
+            formData.append('filename', filename);
+
+            const response = await fetch('/cgi-bin/delete_file.cgi', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: formData.toString()
+            });
+
+            const result = await response.json();
+            if (result.status === 'success') {
+                fetchFiles(); // Refresh list
+            } else {
+                alert('Error: ' + (result.error || 'Unknown'));
+            }
+        }
+
+        fetchFiles();
+    </script>
+</body>
+</html>
