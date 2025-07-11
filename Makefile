@@ -31,11 +31,11 @@ $(OBJDIR):
 	@mkdir -p $(OBJDIR) $(addprefix $(OBJDIR), $(SUBDIRS))
 
 $(NAME): $(OBJS) 
+	@echo "$(GREEN)object files were created$(RESET)"
 	@$(CXX) $(CXXFLAGS) $(OBJS) -o $(NAME) && echo "$(GREEN)$(NAME) was created$(RESET)"
 
-
 $(OBJDIR)%.o: $(SRCDIR)%.cpp 
-	@$(CXX) $(CXXFLAGS) -c $< -o $@ && echo "$(GREEN)object files were created$(RESET)"
+	@$(CXX) $(CXXFLAGS) -c $< -o $@ 
 
 # Clean Up
 RM = rm -rf
