@@ -5,7 +5,7 @@
   <img width="150" height="150" alt="Image" src="https://github.com/user-attachments/assets/cfe0b16d-6b54-44a2-91c8-94ae70fd1ae2" />
 </p>
 
-Webserv is a custom implementation of a lightweight HTTP/1.1 server written in C++98. It is designed to handle multiple clients simultaneously using non-blocking I/O and `poll()`. The server supports standard HTTP methods, CGI execution, and extensive configuration via a file format similar to NGINXx. This project serves as a deep dive into network programming, socket manipulation, and the HTTP protocol.
+Webserv is a custom implementation of a lightweight HTTP/1.1 server written in C++98. It is designed to handle multiple clients simultaneously using non-blocking I/O and `poll()`. The server supports standard HTTP methods, CGI execution, and extensive configuration via a file format similar to NGINX. This project serves as a deep dive into network programming, socket manipulation, and the HTTP protocol.
 
 ## Status
 Finished: 2025-07-11. Grade: 125/100.
